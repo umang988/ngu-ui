@@ -1,0 +1,21 @@
+# Netlify site for the ngu-dropdown docs (angular.json project `ngu-dropdown-demo`).
+# In the Netlify UI leave "Base directory" empty and set "Package directory" to projects/ngu-dropdown-demo.
+# Netlify then installs and builds from the repo root, so the paths below are relative to it.
+
+[build]
+  command = "npx ng build ngu-dropdown-demo"
+  publish = "dist/ngu-dropdown-demo/browser"
+  # Exit 0 skips the build: only when nothing this site is built from changed since the last
+  # deploy. A build without a cached commit (first deploy, "clear cache") always runs.
+  ignore = 'test "$CACHED_COMMIT_REF" != "$COMMIT_REF" && git diff --quiet "$CACHED_COMMIT_REF" "$COMMIT_REF" -- projects/ngu-dropdown-demo projects/ngu-dropdown projects/docs-kit angular.json package.json package-lock.json tsconfig.json'
+
+[build.environment]
+  NODE_VERSION = "24"
+  NG_CLI_ANALYTICS = "false"
+
+# Client-side routing: deep links such as /docs/installation get index.html.
+# Files that exist (bundles, source/, favicon) are still served as themselves.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
