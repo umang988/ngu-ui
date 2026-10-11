@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.1.1 (2026-10-11): Docs links
+
+No code changes.
+
+### Changed
+
+- The npm page links the docs and live demos at
+  [ngu-dropdown.netlify.app](https://ngu-dropdown.netlify.app), as its homepage and from
+  the README.
+- The README's ngu-form link opens the ngu-form docs site instead of its GitHub folder.
+
 ## 0.1.0 (2026-10-11): First release
 
 Extracted from a production app's dropdown and made standalone.
