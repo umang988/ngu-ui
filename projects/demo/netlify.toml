@@ -12,6 +12,9 @@
 [build.environment]
   NODE_VERSION = "24"
   NG_CLI_ANALYTICS = "false"
+  # Netlify adds its Angular plugin automatically. Without this it takes the first project in
+  # angular.json, the ngu-form library, and fails the build.
+  ANGULAR_PROJECT = "demo"
 
 # Client-side routing: deep links such as /docs/installation get index.html.
 # Files that exist (bundles, source/, favicon) are still served as themselves.
