@@ -138,7 +138,7 @@ export const appConfig: ApplicationConfig = {
         id: 'with-ngu-form',
         title: 'With ngu-form',
         text: [
-          'ngu-dropdown reads the same `--ngu-*` CSS variables as [ngu-form](https://github.com/umang988/ngu-ui/tree/main/projects/ngu-form), so a form theme styles both. Each package works without the other.',
+          'ngu-dropdown reads the same `--ngu-*` CSS variables as [ngu-form](https://ngu-form.netlify.app), so a form theme styles both. Each package works without the other.',
         ],
       },
     ],

@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.1.0 (unreleased): First release
+## 0.1.0 (2026-10-11): First release
 
 Extracted from a production app's dropdown and made standalone.
 

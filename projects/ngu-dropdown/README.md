@@ -4,6 +4,8 @@ An Angular select that pages through your server as people scroll and search. Yo
 one `fetchFn`; the dropdown handles paging, search, loading states and a virtual list, so
 no component has to write that logic again.
 
+**Docs and live demos: [ngu-dropdown.netlify.app](https://ngu-dropdown.netlify.app)**
+
 - **Server paging with an honest scrollbar.** The scrollbar is sized to the server's total
   from the first response. Dragging it to the middle of 50,000 rows asks for that one page,
   not every page before it.
@@ -157,7 +159,7 @@ Nested providers merge, and `messages` can be a signal for a live language switc
 
 ## Theming
 
-The dropdown reads the same CSS variables as [ngu-form](https://github.com/umang988/ngu-ui/tree/main/projects/ngu-form):
+The dropdown reads the same CSS variables as [ngu-form](https://ngu-form.netlify.app):
 `--ngu-border-color`, `--ngu-radius`, `--ngu-input-bg`, `--ngu-surface`, `--ngu-primary`,
 `--ngu-focus-color`, `--ngu-hint-color`, `--ngu-error-color`, `--ngu-option-hover`,
 `--ngu-option-selected-bg` and `--ngu-dropdown-shadow`. Styles are not encapsulated and

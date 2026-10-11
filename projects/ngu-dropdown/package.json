@@ -28,6 +28,6 @@
     "url": "git+https://github.com/umang988/ngu-ui.git",
     "directory": "projects/ngu-dropdown"
   },
-  "homepage": "https://github.com/umang988/ngu-ui/tree/main/projects/ngu-dropdown#readme",
+  "homepage": "https://ngu-dropdown.netlify.app",
   "bugs": "https://github.com/umang988/ngu-ui/issues"
 }
