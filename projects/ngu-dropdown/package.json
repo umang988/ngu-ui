@@ -22,5 +22,12 @@
     "signal-forms"
   ],
   "license": "MIT",
-  "author": "Umang"
+  "author": "Umang",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/umang988/ngu-ui.git",
+    "directory": "projects/ngu-dropdown"
+  },
+  "homepage": "https://github.com/umang988/ngu-ui/tree/main/projects/ngu-dropdown#readme",
+  "bugs": "https://github.com/umang988/ngu-ui/issues"
 }

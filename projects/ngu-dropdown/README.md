@@ -157,7 +157,7 @@ Nested providers merge, and `messages` can be a signal for a live language switc
 
 ## Theming
 
-The dropdown reads the same CSS variables as [ngu-form](https://www.npmjs.com/package/ngu-form):
+The dropdown reads the same CSS variables as [ngu-form](https://github.com/umang988/ngu-ui/tree/main/projects/ngu-form):
 `--ngu-border-color`, `--ngu-radius`, `--ngu-input-bg`, `--ngu-surface`, `--ngu-primary`,
 `--ngu-focus-color`, `--ngu-hint-color`, `--ngu-error-color`, `--ngu-option-hover`,
 `--ngu-option-selected-bg` and `--ngu-dropdown-shadow`. Styles are not encapsulated and
