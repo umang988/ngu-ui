@@ -1,0 +1,98 @@
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="header">
+  <div class="header__row">
+    <button
+      type="button"
+      class="icon-button menu-button"
+      (click)="openMenu()"
+      aria-label="Open the documentation menu"
+    >
+      <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+        <path
+          d="M4 7h16M4 12h16M4 17h16"
+          stroke="currentColor"
+          stroke-width="1.75"
+          stroke-linecap="round"
+        />
+      </svg>
+    </button>
+    <a class="wordmark" routerLink="/" [attr.aria-label]="site.name + ' home'">
+      <span class="wordmark__name">{{ site.name }}</span>
+      <span class="wordmark__version">v{{ site.version }}</span>
+    </a>
+    <app-search />
+    <nav class="nav" aria-label="Main">
+      @for (link of site.links; track link.path) {
+        <a
+          [routerLink]="link.path"
+          [class.is-active]="current() === link"
+          [attr.aria-current]="current() === link ? 'true' : null"
+          >{{ link.label }}</a
+        >
+      }
+    </nav>
+    <button
+      type="button"
+      class="icon-button"
+      (click)="theme.toggle()"
+      [attr.aria-label]="theme.theme() === 'dark' ? 'Use light theme' : 'Use dark theme'"
+    >
+      @if (theme.theme() === 'dark') {
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+          <circle cx="12" cy="12" r="4.5" fill="none" stroke="currentColor" stroke-width="1.75" />
+          <path
+            d="M12 2.5v2.5M12 19v2.5M4.6 4.6l1.8 1.8M17.6 17.6l1.8 1.8M2.5 12H5M19 12h2.5M4.6 19.4l1.8-1.8M17.6 6.4l1.8-1.8"
+            stroke="currentColor"
+            stroke-width="1.75"
+            stroke-linecap="round"
+          />
+        </svg>
+      } @else {
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+          <path
+            d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5Z"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.75"
+            stroke-linejoin="round"
+          />
+        </svg>
+      }
+    </button>
+  </div>
+</header>
+
+<dialog #drawer class="drawer" aria-label="Documentation menu" (click)="onDrawerClick($event)">
+  <div class="drawer__head">
+    <span class="wordmark__name">{{ site.name }}</span>
+    <button type="button" class="icon-button" (click)="closeMenu()" aria-label="Close the menu">
+      <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+        <path
+          d="M6 6l12 12M18 6 6 18"
+          stroke="currentColor"
+          stroke-width="1.75"
+          stroke-linecap="round"
+        />
+      </svg>
+    </button>
+  </div>
+  <nav aria-label="Documentation">
+    <app-nav-menu />
+  </nav>
+</dialog>
+
+<main id="main" tabindex="-1">
+  <router-outlet />
+</main>
+
+<footer class="footer">
+  <div class="footer__row">
+    <p>{{ site.name }} {{ site.version }} · {{ site.footer.text }}</p>
+    <nav aria-label="Footer">
+      @for (link of site.footer.links; track link.path) {
+        <a [routerLink]="link.path">{{ link.label }}</a>
+      }
+    </nav>
+  </div>
+</footer>

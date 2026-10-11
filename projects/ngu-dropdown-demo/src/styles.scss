@@ -1,0 +1,98 @@
+/* The ngu-dropdown demos: a label above each control, as in a form field. */
+
+.dd-demo {
+  display: grid;
+  gap: 1.25rem;
+  max-inline-size: 26rem;
+
+  label {
+    display: block;
+    margin-block-end: 0.375rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+  }
+
+  > button {
+    justify-self: start;
+    padding: 0.4375rem 0.875rem;
+    border: 1px solid var(--ngu-border-color);
+    border-radius: var(--ngu-radius);
+    background: var(--surface);
+    color: inherit;
+    font: inherit;
+    font-size: 0.875rem;
+    cursor: pointer;
+  }
+
+  > button:focus-visible {
+    outline: 2px solid var(--brand);
+    outline-offset: 2px;
+  }
+}
+
+.dd-note {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: var(--ink-2);
+}
+
+.dd-error {
+  min-block-size: 1.25rem;
+  margin: 0.25rem 0 0;
+  font-size: 0.8125rem;
+  color: var(--ngu-error-color);
+}
+
+.dd-row {
+  display: grid;
+  line-height: 1.3;
+
+  small {
+    color: var(--ink-2);
+  }
+}
+
+/* Two buttons acting as one switch, for the language demo. */
+.dd-switch {
+  display: inline-flex;
+  justify-self: start;
+  border: 1px solid var(--ngu-border-color);
+  border-radius: var(--ngu-radius);
+  overflow: hidden;
+
+  button {
+    padding: 0.375rem 0.875rem;
+    border: 0;
+    background: var(--surface);
+    color: inherit;
+    font: inherit;
+    font-size: 0.875rem;
+    cursor: pointer;
+  }
+
+  button + button {
+    border-inline-start: 1px solid var(--ngu-border-color);
+  }
+
+  button[aria-pressed='true'] {
+    background: var(--ink);
+    color: var(--paper);
+  }
+
+  button:focus-visible {
+    outline: 2px solid var(--brand);
+    outline-offset: -2px;
+  }
+}
+
+/* A code and its description in one row, for the labels demo. */
+.dd-code {
+  flex: none;
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  color: var(--ink-2);
+}
+
+.dd-desc {
+  flex: 1;
+}

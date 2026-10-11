@@ -1,0 +1,212 @@
+<div #field class="ngu-dd-field">
+  <button
+    #trigger
+    type="button"
+    class="ngu-dd-trigger"
+    [class.ngu-dd-trigger--clear]="canClear()"
+    [id]="triggerId()"
+    [disabled]="isDisabled()"
+    role="combobox"
+    aria-haspopup="listbox"
+    [attr.aria-label]="ariaLabel()"
+    [attr.aria-controls]="open() ? listId : null"
+    [attr.aria-expanded]="open()"
+    [attr.aria-activedescendant]="open() && !searchVisible() ? activeId() : null"
+    [attr.aria-invalid]="errorVisible() ? 'true' : null"
+    [attr.aria-required]="required() || null"
+    [attr.aria-readonly]="readonly() || null"
+    [attr.aria-describedby]="describedBy() || null"
+    (click)="toggle()"
+    (blur)="onTriggerBlur()"
+    (keydown)="onTriggerKeydown($event)"
+    (keyup)="onTriggerKeyup($event)"
+  >
+    @if (!hasValue()) {
+      <span class="ngu-dd-placeholder">{{ placeholderText() }}</span>
+    } @else if (multiple()) {
+      <span class="ngu-dd-chips">
+        @for (chip of visibleChips(); track chip.key) {
+          <span class="ngu-dd-chip">{{ chip.label }}</span>
+        }
+        @if (overflowChips()) {
+          <span class="ngu-dd-more">{{ messages().more(overflowChips()) }}</span>
+        }
+      </span>
+    } @else if (selectionView(); as view) {
+      <span class="ngu-dd-value">
+        <ng-container [ngTemplateOutlet]="view.template" [ngTemplateOutletContext]="view.context" />
+      </span>
+    } @else {
+      <span class="ngu-dd-value ngu-dd-value--text">{{ chips()[0].label }}</span>
+    }
+  </button>
+
+  @if (canClear()) {
+    <button
+      type="button"
+      class="ngu-dd-clear"
+      [attr.aria-label]="messages().clear"
+      (click)="clear()"
+    >
+      <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
+        <path d="M4 4l8 8M12 4l-8 8" />
+      </svg>
+    </button>
+  }
+
+  <svg class="ngu-dd-caret" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
+    <path d="M4 6l4 4 4-4" />
+  </svg>
+</div>
+
+<!-- In the top layer, so no card, table or transformed ancestor can clip or re-anchor it. -->
+@if (open()) {
+  <div
+    #panel
+    class="ngu-dd-panel"
+    [class.ngu-dd-panel--above]="above()"
+    [class.ngu-dd-panel--scroll-x]="optionOverflow() === 'scroll'"
+    popover="manual"
+    [style.left.px]="panelBox().left"
+    [style.top.px]="panelBox().top"
+    [style.bottom.px]="panelBox().bottom"
+    [style.width.px]="panelBox().width"
+    [style.max-height.px]="panelBox().maxHeight"
+    (keydown)="onListKeydown($event)"
+  >
+    @if (searchVisible()) {
+      <div class="ngu-dd-search">
+        <svg viewBox="0 0 16 16" width="15" height="15" aria-hidden="true">
+          <circle cx="7" cy="7" r="4.5" />
+          <path d="M10.5 10.5L14 14" />
+        </svg>
+        <!-- The ARIA 1.2 combobox with a text box: focus stays here, so this names the
+             active option. -->
+        <input
+          #searchBox
+          type="text"
+          autocomplete="off"
+          spellcheck="false"
+          role="combobox"
+          aria-autocomplete="list"
+          aria-expanded="true"
+          [attr.aria-controls]="listId"
+          [attr.aria-activedescendant]="activeId()"
+          [attr.aria-label]="searchPlaceholderText()"
+          [placeholder]="searchPlaceholderText()"
+          [value]="searchText()"
+          (input)="searchText.set($any($event.target).value)"
+        />
+      </div>
+    }
+
+    <!-- The scroller: count × optionHeight tall from the first response. -->
+    <div
+      #list
+      class="ngu-dd-list"
+      role="listbox"
+      [attr.id]="listId"
+      [attr.aria-label]="listLabel()"
+      [attr.aria-multiselectable]="multiple() || null"
+      [attr.aria-busy]="busy() || null"
+      (scroll)="onScroll($event)"
+    >
+      @if (failed()) {
+        <div class="ngu-dd-notice" role="alert">
+          <svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true">
+            <path d="M10 3l8 14H2z" />
+            <path d="M10 8v4M10 14.5v.5" />
+          </svg>
+          <span class="ngu-dd-notice-title">{{ messages().errorTitle }}</span>
+          <p class="ngu-dd-notice-text">{{ messages().errorMessage }}</p>
+          <button type="button" class="ngu-dd-retry" (click)="retry()">
+            {{ messages().retry }}
+          </button>
+        </div>
+      } @else if (showSkeleton()) {
+        @for (line of skeletonRange(); track line) {
+          <div
+            class="ngu-dd-option ngu-dd-option--loading"
+            aria-hidden="true"
+            [style.height.px]="optionHeight()"
+          >
+            <span class="ngu-dd-skeleton"></span>
+          </div>
+        }
+      } @else if (showEmpty()) {
+        <div class="ngu-dd-notice">
+          <span class="ngu-dd-notice-title">{{ emptyTitleText() }}</span>
+          <p class="ngu-dd-notice-text">{{ emptyMessageText() }}</p>
+        </div>
+      } @else {
+        <div class="ngu-dd-spacer" [style.height.px]="visibleWindow().spacer">
+          <div
+            class="ngu-dd-window"
+            [style.transform]="'translateY(' + visibleWindow().offset + 'px)'"
+          >
+            @for (option of rendered(); track option.index) {
+              @if (!option.loading) {
+                <div
+                  class="ngu-dd-option"
+                  role="option"
+                  [id]="option.id"
+                  [class.ngu-dd-option--selected]="option.selected"
+                  [class.ngu-dd-option--active]="option.active"
+                  [class.ngu-dd-option--disabled]="option.disabled"
+                  [style.height.px]="optionHeight()"
+                  [attr.aria-selected]="option.selected"
+                  [attr.aria-disabled]="option.disabled || null"
+                  [attr.aria-setsize]="count()"
+                  [attr.aria-posinset]="option.index + 1"
+                  (mousedown)="keepFocus($event)"
+                  (click)="pick(option.row!)"
+                >
+                  @if (option.context) {
+                    <ng-container
+                      [ngTemplateOutlet]="optionTemplateRef()!"
+                      [ngTemplateOutletContext]="option.context"
+                    />
+                  } @else {
+                    <span class="ngu-dd-label">{{ option.label }}</span>
+                  }
+                  @if (option.selected) {
+                    <svg
+                      class="ngu-dd-check"
+                      viewBox="0 0 16 16"
+                      width="15"
+                      height="15"
+                      aria-hidden="true"
+                    >
+                      <path d="M3.5 8.5l3 3 6-7" />
+                    </svg>
+                  }
+                </div>
+              } @else {
+                <!-- This slot's page has not landed. It keeps its height, so nothing moves
+                     when the rows arrive. -->
+                <div
+                  class="ngu-dd-option ngu-dd-option--loading"
+                  aria-hidden="true"
+                  [style.height.px]="optionHeight()"
+                >
+                  <span class="ngu-dd-skeleton"></span>
+                </div>
+              }
+            }
+          </div>
+        </div>
+      }
+    </div>
+
+    @if (showCount() && !failed()) {
+      <div class="ngu-dd-foot">
+        <span role="status">{{ count() ? messages().count(count()) : '' }}</span>
+        @if (busy()) {
+          <span class="ngu-dd-busy">{{ messages().loading }}</span>
+        } @else if (multiple() && hasValue()) {
+          <span>{{ messages().selected(chips().length) }}</span>
+        }
+      </div>
+    }
+  </div>
+}

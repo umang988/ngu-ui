@@ -1,0 +1,132 @@
+<section class="hero page" aria-labelledby="hero-title">
+  <h1 id="hero-title">Fifty thousand rows.<br />One page at a time.</h1>
+  <p class="lead">
+    ngu-dropdown is an Angular select that asks your server only for the rows under the scroll
+    position. You write one
+    <code>fetchFn</code>; paging, search, loading states and the virtual list are done, in every
+    component that needs a picker.
+  </p>
+  <div class="hero__actions">
+    <a class="button" routerLink="/installation">Get started</a>
+    <a class="button button--quiet" routerLink="/introduction">Read the guide</a>
+    <div class="install">
+      <code
+        ><span class="install__prompt" aria-hidden="true">$</span> npm install ngu-dropdown</code
+      >
+      <button
+        type="button"
+        class="install__copy"
+        (click)="copyInstall()"
+        aria-label="Copy the install command"
+      >
+        {{ installCopied() ? 'Copied' : 'Copy' }}
+      </button>
+      <span class="visually-hidden" aria-live="polite">{{
+        installCopied() ? 'Copied to the clipboard' : ''
+      }}</span>
+    </div>
+  </div>
+</section>
+
+<section class="live page" aria-labelledby="live-title">
+  <h2 id="live-title" class="visually-hidden">Live demo</h2>
+  <div class="sheet">
+    <div class="sheet__col sheet__col--code">
+      <p class="sheet__caption">The code you write</p>
+      <app-code [code]="service" filename="customer-picker.ts" [bare]="true" />
+      <app-code [code]="template" language="angular-html" filename="template" [bare]="true" />
+    </div>
+    <div class="sheet__col sheet__col--demo">
+      <p class="sheet__caption">The picker people use</p>
+      <label class="field-label" for="home-customer">Customer</label>
+      <ngu-dropdown
+        inputId="home-customer"
+        [fetchFn]="load"
+        [lookupFn]="lookup"
+        [(value)]="customerId"
+        optionValue="id"
+        optionLabel="name"
+        placeholder="Choose one of 50,000"
+        (queryChange)="asked($event)"
+      />
+      <p class="sheet__hint">
+        Open it, drag the scrollbar to the middle, then search. The value is
+        <code>{{ customerId() ?? 'null' }}</code
+        >.
+      </p>
+    </div>
+    <div class="sheet__col sheet__col--log">
+      <p class="sheet__caption">What your server is asked</p>
+      @if (requests().length) {
+        <ol class="log" aria-label="Requests, newest first">
+          @for (r of requests(); track r.id; let first = $first) {
+            <li class="log__row" [class.log__row--new]="first">
+              <span class="log__page">page {{ r.page }}</span>
+              <span class="log__search">{{ r.search ? '"' + r.search + '"' : 'no search' }}</span>
+            </li>
+          }
+        </ol>
+      } @else {
+        <p class="log__empty">Nothing yet. A closed dropdown asks for nothing.</p>
+      }
+    </div>
+  </div>
+</section>
+
+<section class="why page" aria-labelledby="why-title">
+  <div class="section-head">
+    <h2 id="why-title">Why ngu-dropdown</h2>
+  </div>
+  <dl class="why__list">
+    <div>
+      <dt>An honest scrollbar</dt>
+      <dd>
+        It is sized to the server's total from the first response. Dragging it to row 25,000 asks
+        for that one page, not the 499 before it.
+      </dd>
+    </div>
+    <div>
+      <dt>Bounded memory</dt>
+      <dd>
+        At most twelve pages are kept and about fifteen rows are in the DOM, however long the list
+        and however far people scroll.
+      </dd>
+    </div>
+    <div>
+      <dt>No stale answers</dt>
+      <dd>
+        A new search, filter or sort cancels requests in flight and drops late answers, so the list
+        never shows rows for a query that has changed.
+      </dd>
+    </div>
+    <div>
+      <dt>Names, not ids</dt>
+      <dd>
+        <code>lookupFn</code> names the ids an edit form loads, without opening the list. People see
+        "Maple Agro &amp; Co", not 4821.
+      </dd>
+    </div>
+    <div>
+      <dt>Every form API</dt>
+      <dd>
+        Signal Forms <code>[formField]</code>, reactive forms, <code>ngModel</code> or a plain
+        <code>[(value)]</code>. Disabled, required and invalid states follow the form.
+      </dd>
+    </div>
+    <div>
+      <dt>Accessible</dt>
+      <dd>
+        The ARIA combobox pattern, full keyboard support, each virtual row's place in the whole
+        list, forced colors and reduced motion. The site is checked with axe.
+      </dd>
+    </div>
+  </dl>
+</section>
+
+<section class="next page" aria-labelledby="next-title">
+  <h2 id="next-title">Replace your next hand-written picker</h2>
+  <p class="lead">
+    Install the package, write one method that loads a page, put one tag in a template.
+  </p>
+  <a class="button" routerLink="/installation">Read the installation guide</a>
+</section>

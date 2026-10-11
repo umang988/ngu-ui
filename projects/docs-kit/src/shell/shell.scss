@@ -1,0 +1,204 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+.skip {
+  position: absolute;
+  left: 1rem;
+  top: -4rem;
+  z-index: 10;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  background: var(--brand);
+  color: var(--brand-ink);
+}
+
+.skip:focus {
+  top: 0.75rem;
+}
+
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  border-bottom: 1px solid var(--rule);
+  background: color-mix(in srgb, var(--paper) 88%, transparent);
+  backdrop-filter: saturate(1.4) blur(10px);
+}
+
+.header__row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  height: var(--header-h);
+  max-width: var(--page-wide);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+.wordmark {
+  flex: none;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.wordmark__name {
+  font-size: 1.1875rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
+.wordmark__version {
+  padding: 0.0625rem 0.375rem;
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: var(--ink-2);
+}
+
+app-search {
+  margin-inline-start: auto;
+}
+
+.nav {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.nav a {
+  white-space: nowrap;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.5rem;
+  color: var(--ink-2);
+  font-size: 0.9375rem;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.nav a:hover {
+  color: var(--ink);
+}
+
+/* The current area is marked like a word run over with a highlighter. */
+.nav a.is-active {
+  color: var(--marker-ink);
+  background: linear-gradient(
+    transparent 20%,
+    var(--marker) 20%,
+    var(--marker) 80%,
+    transparent 80%
+  );
+  background-size: calc(100% - 1.5rem) 100%;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.icon-button {
+  flex: none;
+  display: inline-grid;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border: 1px solid var(--rule);
+  border-radius: 0.5rem;
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.icon-button:hover {
+  border-color: var(--ink-2);
+}
+
+.menu-button {
+  display: none;
+}
+
+/* The documentation menu on phones and narrow windows. */
+.drawer {
+  margin: 0;
+  inset-block: 0;
+  inset-inline-start: 0;
+  width: min(20rem, 88vw);
+  max-width: none;
+  height: 100dvh;
+  max-height: none;
+  padding: 0 1.25rem 2rem;
+  border: 0;
+  border-inline-end: 1px solid var(--rule);
+  background: var(--paper);
+  color: var(--ink);
+  overflow-y: auto;
+}
+
+.drawer::backdrop {
+  background: rgba(14, 20, 36, 0.45);
+}
+
+.drawer__head {
+  position: sticky;
+  top: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: var(--header-h);
+  margin-bottom: 0.5rem;
+  background: var(--paper);
+}
+
+main {
+  flex: 1;
+}
+
+main:focus {
+  outline: none;
+}
+
+.footer {
+  border-top: 1px solid var(--rule);
+  color: var(--ink-2);
+  font-size: 0.875rem;
+}
+
+.footer__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem 2rem;
+  justify-content: space-between;
+  max-width: var(--page-wide);
+  margin-inline: auto;
+  padding: 1.5rem var(--gutter);
+}
+
+.footer nav {
+  display: flex;
+  gap: 1.25rem;
+}
+
+.footer a {
+  color: var(--ink-2);
+}
+
+@media (max-width: 64rem) {
+  .menu-button {
+    display: inline-grid;
+  }
+}
+
+@media (max-width: 40rem) {
+  .header__row {
+    gap: 0.5rem;
+  }
+  .wordmark__version,
+  .nav {
+    display: none;
+  }
+}

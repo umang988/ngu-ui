@@ -1,0 +1,116 @@
+/* Helpers for ngu-form's example and demo components; the site itself is in docs-kit. */
+
+/* Small helpers the example components use, so their own source stays about forms. */
+.demo-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  justify-content: flex-end;
+  margin-bottom: 1.25rem;
+}
+
+.demo-toolbar button,
+.demo-toolbar a {
+  font: inherit;
+  font-size: 0.875rem;
+  min-height: 2.25rem;
+  padding: 0.375rem 0.875rem;
+  border: 1px solid var(--rule);
+  border-radius: 0.5rem;
+  background: var(--surface);
+  color: var(--ink);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.demo-toolbar button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.demo-status {
+  margin-inline-end: auto;
+  font-size: 0.875rem;
+  color: var(--ink-2);
+}
+
+.demo-result {
+  margin: 1.25rem 0 0;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  background: var(--surface-2);
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  overflow: auto;
+}
+
+.demo-success {
+  margin: 1rem 0 0;
+  font-size: 0.9375rem;
+  color: var(--ok);
+}
+
+.demo-panels {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.demo-panels h3 {
+  font-size: 0.9375rem;
+  margin-bottom: 0.5rem;
+  color: var(--ink-2);
+}
+
+.demo-panels pre {
+  margin: 0;
+  padding: 0.875rem;
+  border-radius: 0.5rem;
+  background: var(--surface-2);
+  font-size: 0.75rem;
+  line-height: 1.5;
+  overflow: auto;
+  max-height: 18rem;
+}
+
+/* The pretend captcha in the field types example; a real provider brings its own widget. */
+.demo-captcha {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--ngu-border-color);
+  border-radius: var(--ngu-radius);
+  background: var(--surface-2);
+  font-size: 0.9375rem;
+  cursor: pointer;
+}
+
+.demo-captcha input {
+  inline-size: 1.25rem;
+  block-size: 1.25rem;
+  margin: 0;
+  accent-color: var(--brand);
+}
+
+/* A callout-style checkbox, used by the override demo in the docs. */
+.demo-callout {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+  padding: 1rem;
+  border: 1px solid var(--rule);
+  border-radius: 0.75rem;
+  background: var(--surface-2);
+  cursor: pointer;
+}
+
+.demo-callout input {
+  flex: none;
+  margin-top: 0.3rem;
+  inline-size: 1.125rem;
+  block-size: 1.125rem;
+  accent-color: var(--brand);
+}

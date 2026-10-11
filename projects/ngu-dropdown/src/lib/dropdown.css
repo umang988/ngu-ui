@@ -1,0 +1,398 @@
+/*
+ * Not encapsulated, like Angular Material: every class is prefixed, and apps can override
+ * them without ::ng-deep. The ngu-form theme variables are read once here; the panel
+ * inherits them, since it stays inside the host in the DOM even in the top layer.
+ */
+.ngu-dropdown {
+  --ngu-dd-border: var(--ngu-border-color, #c7c7c7);
+  --ngu-dd-radius: var(--ngu-radius, 0.375rem);
+  --ngu-dd-hint: var(--ngu-hint-color, #6b6b6b);
+  --ngu-dd-primary: var(--ngu-primary, #1a73e8);
+  --ngu-dd-focus: 2px solid var(--ngu-focus-color, #1a73e8);
+  --ngu-dd-hover: var(--ngu-option-hover, rgba(127, 127, 127, 0.14));
+  --ngu-dd-tint: color-mix(in srgb, var(--ngu-dd-primary) 12%, transparent);
+  display: block;
+}
+
+.ngu-dropdown svg {
+  flex: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* The closed control: the same box as an ngu-form input, so the two line up in a row. */
+.ngu-dd-field {
+  position: relative;
+}
+
+.ngu-dd-trigger {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  inline-size: 100%;
+  box-sizing: border-box;
+  padding: var(--ngu-input-padding, 0.5rem 0.75rem);
+  padding-inline-end: 2.25rem;
+  border: 1px solid var(--ngu-dd-border);
+  border-radius: var(--ngu-dd-radius);
+  background: var(--ngu-input-bg, transparent);
+  color: inherit;
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.ngu-dd-trigger--clear {
+  padding-inline-end: 3.75rem;
+}
+
+.ngu-dd-trigger:focus-visible,
+.ngu-dropdown--open .ngu-dd-trigger {
+  outline: var(--ngu-dd-focus);
+  outline-offset: 1px;
+}
+
+.ngu-dropdown--sm .ngu-dd-trigger {
+  padding-block: 0.25rem;
+  font-size: 0.875em;
+}
+
+.ngu-dropdown--invalid .ngu-dd-trigger {
+  border-color: var(--ngu-error-color, #c62828);
+}
+
+.ngu-dropdown--disabled .ngu-dd-field {
+  opacity: 0.6;
+}
+
+.ngu-dd-trigger:disabled {
+  cursor: not-allowed;
+}
+
+.ngu-dropdown--readonly .ngu-dd-trigger {
+  background: var(--ngu-readonly-bg, rgba(127, 127, 127, 0.08));
+  cursor: default;
+}
+
+.ngu-dropdown--readonly .ngu-dd-caret {
+  display: none;
+}
+
+/* `min-width: 0` lets a flex item shrink below its text, which is what makes ellipsis work. */
+.ngu-dd-placeholder,
+.ngu-dd-value--text,
+.ngu-dd-chip,
+.ngu-dd-option > * {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ngu-dd-placeholder,
+.ngu-dd-more,
+.ngu-dd-caret,
+.ngu-dd-clear,
+.ngu-dd-search,
+.ngu-dd-notice,
+.ngu-dd-foot {
+  color: var(--ngu-dd-hint);
+}
+
+.ngu-dd-value,
+.ngu-dd-chips {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  min-width: 0;
+  min-block-size: 1lh;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.ngu-dd-value--text {
+  display: block;
+}
+
+.ngu-dd-chip,
+.ngu-dd-more {
+  font-size: 0.8125em;
+}
+
+.ngu-dd-chip {
+  max-inline-size: 9rem;
+  padding: 0 0.5em;
+  border-radius: 999px;
+  background: var(--ngu-tag-bg, var(--ngu-dd-tint));
+  line-height: 1.6;
+}
+
+.ngu-dd-more {
+  flex: none;
+}
+
+.ngu-dd-caret,
+.ngu-dd-clear {
+  position: absolute;
+  inset-block-start: 50%;
+  translate: 0 -50%;
+}
+
+.ngu-dd-caret {
+  inset-inline-end: 0.75rem;
+  pointer-events: none;
+  transition: rotate 0.15s;
+}
+
+.ngu-dropdown--open .ngu-dd-caret {
+  rotate: 180deg;
+}
+
+.ngu-dd-clear {
+  inset-inline-end: 2.125rem;
+  display: grid;
+  place-items: center;
+  inline-size: 1.5rem;
+  block-size: 1.5rem;
+  padding: 0;
+  border: 0;
+  border-radius: var(--ngu-dd-radius);
+  background: none;
+  cursor: pointer;
+}
+
+.ngu-dd-clear:hover {
+  background: var(--ngu-dd-hover);
+}
+
+.ngu-dd-clear:focus-visible,
+.ngu-dd-retry:focus-visible {
+  outline: var(--ngu-dd-focus);
+}
+
+/* The panel. `inset`, `margin` and `color` undo the popover's UA styles. */
+.ngu-dd-panel {
+  position: fixed;
+  inset: auto;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--ngu-dd-border);
+  border-radius: var(--ngu-dd-radius);
+  background: var(--ngu-surface, #fff);
+  color: inherit;
+  box-shadow: var(--ngu-dropdown-shadow, 0 8px 24px rgba(0, 0, 0, 0.14));
+  overflow: hidden;
+  animation: ngu-dd-in 0.12s ease-out;
+}
+
+/* Above the field it grows upwards, so it comes in from below. */
+.ngu-dd-panel--above {
+  --ngu-dd-from: 4px;
+}
+
+@keyframes ngu-dd-in {
+  from {
+    opacity: 0;
+    translate: 0 var(--ngu-dd-from, -4px);
+  }
+}
+
+.ngu-dd-search {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: none;
+  padding-inline: 0.75rem;
+  border-block-end: 1px solid var(--ngu-dd-border);
+}
+
+.ngu-dd-search:focus-within {
+  box-shadow: inset 0 -2px 0 var(--ngu-focus-color, #1a73e8);
+}
+
+.ngu-dd-search input {
+  flex: 1;
+  min-width: 0;
+  padding: 0.5rem 0;
+  border: 0;
+  outline: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+}
+
+.ngu-dd-search input::placeholder {
+  color: var(--ngu-dd-hint);
+}
+
+.ngu-dd-list {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.ngu-dd-spacer {
+  position: relative;
+}
+
+.ngu-dd-window {
+  position: absolute;
+  inset: 0 0 auto;
+  will-change: transform;
+}
+
+/* Rows are exactly `optionHeight` tall: padding, never margin, and the content is clipped. */
+.ngu-dd-option {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  box-sizing: border-box;
+  padding-inline: 0.75rem;
+  cursor: pointer;
+  user-select: none;
+  overflow: hidden;
+}
+
+.ngu-dd-label {
+  flex: 1;
+}
+
+.ngu-dd-option:hover,
+.ngu-dd-option--active {
+  background: var(--ngu-dd-hover);
+}
+
+.ngu-dd-option--selected {
+  background: var(--ngu-option-selected-bg, var(--ngu-dd-tint));
+  font-weight: 500;
+}
+
+.ngu-dd-option--selected:is(:hover, .ngu-dd-option--active) {
+  background: color-mix(in srgb, var(--ngu-dd-primary) 20%, transparent);
+}
+
+.ngu-dd-option--disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.ngu-dd-option--loading {
+  cursor: default;
+  background: none;
+}
+
+.ngu-dd-check {
+  margin-inline-start: auto;
+  color: var(--ngu-dd-primary);
+}
+
+.ngu-dd-skeleton {
+  display: block;
+  inline-size: 60%;
+  block-size: 0.75em;
+  border-radius: 4px;
+  background: var(--ngu-skeleton-color, rgba(127, 127, 127, 0.16));
+  animation: ngu-dd-pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes ngu-dd-pulse {
+  50% {
+    opacity: 0.45;
+  }
+}
+
+.ngu-dd-panel--scroll-x .ngu-dd-list {
+  overflow-x: auto;
+}
+
+.ngu-dd-panel--scroll-x :is(.ngu-dd-window, .ngu-dd-option) {
+  inline-size: max-content;
+  min-inline-size: 100%;
+}
+
+.ngu-dd-panel--scroll-x .ngu-dd-window {
+  inset-inline-end: auto;
+}
+
+.ngu-dd-panel--scroll-x .ngu-dd-option > * {
+  overflow: visible;
+}
+
+.ngu-dd-notice {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1.5rem 1rem;
+  text-align: center;
+}
+
+.ngu-dd-notice svg {
+  color: var(--ngu-error-color, #c62828);
+}
+
+.ngu-dd-notice-title {
+  font-weight: 600;
+  color: var(--ngu-label-color, inherit);
+}
+
+.ngu-dd-notice-text {
+  margin: 0;
+  max-inline-size: 32ch;
+  font-size: 0.875em;
+}
+
+.ngu-dd-retry {
+  padding: 0.375rem 0.75rem;
+  border: 1px solid var(--ngu-dd-border);
+  border-radius: var(--ngu-dd-radius);
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-size: 0.875em;
+  cursor: pointer;
+}
+
+.ngu-dd-foot {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex: none;
+  padding: 0.375rem 0.75rem;
+  border-block-start: 1px solid var(--ngu-dd-border);
+  font-size: 0.75em;
+  font-variant-numeric: tabular-nums;
+}
+
+.ngu-dd-busy {
+  color: var(--ngu-dd-primary);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ngu-dd-panel,
+  .ngu-dd-skeleton {
+    animation: none;
+  }
+}
+
+@media (forced-colors: active) {
+  .ngu-dd-option--active {
+    outline: 2px solid Highlight;
+    outline-offset: -2px;
+  }
+
+  .ngu-dd-option--selected {
+    forced-color-adjust: none;
+    background: Highlight;
+    color: HighlightText;
+  }
+}

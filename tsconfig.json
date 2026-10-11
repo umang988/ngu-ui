@@ -1,0 +1,55 @@
+/* To learn more about Typescript configuration file: https://www.typescriptlang.org/docs/handbook/tsconfig-json.html. */
+/* To learn more about Angular compiler options: https://angular.dev/reference/configs/angular-compiler-options. */
+{
+  "compileOnSave": false,
+  "compilerOptions": {
+    "noImplicitOverride": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "paths": {
+      "ngu-form": ["./projects/ngu-form/src/public-api.ts"],
+      "ngu-form/upload": ["./projects/ngu-form/upload/src/public-api.ts"],
+      "ngu-dropdown": ["./projects/ngu-dropdown/src/public-api.ts"],
+      "docs-kit/*": ["./projects/docs-kit/src/*"]
+    },
+    "skipLibCheck": true,
+    "isolatedModules": true,
+    "experimentalDecorators": true,
+    "importHelpers": true,
+    "target": "ES2022",
+    "module": "preserve"
+  },
+  "angularCompilerOptions": {
+    "enableI18nLegacyMessageIdFormat": false,
+    "strictInjectionParameters": true,
+    "strictInputAccessModifiers": true
+  },
+  "files": [],
+  "references": [
+    {
+      "path": "./projects/ngu-form/tsconfig.lib.json"
+    },
+    {
+      "path": "./projects/ngu-form/tsconfig.spec.json"
+    },
+    {
+      "path": "./projects/ngu-dropdown/tsconfig.lib.json"
+    },
+    {
+      "path": "./projects/ngu-dropdown/tsconfig.spec.json"
+    },
+    {
+      "path": "./projects/demo/tsconfig.app.json"
+    },
+    {
+      "path": "./projects/demo/tsconfig.spec.json"
+    },
+    {
+      "path": "./projects/ngu-dropdown-demo/tsconfig.app.json"
+    },
+    {
+      "path": "./projects/ngu-dropdown-demo/tsconfig.spec.json"
+    }
+  ]
+}

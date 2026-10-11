@@ -1,0 +1,242 @@
+{
+  "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
+  "version": 1,
+  "cli": {
+    "packageManager": "npm"
+  },
+  "newProjectRoot": "projects",
+  "projects": {
+    "ngu-form": {
+      "projectType": "library",
+      "root": "projects/ngu-form",
+      "sourceRoot": "projects/ngu-form/src",
+      "prefix": "ngu",
+      "architect": {
+        "build": {
+          "builder": "@angular/build:ng-packagr",
+          "configurations": {
+            "production": {
+              "tsConfig": "projects/ngu-form/tsconfig.lib.prod.json"
+            },
+            "development": {
+              "tsConfig": "projects/ngu-form/tsconfig.lib.json"
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "test": {
+          "builder": "@angular/build:unit-test",
+          "options": {
+            "tsConfig": "projects/ngu-form/tsconfig.spec.json"
+          }
+        }
+      }
+    },
+    "ngu-dropdown": {
+      "projectType": "library",
+      "root": "projects/ngu-dropdown",
+      "sourceRoot": "projects/ngu-dropdown/src",
+      "prefix": "ngu",
+      "architect": {
+        "build": {
+          "builder": "@angular/build:ng-packagr",
+          "configurations": {
+            "production": {
+              "tsConfig": "projects/ngu-dropdown/tsconfig.lib.prod.json"
+            },
+            "development": {
+              "tsConfig": "projects/ngu-dropdown/tsconfig.lib.json"
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "test": {
+          "builder": "@angular/build:unit-test",
+          "options": {
+            "tsConfig": "projects/ngu-dropdown/tsconfig.spec.json"
+          }
+        }
+      }
+    },
+    "demo": {
+      "projectType": "application",
+      "schematics": {
+        "@schematics/angular:component": {
+          "style": "scss"
+        }
+      },
+      "root": "projects/demo",
+      "sourceRoot": "projects/demo/src",
+      "prefix": "app",
+      "architect": {
+        "build": {
+          "builder": "@angular/build:application",
+          "options": {
+            "browser": "projects/demo/src/main.ts",
+            "tsConfig": "projects/demo/tsconfig.app.json",
+            "inlineStyleLanguage": "scss",
+            "assets": [
+              {
+                "glob": "**/*",
+                "input": "projects/demo/public"
+              },
+              {
+                "glob": "**/*.ts",
+                "input": "projects/demo/src/app/examples",
+                "output": "source",
+                "ignore": [
+                  "**/*.spec.ts"
+                ]
+              },
+              {
+                "glob": "**/*.ts",
+                "input": "projects/demo/src/app/docs/demos",
+                "output": "source/docs",
+                "ignore": [
+                  "**/*.spec.ts"
+                ]
+              },
+              {
+                "glob": "CHANGELOG.md",
+                "input": "projects/ngu-form",
+                "output": "source"
+              }
+            ],
+            "styles": [
+              "projects/docs-kit/styles/base.scss",
+              "projects/docs-kit/styles/docs.scss",
+              "projects/demo/src/styles.scss"
+            ]
+          },
+          "configurations": {
+            "production": {
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "520kB",
+                  "maximumError": "1MB"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "6kB",
+                  "maximumError": "8kB"
+                }
+              ],
+              "outputHashing": "all"
+            },
+            "development": {
+              "optimization": false,
+              "extractLicenses": false,
+              "sourceMap": true
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "serve": {
+          "builder": "@angular/build:dev-server",
+          "configurations": {
+            "production": {
+              "buildTarget": "demo:build:production"
+            },
+            "development": {
+              "buildTarget": "demo:build:development"
+            }
+          },
+          "defaultConfiguration": "development"
+        },
+        "test": {
+          "builder": "@angular/build:unit-test"
+        }
+      }
+    },
+    "ngu-dropdown-demo": {
+      "projectType": "application",
+      "schematics": {
+        "@schematics/angular:component": {
+          "style": "scss"
+        }
+      },
+      "root": "projects/ngu-dropdown-demo",
+      "sourceRoot": "projects/ngu-dropdown-demo/src",
+      "prefix": "app",
+      "architect": {
+        "build": {
+          "builder": "@angular/build:application",
+          "options": {
+            "browser": "projects/ngu-dropdown-demo/src/main.ts",
+            "tsConfig": "projects/ngu-dropdown-demo/tsconfig.app.json",
+            "inlineStyleLanguage": "scss",
+            "assets": [
+              {
+                "glob": "**/*",
+                "input": "projects/ngu-dropdown-demo/public"
+              },
+              {
+                "glob": "**/*.ts",
+                "input": "projects/ngu-dropdown-demo/src/app/demos",
+                "output": "source/docs",
+                "ignore": [
+                  "**/*.spec.ts"
+                ]
+              },
+              {
+                "glob": "CHANGELOG.md",
+                "input": "projects/ngu-dropdown",
+                "output": "source"
+              }
+            ],
+            "styles": [
+              "projects/docs-kit/styles/base.scss",
+              "projects/docs-kit/styles/docs.scss",
+              "projects/ngu-dropdown-demo/src/styles.scss"
+            ]
+          },
+          "configurations": {
+            "production": {
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "520kB",
+                  "maximumError": "1MB"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "6kB",
+                  "maximumError": "8kB"
+                }
+              ],
+              "outputHashing": "all"
+            },
+            "development": {
+              "optimization": false,
+              "extractLicenses": false,
+              "sourceMap": true
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "serve": {
+          "builder": "@angular/build:dev-server",
+          "configurations": {
+            "production": {
+              "buildTarget": "ngu-dropdown-demo:build:production"
+            },
+            "development": {
+              "buildTarget": "ngu-dropdown-demo:build:development"
+            }
+          },
+          "defaultConfiguration": "development",
+          "options": {
+            "port": 4301
+          }
+        },
+        "test": {
+          "builder": "@angular/build:unit-test",
+          "options": {
+            "tsConfig": "projects/ngu-dropdown-demo/tsconfig.spec.json"
+          }
+        }
+      }
+    }
+  }
+}

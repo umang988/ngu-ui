@@ -1,0 +1,225 @@
+import type { Type } from '@angular/core';
+import type { CodeFile } from 'docs-kit/ui/code-tabs';
+
+export interface LazyComponent {
+  readonly load: () => Promise<Type<unknown>>;
+}
+
+export function isLazy(component: Example['component']): component is LazyComponent {
+  return 'load' in component;
+}
+
+export interface Example {
+  readonly id: string;
+  readonly title: string;
+  /** One line for lists. */
+  readonly summary: string;
+  /** The main features, short; backticks mark code. */
+  readonly highlights: string;
+  /** The situation this example solves. */
+  readonly useCase: string;
+  /** Features it uses; backticks mark code. */
+  readonly shows: readonly string[];
+  /** Things to do in the preview. */
+  readonly tryThis: readonly string[];
+  /** The example, or a loader for examples with heavy dependencies, so Zod loads only when needed. */
+  readonly component: Type<unknown> | LazyComponent;
+  readonly files: readonly CodeFile[];
+}
+
+export const EXAMPLES: readonly Example[] = [
+  {
+    id: 'login',
+    title: 'Sign in',
+    summary: 'Email and password with the right keyboard and autofill hints.',
+    highlights: 'Inferred input types, `autocomplete`, show password',
+    useCase:
+      'The smallest useful form, and a good starting point for any auth screen. It shows how little a spec needs: a label string is enough for a checkbox, and the input types come from the model.',
+    shows: [
+      'A string as the whole spec: `remember: \'Keep me signed in\'`',
+      '`type: \'email\'` with email validation and the email keyboard on phones',
+      'A show-password button and `autocomplete` hints for password managers',
+      '`enterkeyhint: \'go\'` on the last field',
+    ],
+    tryThis: [
+      'Press Enter in the empty email field. Focus moves to the first problem, and a screen reader hears how many fields need attention.',
+      'Use Show to check the password, then submit. The password is hidden again.',
+    ],
+    component: { load: () => import('../../examples/login/login').then((m) => m.LoginForm) },
+    files: [{ name: 'login.ts', src: 'login/login.ts' }],
+  },
+  {
+    id: 'signup',
+    title: 'Create an account',
+    summary: 'Server checks, cascading selects, and a request body shaped apart from the form.',
+    highlights: '`validateAsync`, password strength, warnings, error summary, cascading selects, `mapValue`',
+    useCase:
+      'Registration with a username checked on the server, a password confirmation, a country then state select, and a plan that changes which fields are asked. What the server receives is built separately from what the user edits, and leaving with unsaved changes asks first.',
+    shows: [
+      '`validateAsync` with `debounce` for the username',
+      'A password strength meter and checklist with `strength: { min: 2 }`',
+      'A `warn` on the email that suggests a fix for typos such as gmial.com, without blocking the submit',
+      'A cross-field `validate` that compares the two passwords',
+      'An `errorSummary` that lists every problem after a refused submit',
+      'Cascading select: `options: (m) => regionsOf(m.profile.country)` with a conditional `required`',
+      'A company field that is `hidden` on the free plan and left out of the request by `omitHidden`',
+      '`mapValue` to turn the model into the request body',
+      'Form state signals, `changes()` and `nguUnsavedChangesGuard`',
+    ],
+    tryThis: [
+      'Press Create account on the empty form. A summary lists every problem; its links move to each field.',
+      'Type admin as the username to see the server check.',
+      'Type a password and watch the meter and checklist. Then try an email at gmial.com.',
+      'Pick India and a state, then switch to United States. The state is cleared and the list changes.',
+      'Choose Pro. Company appears and is required.',
+      'Change something, then open another example. You are asked before leaving.',
+      'Fill sample uses an email ending in @taken.com, which the pretend server rejects on submit.',
+    ],
+    component: { load: () => import('../../examples/signup/signup').then((m) => m.SignupForm) },
+    files: [
+      { name: 'signup.ts', src: 'signup/signup.ts' },
+      { name: 'fake-users.ts', src: 'api/fake-users.ts' },
+      { name: 'regions.ts', src: 'api/regions.ts' },
+    ],
+  },
+  {
+    id: 'profile',
+    title: 'Edit a profile',
+    summary: 'Data from a server, autosaved drafts, undo, and a PATCH of only what changed.',
+    highlights: '`load`, `draft`, `history`, masks, locale numbers, `Date` values, warnings',
+    useCase:
+      'A settings page for a record that lives on a server. Fields show placeholders while it loads, unsent edits survive a reload or a closed tab, Ctrl+Z steps back through changes, and Save sends only the fields that differ.',
+    shows: [
+      '`load: resource(...)` with skeleton fields while the record loads',
+      '`draft` with `nguIndexedDbDrafts()` saves edits to IndexedDB and restores them with a notice',
+      '`history: true` with Undo and Redo buttons and keyboard shortcuts',
+      'A phone `mask`, a `localized` salary with Indian digit grouping, and a `Date` birthday with `max`',
+      '`parse` to trim the display name, and `warn` for a likely typo or an oversharing bio',
+      '`changes()` as the PATCH body',
+    ],
+    tryThis: [
+      'Wait for the placeholders to turn into fields. Then change the bio and reload the page. Your edit comes back with a notice and a Discard button.',
+      'Change a few fields, then press Ctrl+Z (⌘Z on a Mac). Focus moves to the field that changed back.',
+      'Type a salary such as 2500000. It shows as 25,00,000 when you leave the field.',
+      'Save, then look at the PATCH body: it held only the fields you changed.',
+    ],
+    component: { load: () => import('../../examples/profile/profile').then((m) => m.ProfileForm) },
+    files: [
+      { name: 'profile.ts', src: 'profile/profile.ts' },
+      { name: 'fake-profile.ts', src: 'api/fake-profile.ts' },
+    ],
+  },
+  {
+    id: 'languages',
+    title: 'In three languages',
+    summary: 'English, Hindi and Arabic, right to left, validated by a Zod schema.',
+    highlights: '`provideNguMessages`, translation keys, RTL, Standard Schema, ICU plurals',
+    useCase:
+      'A registration form that switches language without reloading. Labels, hints, schema messages and every text ngu-form renders itself come from one translate function, plural rules follow the language, and Arabic lays the form out right to left. All validation comes from a Zod schema.',
+    shows: [
+      '`provideNguMessages` with a signal, so a language switch re-renders the form',
+      'Labels and Zod messages written as translation keys',
+      'Complete Hindi and Arabic catalogs for ngu-form\'s own texts, with Arabic plural forms',
+      '`schema: z.object(...)`: every rule comes from Zod, and each issue shows on its field',
+      'Arabic-Indic digits in the income field, and a phone mask that accepts digits from any script',
+      'An autosaved `draft`, restored after a reload; the password is never stored',
+    ],
+    tryThis: [
+      'Press Register on the empty form, then switch to العربية. The summary, the messages and the layout follow.',
+      'In Hindi, type the phone number in Devanagari digits, such as ९८७६५४३२१०.',
+      'Fill in a few fields and reload the page. Your answers come back.',
+    ],
+    component: { load: () => import('../../examples/languages/languages').then((m) => m.LanguagesForm) },
+    files: [
+      { name: 'languages.ts', src: 'languages/languages.ts' },
+      { name: 'translations.ts', src: 'languages/translations.ts' },
+    ],
+  },
+  {
+    id: 'order',
+    title: 'Place an order',
+    summary: 'Line items with computed amounts, a live total and an address copy.',
+    highlights: 'Arrays, `compute`, `onChange`, prefix and suffix, a rating',
+    useCase:
+      'An order with repeating line items. Picking a product fills its price, amounts and the total update as you type, and one checkbox copies the billing address to shipping. Rows can be added and removed with the keyboard.',
+    shows: [
+      'Arrays with `item`, `newItem`, `min` and `max`',
+      '`compute` for each row amount and for the order total',
+      '`onChange` with `patchItem` to fill the price, and `patch` to copy an address',
+      '`prefix` and `suffix` text, responsive `cols` per row',
+      'A required `type: \'rating\'`, with stars as native radios',
+      'Static text and a divider between fields',
+    ],
+    tryThis: [
+      'Pick a product. Its unit price fills in. Change Qty and watch Amount and Total.',
+      'Tick Gift wrap to show the note. The note grows as you type.',
+      'Fill the billing address, then tick Ship to the billing address.',
+      'Make the window narrow. Item rows drop to two columns and Remove moves under the row.',
+    ],
+    component: { load: () => import('../../examples/order/order').then((m) => m.OrderForm) },
+    files: [
+      { name: 'order.ts', src: 'order/order.ts' },
+      { name: 'catalog.ts', src: 'api/catalog.ts' },
+    ],
+  },
+  {
+    id: 'survey',
+    title: 'Survey from an API',
+    summary: 'Questions arrive as JSON, and the model follows the list.',
+    highlights: 'Run-time fields from JSON, `showIf`, fields added while filling in',
+    useCase:
+      'Questions come from a server as plain JSON, so they can change without a release. New questions get default values, removed ones lose theirs, and each question brings its own validation and conditions.',
+    shows: [
+      'A `Record<string, …>` property with `fields` from a `resource`',
+      'Plain JSON fields: `type`, `options`, `required`, string `pattern`, `default`',
+      '`showIf` to ask a follow-up question only for some answers',
+      'Questions added and removed at run time',
+    ],
+    tryThis: [
+      'Answer No to "Do you use signals?" to see the follow-up question.',
+      'Use Add question and Remove added to change the list while you fill it in.',
+    ],
+    component: { load: () => import('../../examples/survey/survey').then((m) => m.SurveyForm) },
+    files: [
+      { name: 'survey.ts', src: 'survey/survey.ts' },
+      { name: 'fake-survey.ts', src: 'api/fake-survey.ts' },
+    ],
+  },
+  {
+    id: 'field-types',
+    title: 'Every field type',
+    summary: 'Each built-in input, from switches and sliders to phone numbers, file uploads and signatures.',
+    highlights: 'Checkbox groups, switches, sliders, ratings, date ranges, phone numbers, one-time codes, tags, uploads, signatures',
+    useCase:
+      'A tour of the field type catalogue. Every input comes from a type on the spec, and the value type decides which ones fit: a list of strings can be checkboxes, a multiple select or tags, and a number can be a slider, an amount or stars. Uploads, image cropping and signatures come from the separate ngu-form/upload entry point.',
+    shows: [
+      '`type: \'checkbox\'` and `type: \'select\'` on a list, with `min` and `max` choices',
+      '`switch`, `segmented`, and radios whose number values stay numbers',
+      '`range` with its value shown, `currency` formatted for the locale, and a required `rating`',
+      '`time`, `datetime-local`, `month` and `week` with bounds in their own format, and a `daterange`',
+      '`phone` stored as E.164, `otp` with one-time-code autofill, `url`, `search`, `color` and `tags`',
+      '`file` with a pretend upload, `image` with a square crop, and `signature`, from `ngu-form/upload`',
+      '`consent` that stores the time of acceptance, and a `captcha` through an adapter',
+      'A custom type with its own option, declared in `NguFieldOptionsMap`',
+    ],
+    tryThis: [
+      'Press Send on the empty form. The summary lists what is missing.',
+      'Paste +44 7911 123456 into Mobile number. The country switches to the United Kingdom.',
+      'Paste 123-456 into Verification code. The dashes are dropped and every box fills.',
+      'Type example.com into Website and leave the field. It becomes https://example.com.',
+      'Add a file named fail.txt to Documents. It fails; use Retry, or remove it to submit.',
+      'Choose a photo. Crop it with the mouse or the sliders, then look at the submitted value.',
+      'Use Type instead on Signature to sign with the keyboard.',
+    ],
+    component: { load: () => import('../../examples/field-types/field-types').then((m) => m.FieldTypesForm) },
+    files: [
+      { name: 'field-types.ts', src: 'field-types/field-types.ts' },
+      { name: 'fake-upload.ts', src: 'api/fake-upload.ts' },
+      { name: 'mood-picker.ts', src: 'fields/mood-picker.ts' },
+    ],
+  },
+];
+
+export function exampleById(id: string | undefined): Example | undefined {
+  return EXAMPLES.find((e) => e.id === id);
+}

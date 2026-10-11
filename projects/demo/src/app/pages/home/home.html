@@ -1,0 +1,107 @@
+<section class="hero page" aria-labelledby="hero-title">
+  <h1 id="hero-title">Describe the model.<br />Get the form.</h1>
+  <p class="lead">
+    ngu-form turns a typed TypeScript object into an accessible Angular form. You write the shape of your data; labels,
+    inputs, validation and layout follow from it. Underneath, it is Angular Signal Forms.
+  </p>
+  <div class="hero__actions">
+    <a class="button" routerLink="/installation">Get started</a>
+    <a class="button button--quiet" routerLink="/examples">Browse examples</a>
+    <div class="install">
+      <code><span class="install__prompt" aria-hidden="true">$</span> npm install ngu-form</code>
+      <button type="button" class="install__copy" (click)="copyInstall()" aria-label="Copy the install command">
+        {{ installCopied() ? 'Copied' : 'Copy' }}
+      </button>
+      <span class="visually-hidden" aria-live="polite">{{ installCopied() ? 'Copied to the clipboard' : '' }}</span>
+    </div>
+  </div>
+</section>
+
+<section class="live page" aria-labelledby="live-title">
+  <h2 id="live-title" class="visually-hidden">Live demo</h2>
+  <div class="sheet">
+    <div class="sheet__col sheet__col--spec">
+      <p class="sheet__caption">The spec you write</p>
+      <app-code [code]="spec" filename="trial.ts" [bare]="true" />
+      <app-code [code]="template" language="angular-html" filename="template" [bare]="true" />
+    </div>
+    <div class="sheet__col sheet__col--form">
+      <p class="sheet__caption">The form people fill in</p>
+      <ngu-form [form]="trial" submitLabel="Start trial" (submitted)="submitted.set(true)" />
+    </div>
+    <div class="sheet__col sheet__col--value">
+      <p class="sheet__caption">The value you get</p>
+      <pre class="value" tabindex="0" aria-label="Current form value"><code><span class="value__row">&#123;</span>@for (row of rows(); track row.key; let last = $last) {<span class="value__row value__row--entry" [class]="flashClass(row.key)" [attr.data-latest]="latest() === row.key ? '' : null"><span class="v-key">"{{ row.key }}"</span><span class="v-punct">: </span><span [class]="'v-' + row.kind">{{ row.json }}</span>@if (!last) {<span class="v-punct">,</span>}</span>}<span class="value__row">&#125;</span></code></pre>
+      <p class="value__note">
+        @if (submitted()) {
+          <strong>Submitted.</strong> This is what <code>(submitted)</code> emitted.
+        } @else {
+          Type in the form: this is <code>trial.value()</code>, a signal that updates as you go.
+        }
+      </p>
+    </div>
+  </div>
+</section>
+
+<section class="uses page" aria-labelledby="uses-title">
+  <div class="section-head">
+    <h2 id="uses-title">Use cases</h2>
+    <p class="lead">Each example is one component you can copy. Open it to see the form running next to its source.</p>
+  </div>
+  <ul class="uses__list">
+    @for (e of examples; track e.id) {
+      <li class="use">
+        <h3 class="use__title"><a [routerLink]="['/examples', e.id]">{{ e.title }}</a></h3>
+        <p class="use__summary">{{ e.summary }}</p>
+        <p class="use__uses"><app-rich [text]="e.highlights" /></p>
+      </li>
+    }
+    <li class="use">
+      <h3 class="use__title"><a routerLink="/form-state">Settings and profile pages</a></h3>
+      <p class="use__summary">Load saved data, send only what changed, and ask before people leave with edits.</p>
+      <p class="use__uses"><code>patch()</code>, <code>changes()</code> and <code>nguUnsavedChangesGuard</code></p>
+    </li>
+  </ul>
+</section>
+
+<section class="why page" aria-labelledby="why-title">
+  <div class="section-head">
+    <h2 id="why-title">Why ngu-form</h2>
+  </div>
+  <dl class="why__list">
+    <div>
+      <dt>Typed from your model</dt>
+      <dd>
+        Every key needs a spec, and <code>type: 'email'</code> on a number is a compile error. Mistakes show up in
+        your editor, not in testing.
+      </dd>
+    </div>
+    <div>
+      <dt>Signal Forms underneath</dt>
+      <dd>
+        Validation, state and binding are Angular's own. <code>form.tree</code> is a normal field tree, so your tests
+        and tools keep working.
+      </dd>
+    </div>
+    <div>
+      <dt>Accessible by default</dt>
+      <dd>
+        Labels, descriptions, <code>aria-invalid</code>, focus on the first problem and one polite announcement after a
+        refused submit. The demo is checked with axe.
+      </dd>
+    </div>
+    <div>
+      <dt>Plain objects</dt>
+      <dd>
+        A spec is data. Fields can come from JSON sent by your server, with their rules and conditions, and the model
+        follows the list.
+      </dd>
+    </div>
+  </dl>
+</section>
+
+<section class="next page" aria-labelledby="next-title">
+  <h2 id="next-title">Your first form takes about five minutes</h2>
+  <p class="lead">Install the package, describe a model, put one tag in a template.</p>
+  <a class="button" routerLink="/installation">Read the installation guide</a>
+</section>
