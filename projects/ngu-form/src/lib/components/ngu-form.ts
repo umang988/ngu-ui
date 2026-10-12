@@ -18,20 +18,31 @@ import {
   signal,
   untracked,
 } from '@angular/core';
+import { Location } from '@angular/common';
 import { submit, type Field } from '@angular/forms/signals';
 import { DEFAULT_BREAKPOINTS, NGU_FORM_CONFIG } from '../config';
 import { internalsOf } from '../internal';
 import { injectNguI18n } from '../messages';
+import { REVIEW_STEP, type StepsHandle } from '../steps';
 import { resolvePath, toSubmissionErrors } from '../submit-errors';
 import type { ErrorDisplay, FormDef, SubmitAction } from '../types';
 import { NguFormContext, type NguProblemSource, type TemplateMap } from './ngu-form-context';
 import { NguGroup } from './ngu-group';
 import { NguControlTemplate, NguFieldTemplate } from './ngu-templates';
+import { NguWizard } from './ngu-wizard';
 
 let nextFormId = 0;
 
 const FOCUSABLE =
   'input:not([type="hidden"]):not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
+/** Rendered markers of problems, in page order. */
+const PROBLEMS = '.ngu-field--invalid, .ngu-group--invalid > .ngu-error, .ngu-array--invalid > .ngu-error';
+
+/** The first marker that is on screen, not inside a closed tab, panel, row or step. */
+function firstShown(problems: readonly HTMLElement[]): HTMLElement | undefined {
+  return problems.find((el) => !el.closest('[hidden]')) ?? problems[0];
+}
 
 function focusProblem(el: HTMLElement | null | undefined): void {
   if (!el) {
@@ -56,10 +67,13 @@ function focusProblem(el: HTMLElement | null | undefined): void {
  */
 @Component({
   selector: 'ngu-form',
-  imports: [NguGroup],
+  imports: [NguGroup, NguWizard],
   providers: [NguFormContext],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: { class: 'ngu-form' },
+  host: {
+    class: 'ngu-form',
+    '[class.ngu-form--steps]': '!!steps()',
+  },
   template: `
     @let d = form();
     <form
@@ -91,14 +105,33 @@ function focusProblem(el: HTMLElement | null | undefined): void {
       @if (d.loadError() !== undefined) {
         <!-- Without its data the form could overwrite a record with blanks, so it is not shown. -->
         <p class="ngu-form-error" role="alert">{{ i18n.message('loadFailed') }}</p>
+      } @else if (steps()) {
+        @defer (on immediate) {
+          <ngu-wizard [form]="d" (navigate)="goToStep($event)" (edit)="edit($event)" />
+        }
       } @else {
-        <ngu-group [fields]="d.fields" [tree]="tree()" [cols]="d.cols" />
+        <ngu-group [fields]="d.fields" [tree]="tree()" [cols]="d.cols" [layout]="d.layout === 'tabs' ? 'tabs' : 'grid'" />
       }
       <ng-content />
       @if (formError(); as message) {
         <p class="ngu-form-error" [id]="formErrorId" role="alert" tabindex="-1">{{ message }}</p>
       }
-      @if (submitLabel()) {
+      @if (steps(); as s) {
+        <div class="ngu-actions ngu-actions--steps">
+          @if (!s.first()) {
+            <button type="button" class="ngu-back" (click)="back()">{{ i18n.message('back') }}</button>
+          }
+          @if (!s.last()) {
+            <button type="button" class="ngu-next" [attr.aria-disabled]="advancing() || null" (click)="next()">
+              {{ s.returning() ? i18n.message('backToReview') : i18n.message('next') }}
+            </button>
+          } @else if (submitLabel()) {
+            <button type="submit" class="ngu-submit" [attr.aria-disabled]="blocked() || null">
+              {{ i18n.text(submitLabel()) }}
+            </button>
+          }
+        </div>
+      } @else if (submitLabel()) {
         <div class="ngu-actions">
           <!-- aria-disabled, not disabled: a disabled button drops keyboard focus to the page -->
           <button type="submit" class="ngu-submit" [attr.aria-disabled]="blocked() || null">
@@ -123,7 +156,24 @@ function focusProblem(el: HTMLElement | null | undefined): void {
       display: flex;
       justify-content: var(--ngu-actions-justify, flex-start);
     }
-    .ngu-submit {
+    .ngu-actions--steps {
+      gap: 0.75rem;
+    }
+    .ngu-actions--steps > :last-child {
+      margin-inline-start: auto;
+    }
+    .ngu-back {
+      font: inherit;
+      font-weight: 500;
+      padding: var(--ngu-button-padding, 0.5rem 1.25rem);
+      border: 1px solid var(--ngu-border-color, #c7c7c7);
+      border-radius: var(--ngu-radius, 0.375rem);
+      background: none;
+      color: inherit;
+      cursor: pointer;
+    }
+    .ngu-submit,
+    .ngu-next {
       font: inherit;
       font-weight: 500;
       padding: var(--ngu-button-padding, 0.5rem 1.25rem);
@@ -133,7 +183,8 @@ function focusProblem(el: HTMLElement | null | undefined): void {
       color: var(--ngu-on-primary, #fff);
       cursor: pointer;
     }
-    .ngu-submit[aria-disabled='true'] {
+    .ngu-submit[aria-disabled='true'],
+    .ngu-next[aria-disabled='true'] {
       opacity: 0.6;
       cursor: default;
     }
@@ -205,12 +256,22 @@ function focusProblem(el: HTMLElement | null | undefined): void {
       cursor: pointer;
     }
     .ngu-notice__action:focus-visible,
-    .ngu-submit:focus-visible {
+    .ngu-submit:focus-visible,
+    .ngu-next:focus-visible,
+    .ngu-back:focus-visible {
       outline: 2px solid var(--ngu-focus-color, #1a73e8);
       outline-offset: 2px;
     }
+    @media print {
+      .ngu-actions,
+      .ngu-notice,
+      .ngu-error-summary {
+        display: none;
+      }
+    }
     @media (forced-colors: active) {
-      .ngu-submit {
+      .ngu-submit,
+      .ngu-next {
         border: 2px solid ButtonText;
       }
       .ngu-submit[aria-disabled='true'] {
@@ -271,7 +332,8 @@ export class NguForm<TModel extends object, TPayload = TModel> {
   private readonly controlTemplates = contentChildren(NguControlTemplate);
 
   protected readonly i18n = injectNguI18n();
-  protected readonly formErrorId = `ngu-form-error-${nextFormId++}`;
+  private readonly uid = nextFormId++;
+  protected readonly formErrorId = `ngu-form-error-${this.uid}`;
   /** Polite live-region text, set after a refused submit. */
   protected readonly announcement = signal('');
   /** Cleared whenever the form is reset. */
@@ -281,16 +343,24 @@ export class NguForm<TModel extends object, TPayload = TModel> {
   });
 
   protected readonly tree = computed(() => this.form().tree as unknown as Field<any>);
+  /** The wizard, when the form has `layout: 'steps'`. */
+  protected readonly steps = computed<StepsHandle | undefined>(() => internalsOf(this.form()).steps);
+  /** True while Next waits for async checks. */
+  protected readonly advancing = signal(false);
+  private readonly refusals = signal(0);
   protected readonly submitting = computed(() => this.form().submitting());
   private readonly submits = signal(0);
   /** Submits that reached the action. */
   private readonly completed = signal(0);
   private readonly width = signal<number | undefined>(undefined);
   protected readonly loading = computed(() => this.form().loading());
-  /** No submit while submitting, loading, or after the data failed to load. */
-  protected readonly blocked = computed(
-    () => this.submitting() || this.loading() || this.form().loadError() !== undefined,
-  );
+  /** No submit while submitting, loading, disabled, read-only, or after the data failed to load. */
+  protected readonly blocked = computed(() => {
+    const root = this.tree()();
+    return (
+      this.submitting() || this.loading() || this.form().loadError() !== undefined || root.disabled() || root.readonly()
+    );
+  });
   /** Errors on the form itself: `$form` or a string returned by the action. */
   protected readonly formError = computed(() => {
     const message = this.submitAttempted() ? this.form().tree().errors()[0]?.message : undefined;
@@ -342,9 +412,155 @@ export class NguForm<TModel extends object, TPayload = TModel> {
     this.context.i18n = this.i18n;
     this.context.width = this.width.asReadonly();
     this.context.breakpoints = { ...DEFAULT_BREAKPOINTS, ...this.config?.breakpoints };
+    this.context.refusals = this.refusals.asReadonly();
+    this.context.announce = (text) => this.announce(text);
 
     this.observeWidth();
     this.guardUnload();
+    this.syncStepWithUrl();
+  }
+
+  // --- wizard ---------------------------------------------------------------------
+
+  protected goToStep(key: string): void {
+    if (this.steps()?.goTo(key)) {
+      this.afterStepChange();
+    }
+  }
+
+  protected edit(key: string): void {
+    const s = this.steps();
+    if (s && s.current() !== key) {
+      s.edit(key);
+      this.afterStepChange();
+    }
+  }
+
+  protected back(): void {
+    const s = this.steps();
+    if (s && !s.first()) {
+      s.back();
+      this.afterStepChange();
+    }
+  }
+
+  /** Waits for async checks, then moves on, or shows the step's problems and focuses the first. */
+  protected async next(): Promise<void> {
+    const s = this.steps();
+    if (!s || this.advancing()) {
+      return;
+    }
+    this.advancing.set(true);
+    try {
+      await this.settled(this.form());
+    } finally {
+      this.advancing.set(false);
+    }
+    if (s.next()) {
+      this.afterStepChange();
+      return;
+    }
+    afterNextRender(
+      () => {
+        const panel = this.host.nativeElement.querySelector<HTMLElement>(':scope > form > ngu-wizard > .ngu-step:not([hidden])');
+        const problems = Array.from(panel?.querySelectorAll<HTMLElement>(PROBLEMS) ?? []);
+        if (problems.length) {
+          const custom = this.invalidAnnouncement();
+          this.announce(custom ? custom(problems.length) : this.i18n.message('invalidSubmit', { count: problems.length }));
+          if (this.focusOnInvalid()) {
+            focusProblem(firstShown(problems));
+          }
+        }
+      },
+      { injector: this.injector },
+    );
+    this.cdr.markForCheck();
+  }
+
+  /** Focus moves to the new step's heading, which reads its position and title. */
+  private afterStepChange(): void {
+    afterNextRender(
+      () => {
+        const heading = this.host.nativeElement.querySelector<HTMLElement>(
+          ':scope > form > ngu-wizard > .ngu-step:not([hidden]) > .ngu-step__title',
+        );
+        heading?.focus({ preventScroll: true });
+        heading?.scrollIntoView?.({ block: 'nearest' });
+      },
+      { injector: this.injector },
+    );
+  }
+
+  /**
+   * With `stepParam`, the current step lives in the URL: moving between steps adds a history
+   * entry, so the browser's Back button goes to the previous step, and a reload opens the
+   * same step when the steps before it are still valid (for example with a draft).
+   */
+  private syncStepWithUrl(): void {
+    const ready = signal(false);
+    effect((onCleanup) => {
+      const def = this.form();
+      const internals = internalsOf(def);
+      const param = internals.stepParam;
+      const s = internals.steps;
+      if (!param || !s || def.loading()) {
+        return;
+      }
+      const location = this.injector.get(Location);
+      untracked(() => {
+        this.applyUrlStep(s, readParam(location.path(), param), location, param);
+        ready.set(true);
+      });
+      const subscription = location.subscribe((event) => {
+        this.applyUrlStep(s, readParam(event.url ?? location.path(), param), undefined, param);
+      });
+      onCleanup(() => subscription.unsubscribe());
+    });
+    effect(() => {
+      const internals = internalsOf(this.form());
+      const param = internals.stepParam;
+      const s = internals.steps;
+      if (!param || !s || !ready()) {
+        return;
+      }
+      const key = s.current();
+      const first = s.keys()[0];
+      untracked(() => {
+        const location = this.injector.get(Location);
+        const path = location.path();
+        const value = key === first ? null : stepValue(s, key);
+        if (readParam(path, param) !== value) {
+          location.go(withParam(path, param, value));
+        }
+      });
+    });
+  }
+
+  /** Opens the step named in the URL, or the furthest step that can be reached before it. */
+  private applyUrlStep(s: StepsHandle, value: string | null, location: Location | undefined, param: string): void {
+    const keys = untracked(s.keys);
+    const key = value === null ? keys[0] : value === 'review' && !s.all.includes('review') ? REVIEW_STEP : value;
+    if (key === undefined || untracked(s.current) === key) {
+      return;
+    }
+    if (keys.includes(key) && s.canGoTo(key)) {
+      s.goTo(key);
+      return;
+    }
+    // Not reachable yet: stop at the furthest step before it that can be opened.
+    const target = keys.includes(key) ? keys.indexOf(key) : 0;
+    let stop = keys[0];
+    for (const k of keys.slice(0, target + 1)) {
+      if (!s.canGoTo(k)) {
+        break;
+      }
+      stop = k;
+    }
+    s.goTo(stop);
+    if (location) {
+      const first = keys[0];
+      location.replaceState(withParam(location.path(), param, stop === first ? null : stepValue(s, stop)));
+    }
   }
 
   /** Responsive columns follow the form's own width, so forms in panels and dialogs adapt too. */
@@ -412,7 +628,7 @@ export class NguForm<TModel extends object, TPayload = TModel> {
 
   protected jumpTo(event: Event, problem: NguProblemSource): void {
     event.preventDefault();
-    problem.focus();
+    this.context.focusProblem(problem);
   }
 
   /** Ctrl+Z / ⌘Z undoes, Ctrl+Shift+Z / ⌘⇧Z / Ctrl+Y redoes, when the form keeps a history. */
@@ -448,7 +664,7 @@ export class NguForm<TModel extends object, TPayload = TModel> {
       () => {
         const source = this.context.problems().find((p) => p.field === node);
         if (source && !source.element.contains(document.activeElement)) {
-          source.focus();
+          this.context.focusProblem(source);
         }
       },
       { injector: this.injector },
@@ -462,6 +678,12 @@ export class NguForm<TModel extends object, TPayload = TModel> {
 
   protected async onSubmit(event: Event): Promise<void> {
     event.preventDefault();
+    // Enter in a wizard's field means Next until the last step.
+    const s = this.steps();
+    if (s && !s.last()) {
+      void this.next();
+      return;
+    }
     if (this.blocked()) {
       return;
     }
@@ -514,6 +736,12 @@ export class NguForm<TModel extends object, TPayload = TModel> {
     } else {
       this.invalidSubmit.emit();
       this.summaryOpen.set(this.errorSummary());
+      // A wizard returns to the first step with problems; tabs, panels and rows open theirs.
+      const bad = this.steps()?.firstInvalid();
+      if (bad) {
+        this.steps()!.goTo(bad);
+      }
+      this.refusals.update((n) => n + 1);
       this.afterRefusedSubmit();
     }
   }
@@ -527,11 +755,7 @@ export class NguForm<TModel extends object, TPayload = TModel> {
     afterNextRender(
       () => {
         const host = this.host.nativeElement;
-        const problems = Array.from(
-          host.querySelectorAll<HTMLElement>(
-            '.ngu-field--invalid, .ngu-group--invalid > .ngu-error, .ngu-array--invalid > .ngu-error',
-          ),
-        );
+        const problems = Array.from(host.querySelectorAll<HTMLElement>(PROBLEMS));
         // The summary is focused and read in full, so it replaces the announcement.
         const summary = host.querySelector<HTMLElement>(':scope > form > .ngu-error-summary');
         if (summary) {
@@ -545,7 +769,7 @@ export class NguForm<TModel extends object, TPayload = TModel> {
           );
         }
         if (this.focusOnInvalid()) {
-          const first = problems[0] ?? host.querySelector<HTMLElement>('.ngu-form-error');
+          const first = firstShown(problems) ?? host.querySelector<HTMLElement>('.ngu-form-error');
           focusProblem(first);
         }
       },
@@ -573,4 +797,24 @@ export class NguForm<TModel extends object, TPayload = TModel> {
       );
     });
   }
+}
+
+/** The step's value in the URL: its key, or `review` for the review step. */
+function stepValue(s: StepsHandle, key: string): string {
+  return key === REVIEW_STEP && !s.all.includes('review') ? 'review' : key;
+}
+
+function readParam(path: string, param: string): string | null {
+  return new URL(path, 'http://ngu.invalid').searchParams.get(param);
+}
+
+/** `path` with the query parameter set, or removed when `value` is null. */
+function withParam(path: string, param: string, value: string | null): string {
+  const url = new URL(path, 'http://ngu.invalid');
+  if (value === null) {
+    url.searchParams.delete(param);
+  } else {
+    url.searchParams.set(param, value);
+  }
+  return url.pathname + url.search + url.hash;
 }

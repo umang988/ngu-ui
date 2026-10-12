@@ -1,13 +1,26 @@
-import { ChangeDetectionStrategy, Component, computed, DestroyRef, ElementRef, forwardRef, inject, input } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  DestroyRef,
+  ElementRef,
+  forwardRef,
+  inject,
+  input,
+  linkedSignal,
+  untracked,
+} from '@angular/core';
 import type { Field } from '@angular/forms/signals';
 import { resolveCols } from '../config';
-import { NGU_STATIC_HIDDEN } from '../internal';
+import { NGU_STATIC_HIDDEN, ordered, withoutTitle } from '../internal';
 import { injectNguI18n } from '../messages';
 import type { AnyFieldDef, Cols, FormDefinition } from '../types';
 import { NguArray } from './ngu-array';
 import { NguDynamic } from './ngu-dynamic';
 import { NguField } from './ngu-field';
 import { NguFormContext } from './ngu-form-context';
+import { NguSection } from './ngu-section';
+import { NguPanel, NguTabs } from './ngu-sections';
 
 let nextGroupId = 0;
 
@@ -19,15 +32,22 @@ interface Entry {
   readonly tree: Field<any> | undefined;
   /** `grid-column` value inside this group. */
   readonly column: string | null;
+  /** True for a collapsible panel. */
+  readonly panel: boolean;
+  /** The title a tab or panel header shows. */
+  readonly title: string | undefined;
+  /** The definition without its title, for content under a tab or panel header. */
+  readonly inner: AnyFieldDef;
 }
 
 /**
  * Renders a definition object as a CSS grid, recursing into nested groups and arrays.
- * The group places its children: spans are capped at the current column count.
+ * The group places its children: spans are capped at the current column count. With
+ * `layout: 'tabs'` the children become tabs; children with `collapsed` set are panels.
  */
 @Component({
   selector: 'ngu-group',
-  imports: [NguField, forwardRef(() => NguArray), forwardRef(() => NguDynamic)],
+  imports: [NguField, NguTabs, NguPanel, forwardRef(() => NguArray), forwardRef(() => NguDynamic)],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     class: 'ngu-group',
@@ -43,64 +63,89 @@ interface Entry {
     @if (description()) {
       <p class="ngu-group__description">{{ i18n.text(description()) }}</p>
     }
-    <div class="ngu-grid">
-      @for (entry of entries(); track entry.key) {
-        @if (!isHidden(entry)) {
-          @switch (entry.def.__ngu) {
-            @case ('group') {
-              <ngu-group
-                [style.grid-column]="entry.column"
-                [fields]="entry.def.fields"
-                [tree]="entry.tree!"
-                [cols]="entry.def.cols ?? 1"
-                [title]="entry.def.title"
-                [description]="entry.def.description"
-                [path]="entry.path"
-              />
-            }
-            @case ('array') {
-              <ngu-array [style.grid-column]="entry.column" [def]="entry.def" [tree]="entry.tree!" [path]="entry.path" />
-            }
-            @case ('dynamic') {
-              <ngu-dynamic [style.grid-column]="entry.column" [def]="entry.def" [tree]="entry.tree!" [path]="entry.path" />
-            }
-            @case ('static') {
-              @let s = entry.def;
-              @switch (s.kind) {
-                @case ('divider') {
-                  <hr class="ngu-static ngu-divider" [style.grid-column]="entry.column" />
+    @if (layout() === 'tabs') {
+      @defer (on immediate) {
+        <ngu-tabs
+          [tabs]="tabs()"
+          [active]="activeTab()"
+          [labelledBy]="title() ? titleId : null"
+          [idPrefix]="titleId"
+          (select)="selectTab($event)"
+        />
+      }
+    } @else {
+      <div class="ngu-grid">
+        @for (entry of entries(); track entry.key) {
+          @if (!isHidden(entry)) {
+            @if (entry.panel) {
+              @defer (on immediate) {
+                <ngu-panel
+                  [style.grid-column]="entry.column"
+                  [section]="entry"
+                  [open]="openPanels().has(entry.key)"
+                  [idPrefix]="titleId"
+                  (toggle)="togglePanel(entry.key)"
+                />
+              }
+            } @else {
+              @switch (entry.def.__ngu) {
+                @case ('group') {
+                  <ngu-group
+                    [style.grid-column]="entry.column"
+                    [fields]="entry.def.fields"
+                    [tree]="entry.tree!"
+                    [cols]="entry.def.cols ?? 1"
+                    [title]="entry.def.title"
+                    [description]="entry.def.description"
+                    [layout]="entry.def.layout ?? 'grid'"
+                    [path]="entry.path"
+                  />
                 }
-                @case ('text') {
-                  <p class="ngu-static ngu-static__text" [style.grid-column]="entry.column">{{ i18n.text(s.text) }}</p>
+                @case ('array') {
+                  <ngu-array [style.grid-column]="entry.column" [def]="entry.def" [tree]="entry.tree!" [path]="entry.path" />
                 }
-                @default {
-                  @switch (s.level) {
-                    @case (2) {
-                      <h2 class="ngu-static ngu-static__heading" [style.grid-column]="entry.column">{{ i18n.text(s.text) }}</h2>
+                @case ('dynamic') {
+                  <ngu-dynamic [style.grid-column]="entry.column" [def]="entry.def" [tree]="entry.tree!" [path]="entry.path" />
+                }
+                @case ('static') {
+                  @let s = entry.def;
+                  @switch (s.kind) {
+                    @case ('divider') {
+                      <hr class="ngu-static ngu-divider" [style.grid-column]="entry.column" />
                     }
-                    @case (4) {
-                      <h4 class="ngu-static ngu-static__heading" [style.grid-column]="entry.column">{{ i18n.text(s.text) }}</h4>
-                    }
-                    @case (5) {
-                      <h5 class="ngu-static ngu-static__heading" [style.grid-column]="entry.column">{{ i18n.text(s.text) }}</h5>
-                    }
-                    @case (6) {
-                      <h6 class="ngu-static ngu-static__heading" [style.grid-column]="entry.column">{{ i18n.text(s.text) }}</h6>
+                    @case ('text') {
+                      <p class="ngu-static ngu-static__text" [style.grid-column]="entry.column">{{ i18n.text(s.text) }}</p>
                     }
                     @default {
-                      <h3 class="ngu-static ngu-static__heading" [style.grid-column]="entry.column">{{ i18n.text(s.text) }}</h3>
+                      @switch (s.level) {
+                        @case (2) {
+                          <h2 class="ngu-static ngu-static__heading" [style.grid-column]="entry.column">{{ i18n.text(s.text) }}</h2>
+                        }
+                        @case (4) {
+                          <h4 class="ngu-static ngu-static__heading" [style.grid-column]="entry.column">{{ i18n.text(s.text) }}</h4>
+                        }
+                        @case (5) {
+                          <h5 class="ngu-static ngu-static__heading" [style.grid-column]="entry.column">{{ i18n.text(s.text) }}</h5>
+                        }
+                        @case (6) {
+                          <h6 class="ngu-static ngu-static__heading" [style.grid-column]="entry.column">{{ i18n.text(s.text) }}</h6>
+                        }
+                        @default {
+                          <h3 class="ngu-static ngu-static__heading" [style.grid-column]="entry.column">{{ i18n.text(s.text) }}</h3>
+                        }
+                      }
                     }
                   }
                 }
+                @default {
+                  <ngu-field [style.grid-column]="entry.column" [def]="entry.def" [field]="entry.tree!" [path]="entry.path" />
+                }
               }
-            }
-            @default {
-              <ngu-field [style.grid-column]="entry.column" [def]="entry.def" [field]="entry.tree!" [path]="entry.path" />
             }
           }
         }
-      }
-    </div>
+      </div>
+    }
     @if (showErrors()) {
       <p class="ngu-error" [id]="titleId + '-msg'" tabindex="-1">{{ message() }}</p>
     }
@@ -157,11 +202,14 @@ export class NguGroup {
   readonly cols = input<Cols>(1);
   readonly title = input<string>();
   readonly description = input<string>();
+  /** `'tabs'` shows each child group or list as a tab. */
+  readonly layout = input<'grid' | 'tabs'>('grid');
   /** Dot path of this group inside the form; empty at the root. */
   readonly path = input<string>('');
 
   protected readonly titleId = `ngu-group-${nextGroupId++}`;
   private readonly context = inject(NguFormContext, { optional: true });
+  private readonly section = inject(NguSection, { optional: true });
   protected readonly i18n = this.context?.i18n ?? injectNguI18n();
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
   protected readonly state = computed(() => this.tree()());
@@ -175,7 +223,7 @@ export class NguGroup {
     if (s.errors().length === 0) {
       return false;
     }
-    return Boolean(this.context?.submitAttempted()) || (s.touched() && s.dirty());
+    return this.errorsDue() || (s.touched() && s.dirty());
   });
   protected readonly message = computed(() => {
     const first = this.state().errors()[0];
@@ -198,6 +246,7 @@ export class NguGroup {
         get field() {
           return self.tree();
         },
+        section: this.section,
         focus: () => {
           const host = this.host.nativeElement;
           host.scrollIntoView?.({ block: 'center' });
@@ -218,17 +267,83 @@ export class NguGroup {
     const subtree = this.tree() as unknown as Record<string, Field<any>>;
     const base = this.path();
     const cols = this.columns();
-    return Object.entries(this.fields()).map(([key, def]) => ({
+    return ordered(this.fields()).map(([key, def]) => ({
       key,
       path: base ? base + '.' + key : key,
       def,
       tree: def.__ngu === 'static' ? undefined : subtree[key],
       column: column(def, cols),
+      panel: (def.__ngu === 'group' || def.__ngu === 'array' || def.__ngu === 'dynamic') && def.collapsed !== undefined,
+      title: 'title' in def ? def.title : undefined,
+      inner: withoutTitle(def),
     }));
   });
 
   protected isHidden(entry: Entry): boolean {
     return entry.tree ? entry.tree().hidden() : Boolean(this.staticHidden()[entry.key]);
+  }
+
+  /** Errors show after a submit attempt, or after Next on the step this group is in. */
+  private errorsDue(): boolean {
+    return Boolean(this.context?.submitAttempted() || this.section?.attempted());
+  }
+
+  // --- tabs --------------------------------------------------------------------
+
+  protected readonly tabs = computed(() => this.entries().filter((e) => e.tree && !e.tree().hidden()));
+
+  /** Changes to the section that holds the first problem when a submit is refused. */
+  private readonly chosenTab = linkedSignal<{ refusals: number; resets: number }, string | undefined>({
+    source: () => ({ refusals: this.context?.refusals() ?? 0, resets: this.context?.resets() ?? 0 }),
+    computation: (source, previous) => {
+      if (!previous || previous.source.resets !== source.resets) {
+        return undefined;
+      }
+      if (previous.source.refusals !== source.refusals) {
+        return untracked(() => this.tabs().find((t) => t.tree!().invalid())?.key) ?? previous.value;
+      }
+      return previous.value;
+    },
+  });
+  protected readonly activeTab = computed(() => {
+    const list = this.tabs();
+    const chosen = this.chosenTab();
+    return list.some((t) => t.key === chosen) ? chosen : list[0]?.key;
+  });
+
+  protected selectTab(key: string): void {
+    this.chosenTab.set(key);
+  }
+
+  // --- panels ------------------------------------------------------------------
+
+  /** Open panels: those with `collapsed: false` at first, plus any with problems after a refused submit. */
+  protected readonly openPanels = linkedSignal<{ refusals: number; resets: number }, ReadonlySet<string>>({
+    source: () => ({ refusals: this.context?.refusals() ?? 0, resets: this.context?.resets() ?? 0 }),
+    computation: (source, previous) => {
+      if (!previous || previous.source.resets !== source.resets) {
+        return untracked(() => new Set(this.entries().filter((e) => e.panel && !(e.def as { collapsed?: boolean }).collapsed).map((e) => e.key)));
+      }
+      if (previous.source.refusals !== source.refusals) {
+        const invalid = untracked(() => this.entries().filter((e) => e.panel && e.tree!().invalid()));
+        return invalid.length ? new Set([...previous.value, ...invalid.map((e) => e.key)]) : previous.value;
+      }
+      return previous.value;
+    },
+  });
+
+  protected togglePanel(key: string): void {
+    const next = new Set(this.openPanels());
+    if (!next.delete(key)) {
+      next.add(key);
+    }
+    this.openPanels.set(next);
+  }
+
+  protected openPanel(key: string): void {
+    if (!this.openPanels().has(key)) {
+      this.togglePanel(key);
+    }
   }
 }
 

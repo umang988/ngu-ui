@@ -130,6 +130,60 @@ readonly profile = defineForm<Profile>(initial, {
 - **Static content** sits under a `$` key: `{ heading, level? }` (level 2 to 6, default 3),
   `{ text }` or `{ divider: true }`. It takes a whole row unless it sets `span`, and accepts
   `hidden: (model) => boolean`. It never appears in the value.
+- **`order`** moves an entry inside its group, like CSS `order`: entries sort by it, lowest
+  first, and entries without it count as `0` and keep the model's order. It works on fields,
+  groups, lists and `$` content, and sets the focus order too.
+
+## Tabs and collapsible panels
+
+```ts
+readonly settings = defineForm(initial, {
+  profile: { title: "Profile", fields: { name: { label: "Name", required: true } } },
+  alerts: { title: "Alerts", fields: { email: { label: "Email", type: "email" } } },
+  advanced: { title: "Advanced", fields: { token: "API token" } },
+}, { layout: "tabs" });
+
+// Or per group: layout on a parent, collapsed on a single group or list.
+details: { title: "Details", layout: "tabs", fields: { ... } },
+extras: { title: "More options", collapsed: true, fields: { ... } },
+```
+
+- **`layout: "tabs"`** on `defineForm` (top level) or on a group shows each child group or
+  list as a tab. Tabs follow the ARIA pattern: arrow keys (mirrored right to left), Home and
+  End. After a refused submit, each tab shows how many problems it holds, and the first tab
+  with a problem opens so its field can be focused.
+- **`collapsed: true | false`** makes a group, list or run-time list a collapsible panel that
+  starts closed or open. **`layout: "accordion"`** does that for every child, the first one
+  open. A refused submit opens every panel with a problem.
+- Closed tabs and panels keep their fields, values and errors. Links in the error summary
+  open the tab or panel before focusing the field. Printing shows them all.
+
+## Wizards
+
+```ts
+readonly checkout = defineForm<Checkout>(initial, {
+  cart: { title: "Cart", fields: { items: { layout: "table", ... } } },
+  delivery: { title: "Delivery", fields: { method: { ... } } },
+  address: { title: "Address", hidden: (m) => m.delivery.method === "pickup", fields: { ... } },
+  payment: { title: "Payment", fields: { ... } },
+}, { layout: "steps", review: "Check your order", stepParam: "step" });
+```
+
+- **`layout: "steps"`** makes each top-level group or list a step: a numbered step list,
+  "Step 2 of 4" in the step heading, and Back, Next and submit buttons. Next shows the
+  step's errors and stays while it is invalid (after waiting for async checks); Enter in a
+  field does the same. Back keeps every value. A step with `hidden` is skipped.
+- Later steps open only once every step before them is valid. If a step became invalid in
+  the meantime, a refused submit returns to the first step with problems.
+- **`review: true`** (or a title) adds a last step that lists every answer under its step,
+  with an Edit button per step. After an edit, Next reads "Back to review". `display` words
+  a value there (`display: (card) => "•••• " + card.slice(-4)`).
+- **`stepParam: "step"`** keeps the current step in the query string, through `Location` from
+  `@angular/common` (no router needed). Each step adds a history entry, so the browser's Back
+  button returns to the previous step; a reload opens the same step if the steps before it
+  are still valid (pair it with `draft`), or else the first step that needs answers.
+- **`def.steps`** has `keys`, `current`, `index`, `count`, `first`, `last`, `next()`,
+  `back()`, `goTo(key)` and `canGoTo(key)` for custom progress bars and buttons.
 
 ## Input details
 
@@ -189,7 +243,22 @@ readonly order = defineForm<Order>(initial, {
 - Logic functions inside `item` get the current element as their second argument.
 - Set `addLabel: ""` or `removeLabel: ""` to hide a button and control the rows yourself
   through `def.model`.
-- Nested arrays inside array items are not supported yet.
+- **`reorder: true`** adds Move up and Move down buttons (focus stays on the moved row and
+  the new position is announced) and a handle to drag rows with a mouse, pen or finger.
+- **`duplicate: true`** (or a label) copies a row next to itself as a new row with its own
+  state.
+- **`summary: (item, index) => string`** collapses each row to one line that opens to edit.
+  New rows start open; a refused submit opens every row with a problem.
+- **`layout: "table"`** edits a list of objects with plain fields as a table: one column per
+  field, headed by its label, `span` as the column's share. Controls keep their labels for
+  screen readers. Below the `sm` breakpoint the rows become cards.
+- **`virtual: true`** renders only the rows in view inside a box `--ngu-list-height` tall,
+  for hundreds of rows. A refused submit brings the first problem row into view, and the
+  list names other rows with problems. Rows out of view keep their model and touched state
+  but not control state of their own (such as a half-typed tag).
+- Lists can be nested (a list inside a list row) and rows can hold run-time fields. Logic in
+  an inner `item` receives the innermost row. A list of lists without an object in between
+  (`string[][]`) is not supported.
 - With `type: "checkbox"`, `"select"` or `"tags"` (or a custom type), an array is one field
   instead of a list of rows; see [Field types](#field-types).
 
@@ -671,6 +740,31 @@ form.changes();     // { address: { city: "Pune" } } – only what differs from 
   the tab is closed or reloaded while there are unsaved changes. The listener is only
   attached while needed, so the page stays eligible for the back/forward cache.
 
+## View mode, read-only and disabled forms
+
+```html
+<ngu-view [form]="profile" />
+<ngu-view [form]="profile" [keys]="['name', 'address']" />
+```
+
+```ts
+readonly profile = defineForm(initial, spec, { readonly: this.locked, disabled: this.saving });
+```
+
+- **`<ngu-view>`** shows the same spec as label and value pairs for detail and confirmation
+  pages: option labels, dates and numbers for the locale, Yes or No, list entries, a table
+  for table lists. Untitled groups join the list; titled groups and lists become sections.
+  Hidden fields, passwords and captcha tokens are never shown; empty values read "Not
+  provided". `section="key"` shows one top-level group without its title.
+- **`display: (value, model) => string`** on a field words its value in view mode and on the
+  review step.
+- **`readonly` and `disabled`** on `defineForm` take a flag, a signal or a function and reach
+  every field. Read-only lists hide their buttons; disabled lists show them disabled. Both
+  block the submit button.
+- **Printing** leaves out buttons, the step list and notices, prints every tab, panel and
+  collapsed row open, and keeps rows on one page. A wizard prints every step, or only the
+  review once the user reached it.
+
 ## Loading, drafts and undo
 
 ```ts
@@ -942,7 +1036,8 @@ ngu-form {
   --ngu-success-color: #1e7a3c; /* met password rules, strong meter */
   --ngu-skeleton-color: #eee;   /* loading placeholders */
   --ngu-notice-bg: #f5f5f5;     /* "draft restored" notice */
-  --ngu-surface: #fff;          /* the crop dialog */
+  --ngu-surface: #fff;          /* the crop dialog, sticky table headers */
+  --ngu-list-height: 32rem;     /* the scrolling box of a virtual list */
   --ngu-on-primary: #fff;       /* text on the submit button and chosen segments */
   --ngu-rating-color: #b25f00;  /* filled stars */
   --ngu-switch-off: #767676;    /* a switch that is off */

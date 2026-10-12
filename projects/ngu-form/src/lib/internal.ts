@@ -1,6 +1,7 @@
 import { signal, type WritableSignal } from '@angular/core';
 import { createMetadataKey, type Field, type ValidationError } from '@angular/forms/signals';
-import type { Choice, FormDef } from './types';
+import type { StepsHandle } from './steps';
+import type { AnyFieldDef, Choice, FormDef, FormDefinition } from './types';
 
 /** Options computed from the model, for `options: (model) => [...]`. */
 export const NGU_CHOICES = createMetadataKey<readonly Choice<any>[]>();
@@ -22,6 +23,12 @@ export interface FormInternals {
   saved(): void;
   /** Model paths the last undo or redo changed. */
   changedByHistory(): readonly string[];
+  /** The wizard, when `layout` is `'steps'`. */
+  readonly steps?: StepsHandle;
+  /** Title of the review step: `true` for the translated default. */
+  readonly review?: string | true;
+  /** URL query parameter that holds the current step. */
+  readonly stepParam?: string;
 }
 
 const internals = new WeakMap<FormDef<any, any>, FormInternals>();
@@ -105,6 +112,52 @@ function copySymbols<T extends object>(from: object, to: T): T {
     (to as Record<symbol, unknown>)[sym] = (from as Record<symbol, unknown>)[sym];
   }
   return to;
+}
+
+/**
+ * Deep copy of plain objects and arrays without their symbol keys, for a duplicated row: the
+ * copy gets a row of its own instead of sharing the original's. Dates are copied; files and
+ * other objects are shared.
+ */
+export function copyRow<T>(value: T): T {
+  if (Array.isArray(value)) {
+    return value.map(copyRow) as T;
+  }
+  if (isPlainObject(value)) {
+    const out: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(value)) {
+      out[k] = copyRow(v);
+    }
+    return out as T;
+  }
+  if (isDate(value)) {
+    return new Date(value.getTime()) as T;
+  }
+  return value;
+}
+
+/** Tab, panel and step contents reuse one untitled copy per definition, so inputs stay stable. */
+const untitled = new WeakMap<AnyFieldDef, AnyFieldDef>();
+
+/** A group or list without its title, for content under a header that already shows it. */
+export function withoutTitle(def: AnyFieldDef): AnyFieldDef {
+  if (def.__ngu !== 'group' && def.__ngu !== 'array' && def.__ngu !== 'dynamic') {
+    return def;
+  }
+  let copy = untitled.get(def);
+  if (!copy) {
+    copy = { ...def, title: undefined };
+    untitled.set(def, copy);
+  }
+  return copy;
+}
+
+/** A definition's entries sorted by `order`, lowest first; equal orders keep model order. */
+export function ordered(fields: FormDefinition): [string, AnyFieldDef][] {
+  return Object.entries(fields)
+    .map((entry, index) => ({ entry, index }))
+    .sort((a, b) => (a.entry[1].order ?? 0) - (b.entry[1].order ?? 0) || a.index - b.index)
+    .map(({ entry }) => entry);
 }
 
 export function clone<T>(value: T): T {

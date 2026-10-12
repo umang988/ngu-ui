@@ -230,6 +230,13 @@ export interface BaseFieldSpec<V, TModel, TScope = TModel> extends ValidationSpe
   warn?: Validator<V, TModel, TScope> | readonly Validator<V, TModel, TScope>[];
   /** Keep this field out of saved drafts. Password fields are never saved. */
   persist?: boolean;
+  /**
+   * Position inside its group, like CSS `order`: entries sort by it, lowest first, and
+   * entries without it count as `0` and keep their model order.
+   */
+  order?: number;
+  /** The text shown for the value in view mode (`<ngu-view>` and the review step). */
+  display?: (value: V, model: TModel) => string;
 }
 
 /**
@@ -478,8 +485,20 @@ export interface GroupSpec<T, TModel, TScope = TModel> extends Pick<ValidationSp
   /** Columns this group spans inside its parent group. */
   span?: number;
   hidden?: LogicFn<TModel, boolean, TScope>;
+  /** Position inside the parent group; see `order` on fields. */
+  order?: number;
+  /**
+   * `'tabs'` shows each child group or list as a tab, with a count of its problems. Use
+   * `'accordion'` for collapsible panels, the first one open.
+   */
+  layout?: SectionLayout;
+  /** Makes this group a collapsible panel: `true` starts closed, `false` starts open. */
+  collapsed?: boolean;
   fields: FormSpec<T, TModel, TScope>;
 }
+
+/** How a group shows its child groups and lists. */
+export type SectionLayout = 'tabs' | 'accordion';
 
 /**
  * An array property. `item` describes one element once; the rows come from the data.
@@ -504,6 +523,29 @@ export interface ArraySpec<TItem, TModel, TScope = TModel>
   removeLabel?: string;
   /** Grid columns inside each row, for object items. Defaults to 1. */
   cols?: Cols;
+  /** Position inside the parent group; see `order` on fields. */
+  order?: number;
+  /** Makes the list a collapsible panel: `true` starts closed, `false` starts open. */
+  collapsed?: boolean;
+  /** Move up and Move down buttons on each row, and a handle to drag rows with a pointer. */
+  reorder?: boolean;
+  /** A button that copies a row next to itself: `true`, or the button's label. */
+  duplicate?: boolean | string;
+  /**
+   * A one-line summary per row. Rows then start collapsed to this line and expand to edit;
+   * new rows start open, and rows with problems open after a refused submit.
+   */
+  summary?: (item: TItem, index: number) => string;
+  /**
+   * `'table'` edits object items as a grid with one column per field, for line items. Below
+   * the `sm` breakpoint the rows fall back to cards.
+   */
+  layout?: 'table';
+  /**
+   * Render only the rows in view, inside a scrolling box, for lists of hundreds of rows. The
+   * box is `--ngu-list-height` tall (default `32rem`).
+   */
+  virtual?: boolean;
 }
 
 /**
@@ -595,6 +637,10 @@ export interface DynamicSpec<V, TModel, TScope = TModel> {
   fields: Signal<readonly DynamicField<V, TModel>[]> | readonly DynamicField<V, TModel>[];
   /** Keep values of fields that disappear from the list. Default `false`: they are removed. */
   keepRemoved?: boolean;
+  /** Position inside the parent group; see `order` on fields. */
+  order?: number;
+  /** Makes the field list a collapsible panel: `true` starts closed, `false` starts open. */
+  collapsed?: boolean;
 }
 
 /** What a model property of type `V` may be described as. */
@@ -623,6 +669,8 @@ export type SpecFor<V, TModel, TScope = TModel> = [NonNullable<V>] extends [read
 interface StaticBase<TModel, TScope> {
   span?: number;
   hidden?: LogicFn<TModel, boolean, TScope>;
+  /** Position inside the group; see `order` on fields. */
+  order?: number;
 }
 
 /**
@@ -668,8 +716,57 @@ export interface FormDefOptions<TModel = any, TPayload = TModel> {
   draft?: DraftOptions;
   /** Keep an undo history of changes: `true` or `{ limit }` (default 100 steps). */
   history?: boolean | { readonly limit?: number };
+  /**
+   * How the top-level groups and lists render. `'steps'` makes each one a step of a wizard,
+   * `'tabs'` a tab, and `'accordion'` a collapsible panel.
+   */
+  layout?: FormLayout;
+  /** Wizard only: end with a summary of every answer, with links back to each step. `true` or its title. */
+  review?: boolean | string;
+  /**
+   * Wizard only: keep the current step in this URL query parameter, such as `'step'`, so the
+   * browser's Back button and a reload keep the step.
+   */
+  stepParam?: string;
+  /** Disables every field, for example while saving. A flag, a signal or a function. */
+  disabled?: boolean | (() => boolean);
+  /** Makes every field read-only. A flag, a signal or a function. */
+  readonly?: boolean | (() => boolean);
   /** Required only when `defineForm` is called outside an injection context. */
   injector?: Injector;
+}
+
+/** How the top-level groups and lists of a form render. */
+export type FormLayout = 'steps' | 'tabs' | 'accordion';
+
+/**
+ * The steps of a wizard, from `defineForm(..., { layout: 'steps' })`. `<ngu-form>` renders the
+ * step list and the Back and Next buttons; use this to drive the wizard from your own controls.
+ */
+export interface FormSteps {
+  /** Keys of the steps that are not skipped, in order; `'$review'` ends the list when `review` is on. */
+  readonly keys: Signal<readonly string[]>;
+  /** Key of the step on screen. */
+  readonly current: Signal<string>;
+  /** Position of the current step among `keys`, from 0. */
+  readonly index: Signal<number>;
+  readonly count: Signal<number>;
+  readonly first: Signal<boolean>;
+  readonly last: Signal<boolean>;
+  /**
+   * Shows the current step's errors and moves on when it is valid. Returns `false`, and
+   * stays, while the step is invalid or an async check runs.
+   */
+  next(): boolean;
+  /** Goes to the previous step. Values are kept. */
+  back(): void;
+  /**
+   * Goes to a step. Earlier steps are always open; a later step only once every step before
+   * it is valid. Returns whether the step changed.
+   */
+  goTo(key: string): boolean;
+  /** True when `goTo(key)` would succeed. */
+  canGoTo(key: string): boolean;
 }
 
 /** Data the form waits for. An Angular `Resource` or `httpResource` fits. */
@@ -761,6 +858,9 @@ export interface GroupDef {
   readonly cols?: Cols;
   readonly span?: number;
   readonly hidden?: LogicFn<any, boolean, any>;
+  readonly order?: number;
+  readonly layout?: 'tabs';
+  readonly collapsed?: boolean;
   readonly fields: FormDefinition;
 }
 
@@ -779,6 +879,13 @@ export interface ArrayDef {
   readonly addLabel?: string;
   readonly removeLabel?: string;
   readonly cols: Cols;
+  readonly order?: number;
+  readonly collapsed?: boolean;
+  readonly reorder?: boolean;
+  readonly duplicate?: boolean | string;
+  readonly summary?: (item: any, index: number) => string;
+  readonly layout?: 'table';
+  readonly virtual?: boolean;
 }
 
 /** One run-time field, compiled. */
@@ -801,6 +908,8 @@ export interface DynamicDef {
   readonly span?: number;
   readonly hidden?: LogicFn<any, boolean, any>;
   readonly keepRemoved: boolean;
+  readonly order?: number;
+  readonly collapsed?: boolean;
   /** Compiled fields by key, in list order. */
   readonly entries: Signal<ReadonlyMap<string, DynamicEntry>>;
 }
@@ -813,6 +922,7 @@ export interface StaticDef {
   readonly level: 2 | 3 | 4 | 5 | 6;
   readonly span?: number;
   readonly hidden?: LogicFn<any, boolean, any>;
+  readonly order?: number;
 }
 
 export type AnyFieldDef = LeafDef | GroupDef | ArrayDef | DynamicDef | StaticDef;
@@ -830,6 +940,10 @@ export interface FormDef<TModel extends object, TPayload = TModel> {
   readonly spec: FormSpec<TModel>;
   readonly fields: FormDefinition;
   readonly cols: Cols;
+  /** How the top-level groups and lists render; unset is one grid. */
+  readonly layout?: FormLayout;
+  /** The wizard's steps; inert unless `layout` is `'steps'`. */
+  readonly steps: FormSteps;
   /** A copy of the value the form started with. */
   readonly initial: TModel;
 

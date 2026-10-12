@@ -37,6 +37,7 @@ export { NguGroup } from './lib/components/ngu-group';
 export { NguField } from './lib/components/ngu-field';
 export { NguArray } from './lib/components/ngu-array';
 export { NguDynamic } from './lib/components/ngu-dynamic';
+export { NguView } from './lib/components/ngu-view';
 export { NguFieldTemplate, NguControlTemplate, type NguFieldContext } from './lib/components/ngu-templates';
 export { provideNguFieldTypes, NGU_FIELD_TYPES, type NguFieldTypes } from './lib/field-types';
 export { provideNguFormConfig, NGU_FORM_CONFIG, type NguFormConfig } from './lib/config';

@@ -45,23 +45,30 @@ describe('App', () => {
   });
 
   it('renders every example inside the docs layout', async () => {
-    for (const [id, submit] of [
+    // The main button: submit, or Next on the first step of a wizard.
+    for (const [id, action] of [
       ['login', 'Sign in'],
       ['signup', 'Create account'],
-      ['order', 'Place order'],
+      ['checkout', 'Next'],
       ['survey', 'Send answers'],
       ['field-types', 'Send'],
     ]) {
       const { el, fixture } = await open(`/examples/${id}`);
-      await until(fixture, () => !!el.querySelector('.preview button[type="submit"]'));
+      const main = () => el.querySelector('.preview .ngu-actions button:last-child');
+      await until(fixture, () => !!main());
       expect(el.querySelector('.sidebar a.is-active')?.textContent?.trim()).toBe(
         EXAMPLES.find((e) => e.id === id)!.title,
       );
-      expect(el.querySelector('.preview button[type="submit"]')?.textContent?.trim()).toBe(submit);
+      expect(main()?.textContent?.trim()).toBe(action);
     }
   });
 
   it('renders every documentation page with its title and live demos', async () => {
+    // A demo shows a form, or a form's values in view mode; a review step's view is part of its form.
+    const shown = (el: HTMLElement) =>
+      Array.from(el.querySelectorAll('.demo ngu-form, .demo ngu-view')).filter(
+        (n) => !n.parentElement?.closest('ngu-form, ngu-view'),
+      ).length;
     const count = (sections: readonly DocSection[]): number =>
       sections.reduce((n, s) => n + (s.demo ? 1 : 0) + count(s.children ?? []), 0);
     for (const entry of NAV_ENTRIES.filter((e) => e.load)) {
@@ -71,14 +78,14 @@ describe('App', () => {
       await until(
         fixture,
         () =>
-          !!el.querySelector('.doc h1') && el.querySelectorAll('.demo ngu-form').length === demos,
+          !!el.querySelector('.doc h1') && shown(el) === demos,
       );
       expect(el.querySelector('.doc h1')?.textContent?.trim(), entry.path).toBe(page.title);
       expect(
         el.querySelectorAll('.doc-section > .doc-section__head').length,
         entry.path,
       ).toBeGreaterThan(0);
-      expect(el.querySelectorAll('.demo ngu-form').length, `${entry.path} demos`).toBe(demos);
+      expect(shown(el), `${entry.path} demos`).toBe(demos);
     }
   }, 120_000);
 

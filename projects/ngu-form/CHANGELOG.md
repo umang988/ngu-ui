@@ -1,5 +1,62 @@
 # Changelog
 
+## 0.5.0 (unreleased): Complex flows and layout
+
+### Added
+
+- **Wizards.** `defineForm(..., { layout: 'steps' })` shows each top-level group or list as a
+  step, with a step list, "Step 2 of 4" in the step heading, and Back, Next and submit buttons.
+  Next shows the current step's errors and stays while it is invalid, after waiting for async
+  checks; Enter in a field does the same. A step with `hidden` is skipped. Later steps open
+  only once every step before them is valid, and a refused submit returns to the first step
+  with problems. `def.steps` (`FormSteps`) has `keys`, `current`, `index`, `count`, `first`,
+  `last`, `next()`, `back()`, `goTo()` and `canGoTo()` for custom controls.
+- **Review step.** `review: true` (or a title) ends a wizard with every answer under its
+  step and an Edit button per step; after an edit, Next becomes "Back to review".
+- **Steps in the URL.** `stepParam: 'step'` keeps the current step in the query string through
+  `Location`: each step is a history entry, and a reload opens the same step when the steps
+  before it are valid, or else the first step that still needs answers. No router needed.
+- **Tabs.** `layout: 'tabs'` on a group, or on the form, shows child groups and lists as tabs
+  (the ARIA tabs pattern, arrow keys mirrored right to left), each with a count of its problems
+  once errors show. A refused submit selects the first tab with a problem.
+- **Collapsible panels.** `collapsed: true | false` on a group, list or run-time field list
+  makes it a panel that starts closed or open; `layout: 'accordion'` does this for every child,
+  the first one open. A refused submit opens every panel with a problem.
+- **Field order.** `order` on fields, groups, lists, run-time lists and `$` content sorts them
+  inside their group like CSS `order`, which also sets the focus order.
+- **List tools.** `reorder: true` adds Move up and Move down buttons (focus stays on the moved
+  row; the new position is announced) and a drag handle for pointers. `duplicate: true | label`
+  copies a row next to itself as a new row. `summary: (item, index) => string` collapses rows
+  to one line; new rows start open, and rows with problems open after a refused submit.
+- **Table layout.** `layout: 'table'` on a list of objects with plain fields: one column per
+  field headed by its label, `span` as the column width, a row number header per row, and
+  labels kept on each control for screen readers. Below `sm` the rows become cards again.
+- **Long lists.** `virtual: true` renders only the rows in view inside a box
+  `--ngu-list-height` tall, with `aria-setsize`/`aria-posinset` (or `aria-rowcount` and
+  `aria-rowindex` in tables). A refused submit brings the first problem row into view, and a
+  line under the list names the other rows with problems. Printing renders every row.
+- **Nested lists** (a list inside a list row) and **run-time fields inside list rows**. Item
+  logic receives the innermost row.
+- **View mode.** `<ngu-view [form]>` shows label and value pairs: option labels, dates,
+  numbers and currencies for the locale, Yes or No, list entries, tables for table lists,
+  "Not provided" for empty values, never passwords or captcha tokens. `keys` and `section`
+  pick what to show. `display: (value, model) => string` words a value.
+- **Whole-form switches.** `readonly` and `disabled` on `defineForm` take a flag, a signal or a
+  function and reach every field. Read-only lists hide their buttons; disabled ones show them
+  disabled. Both block the submit button.
+- **Print styles.** Buttons, the step list and notices are left out; tabs, panels and
+  collapsed rows print open; a wizard prints every step, or the review once reached.
+- Messages for all of the above, with Hindi and Arabic translations in the demo.
+- Docs pages for steps, tabs and accordion, view mode, and the new list sections; the
+  "Place an order" example became the "Checkout" wizard.
+
+### Changed
+
+- **Lists of lists and run-time fields inside lists no longer throw.** Lists whose items are
+  lists themselves (`string[][]`) still need an object in between.
+- Group content inside tabs and panels has no title of its own; the tab or panel header shows
+  it. `NguProblemSource` gained an optional `section`.
+
 ## 0.4.0 (unreleased): Field type catalogue
 
 ### Added

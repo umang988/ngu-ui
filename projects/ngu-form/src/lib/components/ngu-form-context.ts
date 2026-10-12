@@ -1,4 +1,13 @@
-import { Injectable, signal, type Signal, type TemplateRef, type WritableSignal } from '@angular/core';
+import {
+  afterNextRender,
+  inject,
+  Injectable,
+  Injector,
+  signal,
+  type Signal,
+  type TemplateRef,
+  type WritableSignal,
+} from '@angular/core';
 import type { Field } from '@angular/forms/signals';
 import { DEFAULT_BREAKPOINTS } from '../config';
 import { createNguI18n, type NguI18n } from '../messages';
@@ -18,8 +27,16 @@ export interface NguProblemSource {
   /** The host element, for page order. */
   readonly element: HTMLElement;
   readonly field: Field<any>;
+  /** The step, tab, panel or row it sits in, which may be out of view. */
+  readonly section?: NguRevealable | null;
   /** Moves focus to the control and scrolls it into view. */
   focus(): void;
+}
+
+/** A part of the form that can be out of view, such as a tab panel or a wizard step. */
+export interface NguRevealable {
+  shown(): boolean;
+  reveal(): void;
 }
 
 /** Shared by `ngu-form` with the fields it renders. */
@@ -49,6 +66,15 @@ export class NguFormContext {
   controlTemplates: Signal<TemplateMap> = signal(new Map());
   /** Messages and translations for this form. */
   i18n: NguI18n = createNguI18n();
+  /**
+   * Increments when a submit is refused, before focus moves. Tabs, panels, steps and rows
+   * open the parts that hold problems in response, so the first problem can be focused.
+   */
+  refusals: Signal<number> = signal(0);
+  /** Reads a short message out through the form's polite live region. */
+  announce: (text: string) => void = () => undefined;
+
+  private readonly injector = inject(Injector);
 
   private readonly sources = signal<readonly NguProblemSource[]>([]);
   /** Everything rendered that can show a problem, in registration order. */
@@ -64,6 +90,17 @@ export class NguFormContext {
     const done = () => busy.update((n) => n - 1);
     work.then(done, done);
     return work;
+  }
+
+  /** Focuses a problem, first opening the step, tab, panel or row that hides it. */
+  focusProblem(source: NguProblemSource): void {
+    const section = source.section;
+    if (section && !section.shown()) {
+      section.reveal();
+      afterNextRender(() => source.focus(), { injector: this.injector });
+      return;
+    }
+    source.focus();
   }
 
   /** Adds a field, group or list; returns the function that removes it. */

@@ -77,6 +77,55 @@ export interface NguMessages {
   listFallback: NguMessage;
   minItems: NguMessage<{ label: string; min: number }>;
   maxItems: NguMessage<{ label: string; max: number }>;
+  /** A row without a summary, and the row number in tables. */
+  entry: NguMessage<{ index: number }>;
+  /** Accessible names of a row's move buttons. */
+  moveUp: NguMessage<{ index: number }>;
+  moveDown: NguMessage<{ index: number }>;
+  /** Tooltip of a row's drag handle. */
+  dragToReorder: NguMessage;
+  /** Announced after a row moved. */
+  rowMoved: NguMessage<{ index: number; count: number }>;
+  duplicate: NguMessage;
+  /** Accessible name of a row's duplicate button, such as "Duplicate entry 2". */
+  duplicateItem: NguMessage<{ label: string; index: number }>;
+  /** Announced after a row was copied. */
+  rowDuplicated: NguMessage<{ index: number }>;
+  /** Shown on a collapsed row that has problems. */
+  rowNeedsAttention: NguMessage;
+  /** Under a long list whose problem rows are scrolled out of view. */
+  rowsNeedAttention: NguMessage<{ count: number; rows: string }>;
+  goToEntry: NguMessage<{ index: number }>;
+  /** Header of the row number column in tables, read by screen readers; `#` is shown. */
+  rowNumber: NguMessage;
+  /** Header of the buttons column in tables, for screen readers. */
+  rowActions: NguMessage;
+
+  // --- sections and steps -------------------------------------------------------
+  /** Count on a tab or panel header. */
+  sectionProblems: NguMessage<{ count: number }>;
+  /** Accessible name of the wizard's step list. */
+  stepsLabel: NguMessage;
+  stepProgress: NguMessage<{ index: number; count: number }>;
+  /** Read after a finished step in the step list. */
+  stepDone: NguMessage;
+  next: NguMessage;
+  back: NguMessage;
+  /** Next button after an Edit link on the review step. */
+  backToReview: NguMessage;
+  /** Default title of the review step. */
+  review: NguMessage;
+  edit: NguMessage;
+
+  // --- view mode ----------------------------------------------------------------
+  yes: NguMessage;
+  no: NguMessage;
+  /** An empty value in view mode. */
+  notProvided: NguMessage;
+  /** A password in view mode. */
+  secret: NguMessage;
+  ratingValue: NguMessage<{ value: number; max: number }>;
+  consentGiven: NguMessage<{ date: string }>;
 
   // --- inputs ---------------------------------------------------------------
   showPassword: NguMessage;
@@ -219,6 +268,36 @@ export const NGU_DEFAULT_MESSAGES: Readonly<NguMessages> = {
   listFallback: 'This list',
   minItems: '{label} needs at least {min, plural, one {# entry} other {# entries}}',
   maxItems: '{label} allows at most {max, plural, one {# entry} other {# entries}}',
+  entry: 'Entry {index}',
+  moveUp: 'Move entry {index} up',
+  moveDown: 'Move entry {index} down',
+  dragToReorder: 'Drag to reorder',
+  rowMoved: 'Moved to position {index} of {count}',
+  duplicate: 'Duplicate',
+  duplicateItem: '{label} entry {index}',
+  rowDuplicated: 'Copy added as entry {index}',
+  rowNeedsAttention: 'Needs attention',
+  rowsNeedAttention: '{count, plural, one {Entry {rows} needs} other {Entries {rows} need}} attention.',
+  goToEntry: 'Go to entry {index}',
+  rowNumber: 'Entry number',
+  rowActions: 'Actions',
+
+  sectionProblems: '{count, plural, one {# problem} other {# problems}}',
+  stepsLabel: 'Steps',
+  stepProgress: 'Step {index} of {count}',
+  stepDone: 'completed',
+  next: 'Next',
+  back: 'Back',
+  backToReview: 'Back to review',
+  review: 'Check your answers',
+  edit: 'Edit',
+
+  yes: 'Yes',
+  no: 'No',
+  notProvided: 'Not provided',
+  secret: 'Hidden',
+  ratingValue: '{value} of {max}',
+  consentGiven: 'Accepted on {date}',
 
   showPassword: 'Show',
   hidePassword: 'Hide',

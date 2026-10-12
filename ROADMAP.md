@@ -271,36 +271,44 @@ open. Heavier inputs load on first use through `@defer`, and uploads live in the
 
 Goal: handle multi-step and data-heavy forms.
 
+Status: all items built on 2026-10-11 and listed in `projects/ngu-form/CHANGELOG.md` under
+0.5.0 (not yet published). 269 library specs pass; axe reports no violations on all 56 demo
+pages in light and dark, on every step of the checkout wizard, and on tabs, panels and long
+lists with errors showing. The "Done when" is met by the Checkout example. Two choices differ
+from the first wording: reordering and long lists are built into ngu-form instead of using
+Angular CDK, so the core gains no dependency (the Move up and Move down buttons are the
+keyboard path for dragging), and the read-only view is its own component, `<ngu-view>`.
+
 **Multi-step**
 
-- [ ] **Wizard** (L). Top-level groups become steps. Next validates the current step, Back
+- [x] **Wizard** (L). Top-level groups become steps. Next validates the current step, Back
       keeps values, progress shows "Step 2 of 4", and steps can be skipped by a condition.
-- [ ] **Review step** (M). A built-in summary of all answers with "Edit" links to each step.
-- [ ] **URL-synced steps** (S). Optional router integration so Back and refresh keep the step.
+- [x] **Review step** (M). A built-in summary of all answers with "Edit" links to each step.
+- [x] **URL-synced steps** (S). Optional router integration so Back and refresh keep the step.
 
 **Sections**
 
-- [ ] **Tabs** (M). Groups as tabs, with an error badge on tabs containing problems.
-- [ ] **Accordion** (M). Collapsible groups that open automatically to reveal an error.
-- [ ] **Field order** (S). `order` per field, independent of model order.
+- [x] **Tabs** (M). Groups as tabs, with an error badge on tabs containing problems.
+- [x] **Accordion** (M). Collapsible groups that open automatically to reveal an error.
+- [x] **Field order** (S). `order` per field, independent of model order.
 
 **Arrays**
 
-- [ ] **Reorder** (M). Up and down buttons first, then drag and drop with keyboard support
+- [x] **Reorder** (M). Up and down buttons first, then drag and drop with keyboard support
       through Angular CDK.
-- [ ] **Duplicate row** (S). Copy an item next to itself.
-- [ ] **Collapsible rows** (S). Show a one-line summary per row and expand to edit.
-- [ ] **Nested arrays** (M). Arrays inside array items.
-- [ ] **Table layout** (L). Edit an array as a grid with column headers, for line items.
-- [ ] **Large lists** (M). Virtual scrolling for hundreds of rows.
-- [ ] **Run-time fields inside arrays** (M). Close the current gap.
+- [x] **Duplicate row** (S). Copy an item next to itself.
+- [x] **Collapsible rows** (S). Show a one-line summary per row and expand to edit.
+- [x] **Nested arrays** (M). Arrays inside array items.
+- [x] **Table layout** (L). Edit an array as a grid with column headers, for line items.
+- [x] **Large lists** (M). Virtual scrolling for hundreds of rows.
+- [x] **Run-time fields inside arrays** (M). Close the current gap.
 
 **Views**
 
-- [ ] **Read-only view mode** (M). Render the same spec as label and value pairs for detail and
+- [x] **Read-only view mode** (M). Render the same spec as label and value pairs for detail and
       confirmation pages.
-- [ ] **Whole-form disabled and readonly** (S). One switch for the entire form.
-- [ ] **Print styles** (S). A clean printed form and view mode.
+- [x] **Whole-form disabled and readonly** (S). One switch for the entire form.
+- [x] **Print styles** (S). A clean printed form and view mode.
 
 **Done when** the checkout demo is a four-step wizard with a review step and a line-item table.
 
@@ -425,9 +433,9 @@ Found while building v0.1. Each one gets a spec before it is fixed.
 - [x] **Number values in selects** (S). Confirmed in the Phase 2 review: a radio group bound
       to a number shows no selection, and choosing an option writes a string into the model.
       Closed in Phase 3: selects and radios write each option's own value.
-- [ ] **Run-time fields inside arrays** (M). Tracked in Phase 4.
+- [x] **Run-time fields inside arrays** (M). Closed in Phase 4.
 - [x] **Async validation and debounce on run-time fields** (M). Closed in Phase 2.
-- [ ] **Nested arrays** (M). Tracked in Phase 4.
+- [x] **Nested arrays** (M). Closed in Phase 4.
 - [ ] **Typo-safe server error paths** (S). Return values need `satisfies SubmitErrors<T>`; look
       for an API that catches typos without it.
 - [ ] **Errors that appear on blur are not announced** (S). Decide whether an opt-in polite

@@ -144,14 +144,29 @@ describe('run-time fields: rules', () => {
     expect(kinds(def.tree.meta.answers['q']().errors())).toEqual(['required']);
   });
 
-  it('rejects run-time fields inside array items', () => {
-    expect(() =>
-      TestBed.runInInjectionContext(() =>
-        defineForm({ rows: [] as { extra: Answers }[] }, {
-          rows: { newItem: { extra: {} }, item: { extra: { fields: [] } } },
-        }),
-      ),
-    ).toThrow(/not supported/);
+  it('keeps run-time fields inside array items in line with the list, row by row', () => {
+    const fields = signal<DynamicField[]>([{ key: 'size', required: true }]);
+    const def = TestBed.runInInjectionContext(() =>
+      defineForm({ rows: [{ sku: 'A', extra: {} as Answers }] }, {
+        rows: { newItem: () => ({ sku: '', extra: {} }), item: { sku: 'SKU', extra: { fields } } },
+      }),
+    );
+    expect(def.value().rows[0].extra).toEqual({ size: '' });
+    const row = def.tree.rows[0].extra as unknown as Record<string, () => { errors(): { kind: string }[] }>;
+    expect(kinds(row['size']().errors())).toEqual(['required']);
+
+    // A new row gets the run-time fields too, and the first row keeps its state.
+    def.tree.rows[0].extra().value.set({ size: 'L' });
+    def.model.update((m) => ({ rows: [...m.rows, { sku: 'B', extra: {} }] }));
+    TestBed.tick();
+    expect(def.value().rows.map((r) => r.extra)).toEqual([{ size: 'L' }, { size: '' }]);
+
+    fields.set([{ key: 'size' }, { key: 'color', default: 'red' }]);
+    TestBed.tick();
+    expect(def.value().rows.map((r) => r.extra)).toEqual([
+      { size: 'L', color: 'red' },
+      { size: '', color: 'red' },
+    ]);
   });
 });
 

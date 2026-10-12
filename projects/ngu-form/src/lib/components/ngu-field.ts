@@ -45,6 +45,7 @@ import {
 } from '../transform';
 import type { ChangeContext, Choice, InputMode, LeafDef } from '../types';
 import { NguFormContext } from './ngu-form-context';
+import { NguSection } from './ngu-section';
 import { NguStrength } from './ngu-strength';
 import type { NguFieldContext } from './ngu-templates';
 
@@ -124,6 +125,7 @@ function isAutofilled(el: Element): boolean {
     '[class.ngu-field--disabled]': 'state().disabled()',
     '[class.ngu-field--pending]': 'state().pending()',
     '[class.ngu-field--computed]': '!!def().compute',
+    '[class.ngu-field--compact]': 'compact()',
     '(focusout)': 'onFocusOut($event)',
     '(input)': 'onGesture()',
     '(change)': 'onGesture()',
@@ -168,7 +170,7 @@ function isAutofilled(el: Element): boolean {
                       <input type="checkbox" [id]="id" [formField]="field()" [attr.aria-invalid]="invalidAttr()" [attr.aria-describedby]="describedBy()" />
                     }
                   }
-                  <span>{{ label() }}@if (d.type !== 'checkbox' && state().required()) {<span class="ngu-required" aria-hidden="true">*</span>}</span>
+                  <span class="ngu-check__text">{{ label() }}@if (d.type !== 'checkbox' && state().required()) {<span class="ngu-required" aria-hidden="true">*</span>}</span>
                 </label>
                 @if (d.policy; as policy) {
                   <a class="ngu-policy" [href]="policy.href" target="_blank" rel="noopener">{{ i18n.text(policy.label) }}<span class="ngu-sr-only"> ({{ i18n.message('opensInNewTab') }})</span></a>
@@ -718,7 +720,10 @@ function isAutofilled(el: Element): boolean {
         border-width: 2px;
       }
     }
-    .ngu-sr-only {
+    .ngu-sr-only,
+    :host(.ngu-field--compact) .ngu-label,
+    :host(.ngu-field--compact) .ngu-check__text,
+    :host(.ngu-field--compact) .ngu-hint {
       position: absolute;
       inline-size: 1px;
       block-size: 1px;
@@ -729,6 +734,21 @@ function isAutofilled(el: Element): boolean {
       white-space: nowrap;
       border: 0;
     }
+    @media print {
+      :host {
+        break-inside: avoid;
+      }
+      .ngu-reveal,
+      .ngu-counter {
+        display: none;
+      }
+      input,
+      select,
+      textarea {
+        background: none !important;
+        color: #000 !important;
+      }
+    }
   `,
 })
 export class NguField {
@@ -736,11 +756,14 @@ export class NguField {
   readonly field = input.required<Field<any>>();
   /** Dot path of this field inside the form, for template overrides. */
   readonly path = input<string>('');
+  /** Inside a table cell: the label and hint are kept for screen readers but not shown. */
+  readonly compact = input(false);
 
   protected readonly id = `ngu-field-${nextId++}`;
   protected readonly state = computed(() => this.field()());
 
   private readonly context = inject(NguFormContext, { optional: true });
+  private readonly section = inject(NguSection, { optional: true });
   protected readonly i18n = this.context?.i18n ?? injectNguI18n();
   private readonly registeredTypes = inject(NGU_FIELD_TYPES, { optional: true });
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
@@ -771,7 +794,7 @@ export class NguField {
 
   /** Whether messages may show yet: after a submit attempt, or per `errorsOn` once the user left the field. */
   private readonly messagesDue = computed(() => {
-    if (this.context?.submitAttempted()) {
+    if (this.context?.submitAttempted() || this.section?.attempted()) {
       return true;
     }
     const s = this.state();
@@ -1075,6 +1098,7 @@ export class NguField {
         get field() {
           return self.field();
         },
+        section: this.section,
         focus: () => this.focusControl(),
       });
       inject(DestroyRef).onDestroy(unregister);

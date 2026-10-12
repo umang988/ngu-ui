@@ -1,11 +1,12 @@
 import { computed, DestroyRef, effect, inject, isSignal, signal, untracked, type WritableSignal } from '@angular/core';
-import { form, validateStandardSchema, type Field } from '@angular/forms/signals';
+import { disabled, form, readonly, validateStandardSchema, type Field } from '@angular/forms/signals';
 import { diff, hasDerived, runDerived, withoutHidden, type ChoiceMemory } from './derive';
 import { inertDraft, setupDraft } from './draft';
 import { findDynamic, isDynamicSpec, normalizeDynamic, syncDynamic } from './dynamic';
 import { inertHistory, setupHistory } from './history';
 import { clone, deepMerge, isDate, isPlainObject, setInternals } from './internal';
 import { applyDefinition } from './schema';
+import { inertSteps, setupSteps } from './steps';
 import type {
   AnyFieldDef,
   ArrayDef,
@@ -14,6 +15,7 @@ import type {
   FormDef,
   FormDefOptions,
   FormDefinition,
+  FormLayout,
   FormSpec,
   LeafDef,
   StaticDef,
@@ -45,7 +47,12 @@ export function defineForm<TModel extends object, TPayload = TModel>(
     : signal(modelOrInitial as TModel);
   const effectOptions = options.injector ? { injector: options.injector } : undefined;
 
-  const fields = normalize(spec as Record<string, unknown>, untracked(model) as Record<string, unknown>, '');
+  const layout = options.layout;
+  const fields = withLayout(
+    normalize(spec as Record<string, unknown>, untracked(model) as Record<string, unknown>, ''),
+    layout,
+    '',
+  );
 
   // Run-time field lists: give the model a value for every listed field now, and keep
   // it in line whenever a list (or the model, e.g. after reset) changes.
@@ -58,6 +65,15 @@ export function defineForm<TModel extends object, TPayload = TModel>(
     applyDefinition(root, root, root, fields);
     if (options.schema) {
       validateStandardSchema(root, options.schema as never);
+    }
+    // Disabled and read-only pass down to every field below the root.
+    const off = options.disabled;
+    if (off) {
+      disabled(root, () => flag(off));
+    }
+    const locked = options.readonly;
+    if (locked) {
+      readonly(root, () => flag(locked));
     }
   };
   const tree = options.injector
@@ -72,6 +88,8 @@ export function defineForm<TModel extends object, TPayload = TModel>(
     untracked(() => runDerived(root, fields, memory));
     effect(() => runDerived(root, fields, memory), effectOptions);
   }
+
+  const steps = layout === 'steps' ? setupSteps(fields, root, Boolean(options.review)) : inertSteps();
 
   const initial = clone(untracked(model));
   /** What `reset()` returns to: the initial value, or the last value `load` delivered. */
@@ -150,6 +168,8 @@ export function defineForm<TModel extends object, TPayload = TModel>(
     spec,
     fields,
     cols: options.cols ?? 1,
+    layout,
+    steps,
     initial,
     dirty: computed(() => root().dirty()),
     touched: computed(() => root().touched()),
@@ -176,6 +196,7 @@ export function defineForm<TModel extends object, TPayload = TModel>(
     history.checkpoint();
     root().reset(next);
     baseline.set(clone(next));
+    steps.restart();
     resets.update((n) => n + 1);
   }
 
@@ -187,11 +208,64 @@ export function defineForm<TModel extends object, TPayload = TModel>(
       draft.settle();
     },
     changedByHistory: () => history.lastPaths(),
+    steps: layout === 'steps' ? steps : undefined,
+    review: typeof options.review === 'string' ? options.review : options.review ? true : undefined,
+    stepParam: options.stepParam,
   });
   return def;
 }
 
-const GROUP_OPTION_KEYS = new Set(['title', 'description', 'cols', 'span', 'hidden', 'validate', 'fields']);
+function flag(value: boolean | (() => boolean)): boolean {
+  return typeof value === 'function' ? Boolean(value()) : value;
+}
+
+const GROUP_OPTION_KEYS = new Set([
+  'title',
+  'description',
+  'cols',
+  'span',
+  'hidden',
+  'validate',
+  'fields',
+  'order',
+  'layout',
+  'collapsed',
+]);
+
+/**
+ * Applies a section layout to a group's children. Tabs and steps need every child to be a
+ * group or a list; an accordion makes its groups and lists collapsible, the first one open.
+ */
+function withLayout(fields: FormDefinition, layout: FormLayout | undefined, path: string): FormDefinition {
+  if (!layout) {
+    return fields;
+  }
+  const where = path ? `"${path}"` : 'The form';
+  if (layout === 'accordion') {
+    let first = true;
+    const out: Record<string, AnyFieldDef> = {};
+    for (const [key, def] of Object.entries(fields)) {
+      if ((def.__ngu === 'group' || def.__ngu === 'array' || def.__ngu === 'dynamic') && def.collapsed === undefined) {
+        out[key] = { ...def, collapsed: !first };
+        first = false;
+      } else {
+        out[key] = def;
+      }
+    }
+    return out;
+  }
+  if (layout !== 'tabs' && layout !== 'steps') {
+    throw new Error(`ngu-form: ${where} has an unknown layout "${layout}".`);
+  }
+  for (const [key, def] of Object.entries(fields)) {
+    if (def.__ngu !== 'group' && def.__ngu !== 'array' && def.__ngu !== 'dynamic') {
+      throw new Error(
+        `ngu-form: ${where} shows its entries as ${layout}, so "${key}" must be a group or a list. Move it into one.`,
+      );
+    }
+  }
+  return fields;
+}
 
 function normalize(
   spec: Record<string, unknown>,
@@ -247,7 +321,19 @@ function array(spec: unknown, path: string): ArrayDef {
     ? normalize(item as Record<string, unknown>, sample, `${path}[]`)
     : normalizeEntry(item, sample, `${path}[]`);
   if (itemDef.__ngu === 'array' || itemDef.__ngu === 'dynamic') {
-    throw new Error(`ngu-form: "${path}" has array or run-time items inside an array, which is not supported.`);
+    throw new Error(`ngu-form: "${path}" has items that are lists themselves; give each item an object with the list inside.`);
+  }
+  if (rest['layout'] === 'table') {
+    const plain =
+      itemDef.__ngu !== 'leaf' &&
+      itemDef.__ngu !== 'group' &&
+      Object.values(itemDef as FormDefinition).every((d) => d.__ngu === 'leaf');
+    if (!plain) {
+      throw new Error(`ngu-form: "${path}" uses layout "table", which needs object items made of plain fields.`);
+    }
+    if (rest['summary']) {
+      throw new Error(`ngu-form: "${path}" uses layout "table", whose rows have no summary line; remove "summary".`);
+    }
   }
   return {
     __ngu: 'array',
@@ -272,8 +358,19 @@ function group(
     Object.keys(spec).every((k) => GROUP_OPTION_KEYS.has(k));
 
   if (isWrapper) {
-    const { fields, ...rest } = spec as { fields: Record<string, unknown> } & Record<string, unknown>;
-    return { __ngu: 'group', ...rest, fields: normalize(fields, value, path) };
+    const { fields, layout, ...rest } = spec as { fields: Record<string, unknown>; layout?: FormLayout } & Record<
+      string,
+      unknown
+    >;
+    if (layout === 'steps') {
+      throw new Error(`ngu-form: "${path}" asks for steps; only the whole form can be a wizard.`);
+    }
+    return {
+      __ngu: 'group',
+      ...rest,
+      ...(layout === 'tabs' ? { layout: 'tabs' as const } : {}),
+      fields: withLayout(normalize(fields, value, path), layout, path),
+    };
   }
   return { __ngu: 'group', fields: normalize(spec, value, path) };
 }
@@ -282,12 +379,12 @@ function staticEntry(spec: unknown, path: string): StaticDef {
   if (!isPlainObject(spec)) {
     throw new Error(`ngu-form: "${path}" is static content and needs { heading }, { text } or { divider: true }.`);
   }
-  const { heading, text, divider, level, span, hidden } = spec as Record<string, any>;
+  const { heading, text, divider, level, span, hidden, order } = spec as Record<string, any>;
   const kind = typeof heading === 'string' ? 'heading' : typeof text === 'string' ? 'text' : divider ? 'divider' : undefined;
   if (!kind) {
     throw new Error(`ngu-form: "${path}" is static content and needs { heading }, { text } or { divider: true }.`);
   }
-  return { __ngu: 'static', kind, text: heading ?? text ?? '', level: level ?? 3, span, hidden };
+  return { __ngu: 'static', kind, text: heading ?? text ?? '', level: level ?? 3, span, hidden, order };
 }
 
 function leaf(spec: Record<string, unknown>, value: unknown, path: string): LeafDef {

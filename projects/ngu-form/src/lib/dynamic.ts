@@ -180,7 +180,10 @@ export interface DynamicLocation {
   readonly def: DynamicDef;
 }
 
-/** Finds every dynamic group outside arrays. Dynamic groups inside arrays are rejected. */
+/**
+ * Finds every run-time field list. Inside arrays the path holds `'[]'` for "each row", so
+ * each row's record is kept in line with the list.
+ */
 export function findDynamic(fields: FormDefinition, keys: readonly string[] = []): DynamicLocation[] {
   const found: DynamicLocation[] = [];
   for (const [key, def] of Object.entries(fields)) {
@@ -190,9 +193,7 @@ export function findDynamic(fields: FormDefinition, keys: readonly string[] = []
     } else if (def.__ngu === 'group') {
       found.push(...findDynamic(def.fields, here));
     } else if (def.__ngu === 'array' && def.item.__ngu !== 'leaf') {
-      if (findDynamic(def.item as FormDefinition).length) {
-        throw new Error(`ngu-form: run-time fields inside the array "${here.join('.')}" are not supported.`);
-      }
+      found.push(...findDynamic(def.item as FormDefinition, [...here, '[]']));
     }
   }
   return found;
@@ -206,18 +207,39 @@ export function findDynamic(fields: FormDefinition, keys: readonly string[] = []
 export function syncDynamic(model: WritableSignal<any>, locations: readonly DynamicLocation[]): void {
   let next = model();
   for (const { keys, def } of locations) {
-    const current = getIn(next, keys);
-    if (typeof current !== 'object' || current === null) {
-      continue;
-    }
-    const updated = syncRecord(current, def);
-    if (updated) {
-      next = setIn(next, keys, updated);
-    }
+    next = syncAt(next, keys, def);
   }
   if (next !== model()) {
     model.set(next);
   }
+}
+
+/**
+ * Returns `value` itself when nothing changed. Changed objects are copied with spread, which
+ * keeps the symbol Signal Forms tags each array row with, so rows keep their state.
+ */
+function syncAt(value: any, keys: readonly string[], def: DynamicDef): any {
+  if (typeof value !== 'object' || value === null) {
+    return value;
+  }
+  if (keys.length === 0) {
+    return Array.isArray(value) ? value : (syncRecord(value, def) ?? value);
+  }
+  const [head, ...tail] = keys;
+  if (head === '[]') {
+    if (!Array.isArray(value)) {
+      return value;
+    }
+    let changed = false;
+    const rows = value.map((row) => {
+      const next = syncAt(row, tail, def);
+      changed ||= next !== row;
+      return next;
+    });
+    return changed ? rows : value;
+  }
+  const child = syncAt(value[head], tail, def);
+  return child === value[head] ? value : { ...value, [head]: child };
 }
 
 function syncRecord(current: Record<string, unknown>, def: DynamicDef): Record<string, unknown> | undefined {
@@ -242,16 +264,4 @@ function syncRecord(current: Record<string, unknown>, def: DynamicDef): Record<s
     }
   }
   return changed ? out : undefined;
-}
-
-function getIn(value: any, keys: readonly string[]): any {
-  return keys.reduce((v, k) => (v == null ? v : v[k]), value);
-}
-
-function setIn(value: any, keys: readonly string[], leaf: unknown): any {
-  if (keys.length === 0) {
-    return leaf;
-  }
-  const [head, ...tail] = keys;
-  return { ...value, [head]: setIn(value?.[head], tail, leaf) };
 }
