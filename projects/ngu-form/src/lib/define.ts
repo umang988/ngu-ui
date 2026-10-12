@@ -20,6 +20,7 @@ import type {
   LeafDef,
   StaticDef,
 } from './types';
+import { closest, nguError } from './diagnostics';
 
 /**
  * Describes a form in TypeScript. The spec mirrors the model shape:
@@ -255,12 +256,13 @@ function withLayout(fields: FormDefinition, layout: FormLayout | undefined, path
     return out;
   }
   if (layout !== 'tabs' && layout !== 'steps') {
-    throw new Error(`ngu-form: ${where} has an unknown layout "${layout}".`);
+    throw nguError('NGU-101', `${where} has an unknown layout "${layout}". Use "steps", "tabs" or "accordion".`);
   }
   for (const [key, def] of Object.entries(fields)) {
     if (def.__ngu !== 'group' && def.__ngu !== 'array' && def.__ngu !== 'dynamic') {
-      throw new Error(
-        `ngu-form: ${where} shows its entries as ${layout}, so "${key}" must be a group or a list. Move it into one.`,
+      throw nguError(
+        'NGU-102',
+        `${where} shows its entries as ${layout}, so "${key}" must be a group or a list. Move it into one.`,
       );
     }
   }
@@ -280,7 +282,11 @@ function normalize(
       continue;
     }
     if (!(key in value)) {
-      throw new Error(`ngu-form: "${keyPath}" is described but missing from the model value.`);
+      const near = closest(key, Object.keys(value));
+      throw nguError(
+        'NGU-103',
+        `"${keyPath}" is described but missing from the model value.${near ? ` Did you mean "${near}"?` : ''}`,
+      );
     }
     out[key] = normalizeEntry(spec[key], value[key], keyPath);
   }
@@ -301,7 +307,7 @@ function normalizeEntry(spec: unknown, value: unknown, path: string): AnyFieldDe
     return leaf({ label: spec }, value, path);
   }
   if (!isPlainObject(spec)) {
-    throw new Error(`ngu-form: "${path}" must be a label string or an options object.`);
+    throw nguError('NGU-104', `"${path}" must be a label string or an options object.`);
   }
   if (isPlainObject(value)) {
     return group(spec, value, path);
@@ -311,7 +317,7 @@ function normalizeEntry(spec: unknown, value: unknown, path: string): AnyFieldDe
 
 function array(spec: unknown, path: string): ArrayDef {
   if (!isPlainObject(spec) || !('item' in spec) || !('newItem' in spec)) {
-    throw new Error(`ngu-form: "${path}" is an array and needs an object spec with "item" and "newItem".`);
+    throw nguError('NGU-105', `"${path}" is an array and needs an object spec with "item" and "newItem".`);
   }
   const { item, newItem, cols, min, max, ...rest } = spec as Record<string, unknown>;
   const factory: () => unknown =
@@ -321,7 +327,7 @@ function array(spec: unknown, path: string): ArrayDef {
     ? normalize(item as Record<string, unknown>, sample, `${path}[]`)
     : normalizeEntry(item, sample, `${path}[]`);
   if (itemDef.__ngu === 'array' || itemDef.__ngu === 'dynamic') {
-    throw new Error(`ngu-form: "${path}" has items that are lists themselves; give each item an object with the list inside.`);
+    throw nguError('NGU-105', `"${path}" has items that are lists themselves; give each item an object with the list inside.`);
   }
   if (rest['layout'] === 'table') {
     const plain =
@@ -329,10 +335,10 @@ function array(spec: unknown, path: string): ArrayDef {
       itemDef.__ngu !== 'group' &&
       Object.values(itemDef as FormDefinition).every((d) => d.__ngu === 'leaf');
     if (!plain) {
-      throw new Error(`ngu-form: "${path}" uses layout "table", which needs object items made of plain fields.`);
+      throw nguError('NGU-106', `"${path}" uses layout "table", which needs object items made of plain fields.`);
     }
     if (rest['summary']) {
-      throw new Error(`ngu-form: "${path}" uses layout "table", whose rows have no summary line; remove "summary".`);
+      throw nguError('NGU-106', `"${path}" uses layout "table", whose rows have no summary line; remove "summary".`);
     }
   }
   return {
@@ -363,7 +369,7 @@ function group(
       unknown
     >;
     if (layout === 'steps') {
-      throw new Error(`ngu-form: "${path}" asks for steps; only the whole form can be a wizard.`);
+      throw nguError('NGU-107', `"${path}" asks for steps; only the whole form can be a wizard.`);
     }
     return {
       __ngu: 'group',
@@ -377,12 +383,12 @@ function group(
 
 function staticEntry(spec: unknown, path: string): StaticDef {
   if (!isPlainObject(spec)) {
-    throw new Error(`ngu-form: "${path}" is static content and needs { heading }, { text } or { divider: true }.`);
+    throw nguError('NGU-108', `"${path}" is static content and needs { heading }, { text } or { divider: true }.`);
   }
   const { heading, text, divider, level, span, hidden, order } = spec as Record<string, any>;
   const kind = typeof heading === 'string' ? 'heading' : typeof text === 'string' ? 'text' : divider ? 'divider' : undefined;
   if (!kind) {
-    throw new Error(`ngu-form: "${path}" is static content and needs { heading }, { text } or { divider: true }.`);
+    throw nguError('NGU-108', `"${path}" is static content and needs { heading }, { text } or { divider: true }.`);
   }
   return { __ngu: 'static', kind, text: heading ?? text ?? '', level: level ?? 3, span, hidden, order };
 }
@@ -403,7 +409,7 @@ function leaf(spec: Record<string, unknown>, value: unknown, path: string): Leaf
 /** Built-in types that need a particular value shape; plain JavaScript callers get a clear error. */
 function checkLeaf(def: LeafDef, value: unknown, path: string): void {
   const fail = (why: string) => {
-    throw new Error(`ngu-form: "${path}" has type "${def.type}" ${why}.`);
+    throw nguError('NGU-109', `"${path}" has type "${def.type}" ${why}.`);
   };
   switch (def.type) {
     case 'select':
@@ -444,7 +450,7 @@ function inferType(value: unknown, path: string): FieldType {
     return 'date';
   }
   if (value === null || value === undefined) {
-    throw new Error(`ngu-form: cannot infer the input type for "${path}" from ${value}. Set "type" explicitly.`);
+    throw nguError('NGU-110', `cannot infer the input type for "${path}" from ${value}. Set "type" explicitly.`);
   }
   switch (typeof value) {
     case 'string':
@@ -454,9 +460,7 @@ function inferType(value: unknown, path: string): FieldType {
     case 'boolean':
       return 'checkbox';
     default:
-      throw new Error(
-        `ngu-form: cannot infer the input type for "${path}" from a ${typeof value} value. Set "type" explicitly.`,
-      );
+      throw nguError('NGU-110', `cannot infer the input type for "${path}" from a ${typeof value} value. Set "type" explicitly.`);
   }
 }
 

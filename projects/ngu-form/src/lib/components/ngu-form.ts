@@ -21,14 +21,16 @@ import {
 import { Location } from '@angular/common';
 import { submit, type Field } from '@angular/forms/signals';
 import { DEFAULT_BREAKPOINTS, NGU_FORM_CONFIG } from '../config';
+import { closest, fieldPaths, isDevMode, matchesField, nguWarn } from '../diagnostics';
 import { internalsOf } from '../internal';
+import { NGU_LOOK, resolveLook, type NguDensity, type NguLook, type NguSize, type NguTheme } from '../look';
 import { injectNguI18n } from '../messages';
 import { REVIEW_STEP, type StepsHandle } from '../steps';
 import { resolvePath, toSubmissionErrors } from '../submit-errors';
 import type { ErrorDisplay, FormDef, SubmitAction } from '../types';
 import { NguFormContext, type NguProblemSource, type TemplateMap } from './ngu-form-context';
 import { NguGroup } from './ngu-group';
-import { NguControlTemplate, NguFieldTemplate } from './ngu-templates';
+import { NguControlTemplate, NguFieldTemplate, NguPrefixTemplate, NguSuffixTemplate } from './ngu-templates';
 import { NguWizard } from './ngu-wizard';
 
 let nextFormId = 0;
@@ -68,15 +70,21 @@ function focusProblem(el: HTMLElement | null | undefined): void {
 @Component({
   selector: 'ngu-form',
   imports: [NguGroup, NguWizard],
-  providers: [NguFormContext],
+  providers: [NguFormContext, { provide: NGU_LOOK, useFactory: () => inject(NguForm).look }],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     class: 'ngu-form',
     '[class.ngu-form--steps]': '!!steps()',
+    '[class.ngu-unstyled]': "look().theme === 'none'",
+    '[class.ngu-form--compact]': "look().density === 'compact'",
+    '[class.ngu-form--spacious]': "look().density === 'spacious'",
+    '[class.ngu-form--sm]': "look().size === 'sm'",
+    '[class.ngu-form--lg]': "look().size === 'lg'",
   },
   template: `
     @let d = form();
     <form
+      [class]="look().classes.form"
       novalidate
       (submit)="onSubmit($event)"
       (keydown)="onKeydown($event)"
@@ -104,7 +112,7 @@ function focusProblem(el: HTMLElement | null | undefined): void {
       }
       @if (d.loadError() !== undefined) {
         <!-- Without its data the form could overwrite a record with blanks, so it is not shown. -->
-        <p class="ngu-form-error" role="alert">{{ i18n.message('loadFailed') }}</p>
+        <p class="ngu-form-error" [class]="look().classes.error" role="alert">{{ i18n.message('loadFailed') }}</p>
       } @else if (steps()) {
         @defer (on immediate) {
           <ngu-wizard [form]="d" (navigate)="goToStep($event)" (edit)="edit($event)" />
@@ -114,19 +122,19 @@ function focusProblem(el: HTMLElement | null | undefined): void {
       }
       <ng-content />
       @if (formError(); as message) {
-        <p class="ngu-form-error" [id]="formErrorId" role="alert" tabindex="-1">{{ message }}</p>
+        <p class="ngu-form-error" [class]="look().classes.error" [id]="formErrorId" role="alert" tabindex="-1">{{ message }}</p>
       }
       @if (steps(); as s) {
         <div class="ngu-actions ngu-actions--steps">
           @if (!s.first()) {
-            <button type="button" class="ngu-back" (click)="back()">{{ i18n.message('back') }}</button>
+            <button type="button" class="ngu-back" [class]="look().classes.button" (click)="back()">{{ i18n.message('back') }}</button>
           }
           @if (!s.last()) {
-            <button type="button" class="ngu-next" [attr.aria-disabled]="advancing() || null" (click)="next()">
+            <button type="button" class="ngu-next" [class]="look().classes.submit" [attr.aria-disabled]="advancing() || null" (click)="next()">
               {{ s.returning() ? i18n.message('backToReview') : i18n.message('next') }}
             </button>
           } @else if (submitLabel()) {
-            <button type="submit" class="ngu-submit" [attr.aria-disabled]="blocked() || null">
+            <button type="submit" class="ngu-submit" [class]="look().classes.submit" [attr.aria-disabled]="blocked() || null">
               {{ i18n.text(submitLabel()) }}
             </button>
           }
@@ -134,7 +142,7 @@ function focusProblem(el: HTMLElement | null | undefined): void {
       } @else if (submitLabel()) {
         <div class="ngu-actions">
           <!-- aria-disabled, not disabled: a disabled button drops keyboard focus to the page -->
-          <button type="submit" class="ngu-submit" [attr.aria-disabled]="blocked() || null">
+          <button type="submit" class="ngu-submit" [class]="look().classes.submit" [attr.aria-disabled]="blocked() || null">
             {{ i18n.text(submitLabel()) }}
           </button>
         </div>
@@ -144,47 +152,75 @@ function focusProblem(el: HTMLElement | null | undefined): void {
     </form>
   `,
   styles: `
-    :host {
-      display: block;
+    /* Density and size change the defaults of the spacing and text tokens; tokens you set win. */
+    :host(.ngu-form--sm) {
+      --_ngu-font-size: 0.875rem;
+      --_ngu-label-size: 0.8125rem;
+      --_ngu-input-padding: 0.5em 0.75em;
+      --_ngu-button-padding: 0.5em 1.25em;
     }
-    form {
+    :host(.ngu-form--lg) {
+      --_ngu-font-size: 1.125rem;
+      --_ngu-label-size: 1rem;
+      --_ngu-input-padding: 0.5em 0.75em;
+      --_ngu-button-padding: 0.5em 1.25em;
+    }
+    :host(.ngu-form--compact) {
+      --_ngu-gap: 0.75rem;
+      --_ngu-field-gap: 0.25rem;
+      --_ngu-input-padding: 0.3125em 0.625em;
+      --_ngu-button-padding: 0.375em 1em;
+      --_ngu-row-padding: 0.5rem;
+    }
+    :host(.ngu-form--spacious) {
+      --_ngu-gap: 1.5rem;
+      --_ngu-field-gap: 0.5rem;
+      --_ngu-input-padding: 0.75em 1em;
+      --_ngu-button-padding: 0.75em 1.5em;
+      --_ngu-row-padding: 1rem;
+    }
+    :host(:not(.ngu-unstyled)) {
+      display: block;
+      font-size: var(--ngu-font-size, var(--_ngu-font-size));
+    }
+    :host(:where(:not(.ngu-unstyled))) form {
       display: flex;
       flex-direction: column;
-      gap: var(--ngu-gap, 1rem);
+      gap: var(--ngu-gap, var(--_ngu-gap, 1rem));
     }
-    .ngu-actions {
+    :host(:where(:not(.ngu-unstyled))) .ngu-actions {
       display: flex;
       justify-content: var(--ngu-actions-justify, flex-start);
     }
-    .ngu-actions--steps {
+    :host(:where(:not(.ngu-unstyled))) .ngu-actions--steps {
       gap: 0.75rem;
     }
-    .ngu-actions--steps > :last-child {
+    :host(:where(:not(.ngu-unstyled))) .ngu-actions--steps > :last-child {
       margin-inline-start: auto;
     }
-    .ngu-back {
+    :host(:where(:not(.ngu-unstyled))) .ngu-back {
       font: inherit;
       font-weight: 500;
-      padding: var(--ngu-button-padding, 0.5rem 1.25rem);
+      padding: var(--ngu-button-padding, var(--_ngu-button-padding, 0.5rem 1.25rem));
       border: 1px solid var(--ngu-border-color, #c7c7c7);
       border-radius: var(--ngu-radius, 0.375rem);
       background: none;
       color: inherit;
       cursor: pointer;
     }
-    .ngu-submit,
-    .ngu-next {
+    :host(:where(:not(.ngu-unstyled))) .ngu-submit,
+    :host(:where(:not(.ngu-unstyled))) .ngu-next {
       font: inherit;
       font-weight: 500;
-      padding: var(--ngu-button-padding, 0.5rem 1.25rem);
+      padding: var(--ngu-button-padding, var(--_ngu-button-padding, 0.5rem 1.25rem));
       border: 0;
       border-radius: var(--ngu-radius, 0.375rem);
       background: var(--ngu-primary, #1a73e8);
       color: var(--ngu-on-primary, #fff);
       cursor: pointer;
     }
-    .ngu-submit[aria-disabled='true'],
-    .ngu-next[aria-disabled='true'] {
+    :host(:where(:not(.ngu-unstyled))) .ngu-submit[aria-disabled='true'],
+    :host(:where(:not(.ngu-unstyled))) .ngu-next[aria-disabled='true'] {
       opacity: 0.6;
       cursor: default;
     }
@@ -199,7 +235,7 @@ function focusProblem(el: HTMLElement | null | undefined): void {
       white-space: nowrap;
       border: 0;
     }
-    .ngu-form-error {
+    :host(:where(:not(.ngu-unstyled))) .ngu-form-error {
       margin: 0;
       padding: 0.625rem 0.75rem;
       border-radius: var(--ngu-radius, 0.375rem);
@@ -207,33 +243,33 @@ function focusProblem(el: HTMLElement | null | undefined): void {
       color: var(--ngu-error-color, #c62828);
       font-size: 0.875rem;
     }
-    .ngu-error-summary {
+    :host(:where(:not(.ngu-unstyled))) .ngu-error-summary {
       padding: 0.875rem 1rem;
       border: 2px solid var(--ngu-error-color, #c62828);
       border-radius: var(--ngu-radius, 0.375rem);
     }
-    .ngu-error-summary:focus-visible {
+    :host(:where(:not(.ngu-unstyled))) .ngu-error-summary:focus-visible {
       outline: 3px solid var(--ngu-focus-color, #1a73e8);
       outline-offset: 2px;
     }
-    .ngu-error-summary__title {
+    :host(:where(:not(.ngu-unstyled))) .ngu-error-summary__title {
       margin-block: 0 0.5rem;
       margin-inline: 0;
       font-size: var(--ngu-title-size, 1rem);
       font-weight: 600;
     }
-    .ngu-error-summary__list {
+    :host(:where(:not(.ngu-unstyled))) .ngu-error-summary__list {
       margin: 0;
       padding-inline-start: 1.25rem;
       display: flex;
       flex-direction: column;
       gap: 0.25rem;
     }
-    .ngu-error-summary__list a {
+    :host(:where(:not(.ngu-unstyled))) .ngu-error-summary__list a {
       color: var(--ngu-error-color, #c62828);
       font-weight: 500;
     }
-    .ngu-notice {
+    :host(:where(:not(.ngu-unstyled))) .ngu-notice {
       display: flex;
       flex-wrap: wrap;
       align-items: center;
@@ -245,7 +281,7 @@ function focusProblem(el: HTMLElement | null | undefined): void {
       background: var(--ngu-notice-bg, rgba(127, 127, 127, 0.08));
       font-size: 0.875rem;
     }
-    .ngu-notice__action {
+    :host(:where(:not(.ngu-unstyled))) .ngu-notice__action {
       font: inherit;
       font-weight: 500;
       padding: 0.25rem 0.75rem;
@@ -255,31 +291,31 @@ function focusProblem(el: HTMLElement | null | undefined): void {
       color: var(--ngu-primary, #1a73e8);
       cursor: pointer;
     }
-    .ngu-notice__action:focus-visible,
-    .ngu-submit:focus-visible,
-    .ngu-next:focus-visible,
-    .ngu-back:focus-visible {
+    :host(:where(:not(.ngu-unstyled))) .ngu-notice__action:focus-visible,
+    :host(:where(:not(.ngu-unstyled))) .ngu-submit:focus-visible,
+    :host(:where(:not(.ngu-unstyled))) .ngu-next:focus-visible,
+    :host(:where(:not(.ngu-unstyled))) .ngu-back:focus-visible {
       outline: 2px solid var(--ngu-focus-color, #1a73e8);
       outline-offset: 2px;
     }
     @media print {
-      .ngu-actions,
-      .ngu-notice,
-      .ngu-error-summary {
+      :host(:where(:not(.ngu-unstyled))) .ngu-actions,
+      :host(:where(:not(.ngu-unstyled))) .ngu-notice,
+      :host(:where(:not(.ngu-unstyled))) .ngu-error-summary {
         display: none;
       }
     }
     @media (forced-colors: active) {
-      .ngu-submit,
-      .ngu-next {
+      :host(:where(:not(.ngu-unstyled))) .ngu-submit,
+      :host(:where(:not(.ngu-unstyled))) .ngu-next {
         border: 2px solid ButtonText;
       }
-      .ngu-submit[aria-disabled='true'] {
+      :host(:where(:not(.ngu-unstyled))) .ngu-submit[aria-disabled='true'] {
         color: GrayText;
         border-color: GrayText;
       }
-      .ngu-form-error,
-      .ngu-notice {
+      :host(:where(:not(.ngu-unstyled))) .ngu-form-error,
+      :host(:where(:not(.ngu-unstyled))) .ngu-notice {
         border: 1px solid CanvasText;
       }
     }
@@ -317,6 +353,16 @@ export class NguForm<TModel extends object, TPayload = TModel> {
    */
   readonly warnOnUnload = input(false);
 
+  /**
+   * `'none'` renders the form without ngu-form's CSS: markup, classes and behavior stay. Defaults
+   * to `provideNguFormConfig({ theme })`, else `'default'`.
+   */
+  readonly theme = input<NguTheme>();
+  /** Space between and inside fields: `'compact'`, `'normal'` (default) or `'spacious'`. */
+  readonly density = input<NguDensity>();
+  /** Text size of controls, labels and buttons: `'sm'`, `'md'` (default) or `'lg'`. */
+  readonly size = input<NguSize>();
+
   /** Emits the payload (the model, unless `mapValue` is set) after a successful submit. */
   readonly submitted = output<TPayload>();
   /** Emits when a submit was refused: invalid fields or errors returned by the action. */
@@ -328,8 +374,14 @@ export class NguForm<TModel extends object, TPayload = TModel> {
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly cdr = inject(ChangeDetectorRef);
   private readonly config = inject(NGU_FORM_CONFIG, { optional: true });
+  /** Theme, density, size and class map, from the inputs and then the app-wide config. */
+  readonly look = computed<NguLook>(() =>
+    resolveLook(this.config, { theme: this.theme(), density: this.density(), size: this.size() }),
+  );
   private readonly fieldTemplates = contentChildren(NguFieldTemplate);
   private readonly controlTemplates = contentChildren(NguControlTemplate);
+  private readonly prefixTemplates = contentChildren(NguPrefixTemplate);
+  private readonly suffixTemplates = contentChildren(NguSuffixTemplate);
 
   protected readonly i18n = injectNguI18n();
   private readonly uid = nextFormId++;
@@ -406,6 +458,12 @@ export class NguForm<TModel extends object, TPayload = TModel> {
     this.context.controlTemplates = computed<TemplateMap>(
       () => new Map(this.controlTemplates().map((t) => [t.path(), t.template])),
     );
+    this.context.prefixTemplates = computed<TemplateMap>(
+      () => new Map(this.prefixTemplates().map((t) => [t.path(), t.template])),
+    );
+    this.context.suffixTemplates = computed<TemplateMap>(
+      () => new Map(this.suffixTemplates().map((t) => [t.path(), t.template])),
+    );
     this.context.submits = this.submits.asReadonly();
     this.context.completed = this.completed.asReadonly();
     this.context.loading = this.loading;
@@ -418,6 +476,35 @@ export class NguForm<TModel extends object, TPayload = TModel> {
     this.observeWidth();
     this.guardUnload();
     this.syncStepWithUrl();
+    if (isDevMode()) {
+      this.checkTemplatePaths();
+    }
+  }
+
+  /** Development builds warn about override templates whose path matches no field (NGU-201). */
+  private checkTemplatePaths(): void {
+    effect(() => {
+      const paths = fieldPaths(this.form().fields);
+      const kinds = [
+        ['nguField', this.fieldTemplates()],
+        ['nguControl', this.controlTemplates()],
+        ['nguPrefix', this.prefixTemplates()],
+        ['nguSuffix', this.suffixTemplates()],
+      ] as const;
+      for (const [kind, templates] of kinds) {
+        for (const template of templates) {
+          const path = template.path();
+          if (!matchesField(paths, path)) {
+            const near = closest(path, paths.exact);
+            nguWarn(
+              'NGU-201',
+              `${kind}="${path}" matches no field, so the template is never used.${near ? ` Did you mean "${near}"?` : ''} List rows use "[]", as in "items[].sku".`,
+              kind + path,
+            );
+          }
+        }
+      }
+    });
   }
 
   // --- wizard ---------------------------------------------------------------------

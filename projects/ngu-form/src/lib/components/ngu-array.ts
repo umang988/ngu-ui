@@ -18,7 +18,7 @@ import {
   viewChild,
 } from '@angular/core';
 import type { Field } from '@angular/forms/signals';
-import { copyRow, ordered } from '../internal';
+import { copyRow, NGU_PATH, ordered } from '../internal';
 import { injectNguI18n } from '../messages';
 import { isLeafDef, type ArrayDef, type FormDefinition, type LeafDef } from '../types';
 import { NguField } from './ngu-field';
@@ -27,6 +27,7 @@ import { NguArrayTable } from './ngu-array-table';
 import type { ArrayColumn, ArrayRow } from './ngu-array-table';
 import { NguGroup } from './ngu-group';
 import { NguSection } from './ngu-section';
+import { injectNguLook } from '../look';
 
 let nextArrayId = 0;
 let nextRowId = 0;
@@ -56,7 +57,10 @@ interface Drag {
   imports: [NgTemplateOutlet, NguField, NguSection, NguArrayTable, forwardRef(() => NguGroup)],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
+    '[class.ngu-unstyled]': "look().theme === 'none'",
+    '[class]': 'look().classes.list',
     class: 'ngu-array',
+    '[attr.data-ngu-path]': 'modelPath()',
     '[class.ngu-array--invalid]': 'showErrors()',
     '[class.ngu-array--table]': 'table()',
     '[class.ngu-array--dragging]': '!!drag()',
@@ -67,7 +71,7 @@ interface Drag {
   template: `
     @let d = def();
     @if (d.title) {
-      <h3 class="ngu-array__title" [id]="titleId">{{ i18n.text(d.title) }}</h3>
+      <h3 class="ngu-array__title" [class]="look().classes.title" [id]="titleId">{{ i18n.text(d.title) }}</h3>
     }
     @if (d.description) {
       <p class="ngu-array__description">{{ i18n.text(d.description) }}</p>
@@ -90,6 +94,7 @@ interface Drag {
           @for (row of visibleRows(); track row.field) {
             <div
               class="ngu-array__row"
+              [class]="look().classes.row"
               role="listitem"
               [class.ngu-array__row--summarized]="!!d.summary"
               [class.ngu-array__row--tools]="!!d.reorder || !!d.duplicate"
@@ -149,19 +154,19 @@ interface Drag {
     </div>
     @if (offscreenProblems(); as rows) {
       @if (rows.length) {
-        <p class="ngu-error ngu-array__offscreen">
+        <p class="ngu-error ngu-array__offscreen" [class]="look().classes.error">
           {{ i18n.message('rowsNeedAttention', { count: rows.length, rows: rowList(rows) }) }}
           <button type="button" class="ngu-array__link" (click)="goToRow(rows[0])">{{ i18n.message('goToEntry', { index: rows[0] + 1 }) }}</button>
         </p>
       }
     }
     @if (addLabel() && editable()) {
-      <button type="button" class="ngu-array__add" [disabled]="!canAdd()" (click)="add()">
+      <button type="button" class="ngu-array__add" [class]="look().classes.button" [disabled]="!canAdd()" (click)="add()">
         {{ addLabel() }}
       </button>
     }
     @if (showErrors()) {
-      <p class="ngu-error" [id]="titleId + '-msg'" tabindex="-1">{{ message() }}</p>
+      <p class="ngu-error" [class]="look().classes.error" [id]="titleId + '-msg'" tabindex="-1">{{ message() }}</p>
     }
 
     <ng-template #contentTpl let-row>
@@ -188,6 +193,7 @@ interface Drag {
             <button
               type="button"
               class="ngu-array__icon ngu-array__up"
+              [class]="look().classes.button"
               [disabled]="!enabled() || row.index === 0"
               [attr.aria-label]="i18n.message('moveUp', { index: row.index + 1 })"
               (click)="moveBy(row.index, -1)"
@@ -197,6 +203,7 @@ interface Drag {
             <button
               type="button"
               class="ngu-array__icon ngu-array__down"
+              [class]="look().classes.button"
               [disabled]="!enabled() || row.index === rows().length - 1"
               [attr.aria-label]="i18n.message('moveDown', { index: row.index + 1 })"
               (click)="moveBy(row.index, 1)"
@@ -209,6 +216,7 @@ interface Drag {
             <button
               type="button"
               class="ngu-array__duplicate"
+              [class]="look().classes.button"
               [class.ngu-array__button]="!table()"
               [class.ngu-array__icon]="table()"
               [disabled]="!enabled() || !canAdd()"
@@ -227,6 +235,7 @@ interface Drag {
             <button
               type="button"
               class="ngu-array__remove"
+              [class]="look().classes.button"
               [class.ngu-array__button]="!table()"
               [class.ngu-array__icon]="table()"
               [disabled]="!enabled() || !canRemove()"
@@ -246,72 +255,74 @@ interface Drag {
     </ng-template>
   `,
   styles: `
-    :host {
+    :host(:not(.ngu-unstyled)) {
       display: flex;
       flex-direction: column;
-      gap: var(--ngu-gap, 1rem);
+      gap: var(--ngu-gap, var(--_ngu-gap, 1rem));
       min-inline-size: 0;
     }
-    .ngu-array__title {
+    :host(:where(:not(.ngu-unstyled))) .ngu-array__title {
       margin: 0;
       font-size: var(--ngu-title-size, 1rem);
       font-weight: 600;
     }
-    .ngu-array__description,
-    .ngu-array__empty {
+    :host(:where(:not(.ngu-unstyled))) .ngu-array__description,
+    :host(:where(:not(.ngu-unstyled))) .ngu-array__empty {
       margin: 0;
       font-size: 0.875rem;
       color: var(--ngu-hint-color, #6b6b6b);
     }
-    .ngu-array__viewport {
+    :host(:where(:not(.ngu-unstyled))) .ngu-array__viewport {
       min-inline-size: 0;
     }
     .ngu-array__viewport--virtual {
       max-block-size: var(--ngu-list-height, 32rem);
       overflow-y: auto;
       overscroll-behavior: contain;
+    }
+    :host(:where(:not(.ngu-unstyled))) .ngu-array__viewport--virtual {
       padding: 0.5rem;
       border: 1px solid var(--ngu-border-color, #c7c7c7);
       border-radius: var(--ngu-radius, 0.375rem);
     }
-    :host(.ngu-array--table) .ngu-array__viewport {
+    :host(.ngu-array--table:not(.ngu-unstyled)) .ngu-array__viewport {
       overflow-x: auto;
     }
-    .ngu-array__rows {
+    :host(:where(:not(.ngu-unstyled))) .ngu-array__rows {
       display: flex;
       flex-direction: column;
-      gap: var(--ngu-gap, 1rem);
+      gap: var(--ngu-gap, var(--_ngu-gap, 1rem));
       container-type: inline-size;
     }
     /* Move, copy and remove buttons go under the fields when the list itself is narrow. */
     @container (max-width: 36rem) {
-      .ngu-array__row--tools:not(.ngu-array__row--summarized) {
+      :host(:where(:not(.ngu-unstyled))) .ngu-array__row--tools:not(.ngu-array__row--summarized) {
         grid-template-columns: minmax(0, 1fr);
       }
-      .ngu-array__row--tools .ngu-array__actions {
+      :host(:where(:not(.ngu-unstyled))) .ngu-array__row--tools .ngu-array__actions {
         justify-content: flex-end;
       }
     }
-    .ngu-array__row {
+    :host(:where(:not(.ngu-unstyled))) .ngu-array__row {
       display: grid;
       grid-template-columns: minmax(0, 1fr) auto;
-      gap: var(--ngu-gap, 1rem);
+      gap: var(--ngu-gap, var(--_ngu-gap, 1rem));
       align-items: start;
-      padding: var(--ngu-row-padding, 0.75rem);
+      padding: var(--ngu-row-padding, var(--_ngu-row-padding, 0.75rem));
       border: 1px solid var(--ngu-border-color, #c7c7c7);
       border-radius: var(--ngu-radius, 0.375rem);
     }
-    .ngu-array__row--summarized {
+    :host(:where(:not(.ngu-unstyled))) .ngu-array__row--summarized {
       display: flex;
       flex-direction: column;
       align-items: stretch;
     }
-    .ngu-array__head {
+    :host(:where(:not(.ngu-unstyled))) .ngu-array__head {
       display: flex;
       align-items: center;
       gap: 0.5rem;
     }
-    .ngu-array__toggle {
+    :host(:where(:not(.ngu-unstyled))) .ngu-array__toggle {
       flex: 1;
       display: flex;
       align-items: center;
@@ -326,18 +337,18 @@ interface Drag {
       border: 0;
       cursor: pointer;
     }
-    .ngu-array__summary {
+    :host(:where(:not(.ngu-unstyled))) .ngu-array__summary {
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
     }
-    .ngu-array__flag {
+    :host(:where(:not(.ngu-unstyled))) .ngu-array__flag {
       flex: none;
       font-size: 0.8125rem;
       color: var(--ngu-error-color, #c62828);
     }
     /* Physical borders on purpose: the rotations below assume the right and bottom edges. */
-    .ngu-array__chevron {
+    :host(:where(:not(.ngu-unstyled))) .ngu-array__chevron {
       flex: none;
       inline-size: 0.5rem;
       block-size: 0.5rem;
@@ -345,98 +356,103 @@ interface Drag {
       border-bottom: 2px solid currentColor;
       transform: rotate(-45deg);
     }
-    .ngu-array__chevron:dir(rtl) {
+    :host(:where(:not(.ngu-unstyled))) .ngu-array__chevron:dir(rtl) {
       transform: rotate(135deg);
     }
-    .ngu-array__chevron--open,
-    .ngu-array__chevron--open:dir(rtl) {
+    :host(:where(:not(.ngu-unstyled))) .ngu-array__chevron--open,
+    :host(:where(:not(.ngu-unstyled))) .ngu-array__chevron--open:dir(rtl) {
       transform: rotate(45deg);
     }
-    .ngu-array__body {
+    :host(:where(:not(.ngu-unstyled))) .ngu-array__body {
       margin-block-start: 0.75rem;
     }
-    .ngu-array__actions {
+    :host(:where(:not(.ngu-unstyled))) .ngu-array__actions {
       display: flex;
       flex-wrap: wrap;
       align-items: center;
       gap: 0.375rem;
     }
     /* The buttons are stamped into table cells from this template, so their styles live here. */
-    :host(.ngu-array--table) .ngu-array__actions {
+    :host(.ngu-array--table:not(.ngu-unstyled)) .ngu-array__actions {
       flex-wrap: nowrap;
       gap: 0.25rem;
     }
-    :host(.ngu-array--table) .ngu-array__icon {
+    :host(.ngu-array--table:not(.ngu-unstyled)) .ngu-array__icon {
       padding: 0.4375rem;
     }
-    .ngu-array__button,
-    .ngu-array__icon,
-    .ngu-array__add {
+    :host(:where(:not(.ngu-unstyled))) .ngu-array__button,
+    :host(:where(:not(.ngu-unstyled))) .ngu-array__icon,
+    :host(:where(:not(.ngu-unstyled))) .ngu-array__add {
       font: inherit;
       font-size: 0.875rem;
-      padding: var(--ngu-button-padding, 0.5rem 1rem);
+      padding: var(--ngu-button-padding, var(--_ngu-button-padding, 0.5rem 1rem));
       border: 1px solid var(--ngu-border-color, #c7c7c7);
       border-radius: var(--ngu-radius, 0.375rem);
       background: var(--ngu-input-bg, transparent);
       color: inherit;
       cursor: pointer;
     }
-    .ngu-array__icon {
+    :host(:where(:not(.ngu-unstyled))) .ngu-array__icon {
       display: inline-grid;
       place-items: center;
       padding: 0.5rem;
       line-height: 0;
     }
-    .ngu-array__icon svg,
-    .ngu-array__handle svg {
+    :host(:where(:not(.ngu-unstyled))) .ngu-array__icon svg,
+    :host(:where(:not(.ngu-unstyled))) .ngu-array__handle svg {
       fill: currentColor;
     }
     .ngu-array__handle {
+      touch-action: none;
+    }
+    :host(:where(:not(.ngu-unstyled))) .ngu-array__handle {
       display: inline-grid;
       place-items: center;
       padding: 0.5rem 0.25rem;
       color: var(--ngu-hint-color, #6b6b6b);
       cursor: grab;
-      touch-action: none;
     }
-    .ngu-array__handle--off {
+    :host(:where(:not(.ngu-unstyled))) .ngu-array__handle--off {
       opacity: 0.4;
       cursor: default;
     }
     :host(.ngu-array--dragging),
     :host(.ngu-array--dragging) .ngu-array__handle {
-      cursor: grabbing;
       user-select: none;
     }
-    .ngu-array__row--picked {
+    :host(.ngu-array--dragging:not(.ngu-unstyled)),
+    :host(.ngu-array--dragging:not(.ngu-unstyled)) .ngu-array__handle {
+      cursor: grabbing;
+    }
+    :host(:where(:not(.ngu-unstyled))) .ngu-array__row--picked {
       opacity: 0.55;
     }
-    .ngu-array__row--drop-before {
+    :host(:where(:not(.ngu-unstyled))) .ngu-array__row--drop-before {
       box-shadow: 0 -3px 0 var(--ngu-primary, #1a73e8);
     }
-    .ngu-array__row--drop-after {
+    :host(:where(:not(.ngu-unstyled))) .ngu-array__row--drop-after {
       box-shadow: 0 3px 0 var(--ngu-primary, #1a73e8);
     }
-    .ngu-array__add {
+    :host(:where(:not(.ngu-unstyled))) .ngu-array__add {
       align-self: flex-start;
       color: var(--ngu-primary, #1a73e8);
       border-color: currentColor;
     }
-    .ngu-array__button:disabled,
-    .ngu-array__icon:disabled,
-    .ngu-array__add:disabled {
+    :host(:where(:not(.ngu-unstyled))) .ngu-array__button:disabled,
+    :host(:where(:not(.ngu-unstyled))) .ngu-array__icon:disabled,
+    :host(:where(:not(.ngu-unstyled))) .ngu-array__add:disabled {
       opacity: 0.5;
       cursor: default;
     }
-    .ngu-array__button:focus-visible,
-    .ngu-array__icon:focus-visible,
-    .ngu-array__add:focus-visible,
-    .ngu-array__toggle:focus-visible,
-    .ngu-array__link:focus-visible {
+    :host(:where(:not(.ngu-unstyled))) .ngu-array__button:focus-visible,
+    :host(:where(:not(.ngu-unstyled))) .ngu-array__icon:focus-visible,
+    :host(:where(:not(.ngu-unstyled))) .ngu-array__add:focus-visible,
+    :host(:where(:not(.ngu-unstyled))) .ngu-array__toggle:focus-visible,
+    :host(:where(:not(.ngu-unstyled))) .ngu-array__link:focus-visible {
       outline: 2px solid var(--ngu-focus-color, #1a73e8);
       outline-offset: 2px;
     }
-    .ngu-array__link {
+    :host(:where(:not(.ngu-unstyled))) .ngu-array__link {
       font: inherit;
       padding: 0;
       margin-inline-start: 0.25rem;
@@ -446,7 +462,7 @@ interface Drag {
       text-decoration: underline;
       cursor: pointer;
     }
-    .ngu-error {
+    :host(:where(:not(.ngu-unstyled))) .ngu-error {
       margin: 0;
       font-size: 0.8125rem;
       color: var(--ngu-error-color, #c62828);
@@ -460,44 +476,47 @@ interface Drag {
       clip: rect(0, 0, 0, 0);
       white-space: nowrap;
     }
-    :host(.ngu-array--narrow) .ngu-array__row:not(.ngu-array__row--summarized) {
+    :host(.ngu-array--narrow:not(.ngu-unstyled)) .ngu-array__row:not(.ngu-array__row--summarized) {
       grid-template-columns: 1fr;
     }
     @media (forced-colors: active) {
-      .ngu-array__row--drop-before {
+      :host(:where(:not(.ngu-unstyled))) .ngu-array__row--drop-before {
         border-block-start: 3px solid Highlight;
       }
-      .ngu-array__row--drop-after {
+      :host(:where(:not(.ngu-unstyled))) .ngu-array__row--drop-after {
         border-block-end: 3px solid Highlight;
       }
     }
     @media print {
-      .ngu-array__actions,
-      .ngu-array__add,
-      .ngu-array__link,
-      .ngu-array__chevron {
+      :host(:where(:not(.ngu-unstyled))) .ngu-array__actions,
+      :host(:where(:not(.ngu-unstyled))) .ngu-array__add,
+      :host(:where(:not(.ngu-unstyled))) .ngu-array__link,
+      :host(:where(:not(.ngu-unstyled))) .ngu-array__chevron {
         display: none;
       }
-      .ngu-array__body[hidden] {
+      :host(:where(:not(.ngu-unstyled))) .ngu-array__body[hidden] {
         display: block !important;
       }
       .ngu-array__viewport--virtual {
         max-block-size: none;
         overflow: visible;
       }
-      .ngu-array__row {
+      :host(:where(:not(.ngu-unstyled))) .ngu-array__row {
         break-inside: avoid;
       }
     }
   `,
 })
 export class NguArray {
+  protected readonly look = injectNguLook();
   readonly def = input.required<ArrayDef>();
   readonly tree = input.required<Field<any>>();
   /** Dot path of this list inside the form. */
   readonly path = input<string>('');
 
   readonly itemPath = computed(() => this.path() + '[]');
+  /** The list's model path, `orders.0.lines`; for tests and tools. */
+  protected readonly modelPath = computed(() => this.tree()().metadata(NGU_PATH)?.() ?? (this.path() || null));
 
   readonly titleId = `ngu-array-${nextArrayId++}`;
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);

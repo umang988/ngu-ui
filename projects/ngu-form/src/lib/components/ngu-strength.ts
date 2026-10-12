@@ -3,6 +3,7 @@ import { injectNguI18n } from '../messages';
 import { defaultRuleTests, passwordScore } from '../strength';
 import type { StrengthOptions } from '../types';
 import { NguFormContext } from './ngu-form-context';
+import { injectNguLook } from '../look';
 
 /**
  * Password strength meter, text value and checklist for a password field. The bar is
@@ -13,6 +14,7 @@ import { NguFormContext } from './ngu-form-context';
   selector: 'ngu-strength',
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
+    '[class.ngu-unstyled]': "look().theme === 'none'",
     class: 'ngu-strength',
     '[attr.data-score]': 'value() ? score() : null',
   },
@@ -29,7 +31,7 @@ import { NguFormContext } from './ngu-form-context';
     </ul>
   `,
   styles: `
-    :host {
+    :host(:not(.ngu-unstyled)) {
       display: flex;
       flex-direction: column;
       gap: 0.375rem;
@@ -37,44 +39,44 @@ import { NguFormContext } from './ngu-form-context';
       --ngu-strength-fill: 0%;
       --ngu-strength-color: var(--ngu-error-color, #c62828);
     }
-    :host([data-score='0']) {
+    :host([data-score='0']:not(.ngu-unstyled)) {
       --ngu-strength-fill: 10%;
     }
-    :host([data-score='1']) {
+    :host([data-score='1']:not(.ngu-unstyled)) {
       --ngu-strength-fill: 25%;
     }
-    :host([data-score='2']) {
+    :host([data-score='2']:not(.ngu-unstyled)) {
       --ngu-strength-fill: 50%;
       --ngu-strength-color: var(--ngu-warning-color, #8a5300);
     }
-    :host([data-score='3']) {
+    :host([data-score='3']:not(.ngu-unstyled)) {
       --ngu-strength-fill: 75%;
       --ngu-strength-color: var(--ngu-success-color, #1e7a3c);
     }
-    :host([data-score='4']) {
+    :host([data-score='4']:not(.ngu-unstyled)) {
       --ngu-strength-fill: 100%;
       --ngu-strength-color: var(--ngu-success-color, #1e7a3c);
     }
-    .ngu-strength__meter {
+    :host(:where(:not(.ngu-unstyled))) .ngu-strength__meter {
       display: block;
       block-size: 0.375rem;
       border-radius: 999px;
       background: var(--ngu-skeleton-color, rgba(127, 127, 127, 0.16));
       overflow: hidden;
     }
-    .ngu-strength__bar {
+    :host(:where(:not(.ngu-unstyled))) .ngu-strength__bar {
       display: block;
       block-size: 100%;
       inline-size: var(--ngu-strength-fill);
       background: var(--ngu-strength-color);
       transition: inline-size 0.2s ease-out;
     }
-    .ngu-strength__text {
+    :host(:where(:not(.ngu-unstyled))) .ngu-strength__text {
       margin: 0;
       min-block-size: 1lh;
       font-weight: 500;
     }
-    .ngu-strength__rules {
+    :host(:where(:not(.ngu-unstyled))) .ngu-strength__rules {
       margin: 0;
       padding: 0;
       list-style: none;
@@ -83,10 +85,10 @@ import { NguFormContext } from './ngu-form-context';
       gap: 0.125rem 1rem;
       color: var(--ngu-hint-color, #6b6b6b);
     }
-    .ngu-rule--met {
+    :host(:where(:not(.ngu-unstyled))) .ngu-rule--met {
       color: var(--ngu-success-color, #1e7a3c);
     }
-    .ngu-rule__mark {
+    :host(:where(:not(.ngu-unstyled))) .ngu-rule__mark {
       display: inline-block;
       inline-size: 1em;
     }
@@ -99,15 +101,15 @@ import { NguFormContext } from './ngu-form-context';
       white-space: nowrap;
     }
     @media (prefers-reduced-motion: reduce) {
-      .ngu-strength__bar {
+      :host(:where(:not(.ngu-unstyled))) .ngu-strength__bar {
         transition: none;
       }
     }
     @media (forced-colors: active) {
-      .ngu-strength__meter {
+      :host(:where(:not(.ngu-unstyled))) .ngu-strength__meter {
         border: 1px solid CanvasText;
       }
-      .ngu-strength__bar {
+      :host(:where(:not(.ngu-unstyled))) .ngu-strength__bar {
         background: Highlight;
         forced-color-adjust: none;
       }
@@ -115,6 +117,7 @@ import { NguFormContext } from './ngu-form-context';
   `,
 })
 export class NguStrength {
+  protected readonly look = injectNguLook();
   /** The password typed so far. */
   readonly value = input.required<string>();
   readonly options = input.required<StrengthOptions>();

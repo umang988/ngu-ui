@@ -8,10 +8,15 @@ binding are the official ones.
 ## Install
 
 ```sh
+ng add ngu-form      # asks about Material or PrimeNG, uploads and a sample form
+# or
 npm install ngu-form
 ```
 
 Peer dependencies: `@angular/core`, `@angular/common`, `@angular/forms` 22.2 or newer.
+Optional, each for one entry point: `@angular/material` and `@angular/cdk`
+(`ngu-form/material`, `ngu-form/testing`), `primeng` (`ngu-form/primeng`), `ngu-dropdown`
+(`ngu-form/dropdown`).
 
 ## Quick start
 
@@ -857,6 +862,22 @@ Import `NguFieldTemplate` or `NguControlTemplate` next to `NguForm`. Paths are d
 separated; array items use `[]`, as in `items[].sku`. The template context has `field`
 (also `$implicit`), `def`, `state`, `id`, `message` and `showErrors`.
 
+## Icons
+
+Register icon components by name and use them before or after a control, inside its border:
+
+```ts
+providers: [provideNguIcons({ search: SearchIcon, mail: MailIcon })]
+
+query: { label: "Search", type: "search", prefixIcon: "search" },
+email: { label: "Email", type: "email", suffixIcon: "mail" },
+```
+
+Names are strings, so run-time fields from JSON can use them too. For one field, a template
+works as well: `<ng-template nguPrefix="price">€</ng-template>` (or `nguSuffix`), with the
+same context as `nguField`. Icons are hidden from screen readers and a click on one focuses
+the control; draw them at `1em` in `currentColor` to fit every size.
+
 ## Custom field types
 
 Register a component per `type` name, declare which value type it edits, and, if it has
@@ -891,6 +912,66 @@ accepted on `number` properties only, with the number rules (`min`, `max`) and i
 `faces` option; any other option is a compile error. Object and array properties can also
 take a custom type. A custom type registered under a built-in name, such as `rating`,
 replaces the built-in renderer.
+
+A renderer can also load on first use, so a large editor stays out of the main bundle:
+
+```ts
+provideNguFieldTypes({ richText: () => import("./rich-text").then((m) => m.RichText) })
+```
+
+The field shows its label and a placeholder until the code arrives; it loads once for every
+field of that type.
+
+## Whole-field renderers and design systems
+
+`provideNguFieldTypes` replaces the control and keeps ngu-form's label and messages.
+`provideNguFieldRenderers` hands a component the whole field instead, through one
+`context` input (`NguFieldRenderContext`): translated label, hint, placeholder and options,
+`error` only while it should show, `required`, the transform for masks and locale numbers,
+the counter, i18n, the theme, and `touch()`. ngu-form still decides when errors show, links
+the error summary and focuses the first problem.
+
+```ts
+@Component({ /* label, control and message, from context() */ })
+export class BoxedField {
+  readonly context = input.required<NguFieldRenderContext>();
+}
+
+providers: [provideNguFieldRenderers({ text: BoxedField, email: BoxedField })]
+```
+
+Two adapters ship ready:
+
+```ts
+import { provideNguMaterial } from "ngu-form/material";   // Angular Material form fields
+import { provideNguPrimeNG } from "ngu-form/primeng";     // PrimeNG components
+
+providers: [provideNguMaterial({ appearance: "outline" })]
+providers: [providePrimeNG({ theme: { preset: Aura } }), provideNguPrimeNG()]
+```
+
+Types without a counterpart in the design system (one-time code, phone, captcha and a few
+more) keep ngu-form's own control; point its tokens at the design system's variables.
+Controls whose `invalid` input `[formField]` would set too early can be bound with
+`[nguBind]`, which connects any `ControlValueAccessor` to a field and leaves `invalid` to you.
+
+## Server dropdown
+
+`ngu-form/dropdown` adds `type: "dropdown"` on top of the `ngu-dropdown` package: a select that
+pages through the server as you scroll, with search, and multiple selection on list values.
+
+```ts
+providers: [provideNguDropdown()]
+
+city: {
+  label: "City",
+  type: "dropdown",
+  fetch: (query, { signal }) => http.get<Page<City>>("/api/cities", { params: toParams(query) }),
+  lookup: (ids) => http.get<City[]>("/api/cities", { params: { ids: ids.join(",") } }),
+  optionValue: "id",
+  optionLabel: "name",
+}
+```
 
 ## Rich text (recipe)
 
@@ -1045,6 +1126,74 @@ ngu-form {
   --ngu-drop-bg: #e8f0fe;       /* a file drop zone while dragging */
 }
 ```
+
+### Density, size and unstyled forms
+
+```html
+<ngu-form [form]="booking" density="compact" size="lg" />
+<ngu-form [form]="booking" theme="none" />
+```
+
+`density` (`compact`, `normal`, `spacious`) and `size` (`sm`, `md`, `lg`) change the defaults of
+the spacing and text tokens; tokens you set win. `theme="none"` drops ngu-form's CSS and keeps
+the markup, its `ngu-*` classes and the behavior. Set any of them app-wide with
+`provideNguFormConfig({ theme, density, size })`. The full token list is exported as
+`NGU_TOKENS`.
+
+### Tailwind and other utility CSS
+
+`classes` adds your classes to the elements ngu-form renders:
+
+```ts
+provideNguFormConfig({
+  theme: "none",
+  classes: {
+    field: "flex flex-col gap-1.5",
+    label: "text-sm font-medium",
+    control: "rounded-lg border border-slate-300 px-3 py-2",
+    error: "text-sm text-red-700",
+    submit: "rounded-lg bg-teal-700 px-4 py-2 font-semibold text-white",
+  },
+})
+```
+
+Keys: `form`, `field`, `label`, `control`, `check`, `hint`, `error`, `group`, `title`, `list`,
+`row`, `button`, `submit`. Custom renderers read the same settings with `injectNguLook()`.
+
+## Testing
+
+`ngu-form/testing` has harnesses for Angular CDK testing. Fields are found by model path
+(`items.0.sku`) or label; values go in as a user enters them.
+
+```ts
+const form = await TestbedHarnessEnvironment.harnessForFixture(fixture, NguFormHarness);
+await form.fill({ "account.email": "ada@example.com", plan: "Pro", remember: true });
+await form.submit();
+expect(await form.getErrors()).toEqual({});
+```
+
+For Playwright, `ngu-form/playwright` has the same calls on a page or locator:
+
+```ts
+const form = nguForm(page);
+await form.fill({ "account.email": "ada@example.com" });
+await form.submit();
+```
+
+Fields and lists carry `data-ngu-path` and `data-ngu-type` for any other tool.
+
+## Developer tools
+
+- `<ngu-form-debug [form]>` from `ngu-form/debug` shows the value, state, unsaved changes and
+  every error by path.
+- `ng g ngu-form:form signup --model=Signup` writes a form component from an interface.
+- `ng g ngu-form:from-schema new-user --schema=openapi.json --operation=createUser` writes a
+  typed model and form from a JSON Schema or an OpenAPI request body.
+- `ng g ngu-form:from-formly src/app/signup.ts` converts ngx-formly field arrays.
+- Mistakes carry a code (`NGU-103`, `NGU-201`...) and a link to the diagnostics page;
+  development builds warn about template paths that match no field and missing providers.
+- `<ngu-field [field]="f.email" [def]="{ label: 'Email', type: 'email' }" />` renders one field
+  inside a hand-written Signal Forms form.
 
 ## Roadmap
 

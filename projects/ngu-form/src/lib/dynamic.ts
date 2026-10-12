@@ -9,6 +9,7 @@ import type {
   LeafDef,
   Validator,
 } from './types';
+import { nguError } from './diagnostics';
 
 /** Normalizes a `{ fields, ... }` spec for a `Record<string, V>` property. */
 export function normalizeDynamic(spec: Record<string, unknown>, path: string): DynamicDef {
@@ -25,7 +26,7 @@ export function normalizeDynamic(spec: Record<string, unknown>, path: string): D
     const map = new Map<string, DynamicEntry>();
     for (const field of list()) {
       if (map.has(field.key)) {
-        throw new Error(`ngu-form: "${path}" has two run-time fields with key "${field.key}".`);
+        throw nguError('NGU-111', `"${path}" has two run-time fields with key "${field.key}". Keys must be unique.`);
       }
       let entry = cache.get(field);
       if (!entry) {
@@ -71,6 +72,8 @@ function compile(field: DynamicField): DynamicEntry {
     required: field.required,
     prefix: field.prefix,
     suffix: field.suffix,
+    prefixIcon: field.prefixIcon,
+    suffixIcon: field.suffixIcon,
     inputmode: field.inputmode,
     enterkeyhint: field.enterkeyhint,
     counter: field.counter,

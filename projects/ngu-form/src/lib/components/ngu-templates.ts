@@ -51,3 +51,33 @@ export class NguControlTemplate {
     return true;
   }
 }
+
+/**
+ * An icon before the control of the field at the given path, inside its border, such as a
+ * search glass. Decorative: it is hidden from screen readers, so the label must still say
+ * what the field is. The context is the same as `nguField`'s.
+ *
+ * ```html
+ * <ng-template nguPrefix="query"><svg viewBox="0 0 24 24">…</svg></ng-template>
+ * ```
+ */
+@Directive({ selector: 'ng-template[nguPrefix]' })
+export class NguPrefixTemplate {
+  readonly path = input.required<string>({ alias: 'nguPrefix' });
+  readonly template = inject<TemplateRef<NguFieldContext>>(TemplateRef);
+
+  static ngTemplateContextGuard(_dir: NguPrefixTemplate, ctx: unknown): ctx is NguFieldContext {
+    return true;
+  }
+}
+
+/** An icon after the control of the field at the given path; see `nguPrefix`. */
+@Directive({ selector: 'ng-template[nguSuffix]' })
+export class NguSuffixTemplate {
+  readonly path = input.required<string>({ alias: 'nguSuffix' });
+  readonly template = inject<TemplateRef<NguFieldContext>>(TemplateRef);
+
+  static ngTemplateContextGuard(_dir: NguSuffixTemplate, ctx: unknown): ctx is NguFieldContext {
+    return true;
+  }
+}

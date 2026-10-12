@@ -14,7 +14,7 @@ import {
   viewChild,
 } from '@angular/core';
 import { transformedValue } from '@angular/forms/signals';
-import { injectNguI18n, NguFormContext, type LeafDef } from 'ngu-form';
+import { injectNguI18n, injectNguLook, NguFormContext, type LeafDef } from 'ngu-form';
 import { NguImageCropper } from './cropper';
 import { asList, formatBytes, isFile, isImage, matchesAccept } from './files';
 import { processImage } from './image';
@@ -51,7 +51,7 @@ let nextKey = 0;
   selector: 'ngu-file-input',
   imports: [NguImageCropper],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: { class: 'ngu-file-input' },
+  host: { class: 'ngu-file-input', '[class.ngu-unstyled]': "look().theme === 'none'" },
   template: `
     <div
       class="ngu-drop"
@@ -142,13 +142,13 @@ let nextKey = 0;
     }
   `,
   styles: `
-    :host {
+    :host(:not(.ngu-unstyled)) {
       display: flex;
       flex-direction: column;
       gap: 0.5rem;
       min-inline-size: 0;
     }
-    .ngu-drop {
+    :host(:where(:not(.ngu-unstyled))) .ngu-drop {
       display: flex;
       flex-wrap: wrap;
       align-items: center;
@@ -158,15 +158,15 @@ let nextKey = 0;
       border-radius: var(--ngu-radius, 0.375rem);
       background: var(--ngu-input-bg, transparent);
     }
-    .ngu-drop--over {
+    :host(:where(:not(.ngu-unstyled))) .ngu-drop--over {
       border-style: solid;
       border-color: var(--ngu-primary, #1a73e8);
       background: var(--ngu-drop-bg, rgba(26, 115, 232, 0.08));
     }
-    .ngu-drop--invalid {
+    :host(:where(:not(.ngu-unstyled))) .ngu-drop--invalid {
       border-color: var(--ngu-error-color, #c62828);
     }
-    .ngu-drop__button {
+    :host(:where(:not(.ngu-unstyled))) .ngu-drop__button {
       display: inline-flex;
       align-items: center;
       padding: 0.4375rem 0.875rem;
@@ -177,19 +177,19 @@ let nextKey = 0;
       font-weight: 500;
       cursor: pointer;
     }
-    .ngu-drop--off .ngu-drop__button {
+    :host(:where(:not(.ngu-unstyled))) .ngu-drop--off .ngu-drop__button {
       opacity: 0.6;
       cursor: default;
     }
-    .ngu-drop:has(input:focus-visible) .ngu-drop__button {
+    :host(:where(:not(.ngu-unstyled))) .ngu-drop:has(input:focus-visible) .ngu-drop__button {
       outline: 2px solid var(--ngu-focus-color, #1a73e8);
       outline-offset: 2px;
     }
-    .ngu-drop__hint {
+    :host(:where(:not(.ngu-unstyled))) .ngu-drop__hint {
       font-size: 0.875rem;
       color: var(--ngu-hint-color, #6b6b6b);
     }
-    .ngu-files {
+    :host(:where(:not(.ngu-unstyled))) .ngu-files {
       display: flex;
       flex-direction: column;
       gap: 0.375rem;
@@ -197,7 +197,7 @@ let nextKey = 0;
       padding: 0;
       list-style: none;
     }
-    .ngu-file {
+    :host(:where(:not(.ngu-unstyled))) .ngu-file {
       display: flex;
       align-items: center;
       gap: 0.75rem;
@@ -206,54 +206,54 @@ let nextKey = 0;
       border-radius: var(--ngu-radius, 0.375rem);
       min-inline-size: 0;
     }
-    .ngu-file--problem {
+    :host(:where(:not(.ngu-unstyled))) .ngu-file--problem {
       border-color: var(--ngu-error-color, #c62828);
     }
-    .ngu-file__thumb {
+    :host(:where(:not(.ngu-unstyled))) .ngu-file__thumb {
       flex: none;
       inline-size: 2.5rem;
       block-size: 2.5rem;
       border-radius: calc(var(--ngu-radius, 0.375rem) / 2);
       object-fit: cover;
     }
-    .ngu-file__thumb--blank {
+    :host(:where(:not(.ngu-unstyled))) .ngu-file__thumb--blank {
       background: var(--ngu-skeleton-color, rgba(127, 127, 127, 0.16));
     }
-    .ngu-file__body {
+    :host(:where(:not(.ngu-unstyled))) .ngu-file__body {
       display: flex;
       flex-direction: column;
       gap: 0.125rem;
       flex: 1 1 auto;
       min-inline-size: 0;
     }
-    .ngu-file__name {
+    :host(:where(:not(.ngu-unstyled))) .ngu-file__name {
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
       font-size: 0.875rem;
       font-weight: 500;
     }
-    .ngu-file__meta {
+    :host(:where(:not(.ngu-unstyled))) .ngu-file__meta {
       font-size: 0.8125rem;
       color: var(--ngu-hint-color, #6b6b6b);
     }
-    .ngu-file--problem .ngu-file__meta {
+    :host(:where(:not(.ngu-unstyled))) .ngu-file--problem .ngu-file__meta {
       color: var(--ngu-error-color, #c62828);
     }
-    .ngu-file__bar {
+    :host(:where(:not(.ngu-unstyled))) .ngu-file__bar {
       display: block;
       block-size: 0.25rem;
       border-radius: 999px;
       background: var(--ngu-skeleton-color, rgba(127, 127, 127, 0.16));
       overflow: hidden;
     }
-    .ngu-file__bar > span {
+    :host(:where(:not(.ngu-unstyled))) .ngu-file__bar > span {
       display: block;
       block-size: 100%;
       background: var(--ngu-primary, #1a73e8);
       transition: inline-size 0.2s;
     }
-    .ngu-file__action {
+    :host(:where(:not(.ngu-unstyled))) .ngu-file__action {
       flex: none;
       padding: 0.25rem 0.625rem;
       border: 0;
@@ -265,7 +265,7 @@ let nextKey = 0;
       font-weight: 500;
       cursor: pointer;
     }
-    .ngu-file__remove {
+    :host(:where(:not(.ngu-unstyled))) .ngu-file__remove {
       inline-size: 2rem;
       block-size: 2rem;
       padding: 0;
@@ -273,23 +273,23 @@ let nextKey = 0;
       font-size: 1.25rem;
       line-height: 1;
     }
-    .ngu-file__action:hover {
+    :host(:where(:not(.ngu-unstyled))) .ngu-file__action:hover {
       background: rgba(127, 127, 127, 0.12);
     }
-    .ngu-file__action:focus-visible {
+    :host(:where(:not(.ngu-unstyled))) .ngu-file__action:focus-visible {
       outline: 2px solid var(--ngu-focus-color, #1a73e8);
       outline-offset: 0;
     }
     @media (prefers-reduced-motion: reduce) {
-      .ngu-file__bar > span {
+      :host(:where(:not(.ngu-unstyled))) .ngu-file__bar > span {
         transition: none;
       }
     }
     @media (forced-colors: active) {
-      .ngu-file__bar > span {
+      :host(:where(:not(.ngu-unstyled))) .ngu-file__bar > span {
         background: Highlight;
       }
-      .ngu-file--problem {
+      :host(:where(:not(.ngu-unstyled))) .ngu-file--problem {
         border-width: 2px;
       }
     }
@@ -307,6 +307,7 @@ let nextKey = 0;
   `,
 })
 export class NguFileInput {
+  protected readonly look = injectNguLook();
   readonly value = model<readonly NguFileValue[] | NguFileValue | null>(null);
   readonly touch = output<void>();
   readonly disabled = input(false);

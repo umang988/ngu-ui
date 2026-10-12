@@ -1,5 +1,93 @@
 # Changelog
 
+## 0.6.0 (unreleased): Ecosystem and developer experience
+
+### Added
+
+- **Angular Material renderer** (`ngu-form/material`). `provideNguMaterial()` renders text,
+  number, amount, password, textarea, time, month and week fields as `mat-form-field` inputs
+  (prefix and suffix text, counter, show-password button), selects as `mat-select`, checkboxes,
+  groups, switches and consent as `mat-checkbox` and `mat-slide-toggle`, radios and segments as
+  `mat-radio-group` and `mat-button-toggle-group`, sliders as `mat-slider`, tags as chips, and
+  dates and ranges with Material's pickers through the app's `DateAdapter`. Options:
+  `appearance`, `floatLabel`, `subscriptSizing`, `dateAdapter`.
+- **PrimeNG renderer** (`ngu-form/primeng`). `provideNguPrimeNG()` renders fields with
+  `pInputText`, `p-inputmask`, `p-password`, `pTextarea`, `p-inputnumber`, `p-select`,
+  `p-multiselect`, `p-checkbox`, `p-toggleswitch`, `p-radiobutton`, `p-selectbutton`,
+  `p-slider`, `p-datepicker` and `p-rating`, with labels above and errors as `p-message`.
+  Tags and one-time codes keep ngu-form's controls: `p-inputtags` and `p-inputotp` fail axe.
+- **Whole-field renderers.** `provideNguFieldRenderers({ type: Component })` hands a component
+  the whole field through one `context` input (`NguFieldRenderContext`): translated texts and
+  options, the error only while it should show, `required`, the transform, the counter, i18n,
+  the look and `touch()`. `nguField` and `nguControl` templates still win for their paths.
+- **`nguBind`**, a directive that connects a `ControlValueAccessor` (or a plain input) to a
+  field without `[formField]`, leaving the control's own `invalid` and `required` inputs to the
+  renderer, with `nguBindFormat` and `nguBindParse` to convert values.
+- **Server dropdown** (`ngu-form/dropdown`). `provideNguDropdown()` registers `type: 'dropdown'`
+  on top of `ngu-dropdown`: server paging, search, virtual scrolling, `lookup` for saved
+  values, multiple with chips on list values. Closes the combobox item postponed in 0.4.
+- **Unstyled mode.** `theme="none"` on `<ngu-form>` or `<ngu-view>`, or
+  `provideNguFormConfig({ theme: 'none' })`, drops ngu-form's visual CSS and keeps the markup,
+  its classes and its behavior (screen-reader text, the `cols` grid, long-list scrolling,
+  overlays and drag handles keep working).
+- **Class map.** `provideNguFormConfig({ classes })` adds classes to the form, fields, labels,
+  controls, checkboxes, hints, errors, groups, titles, lists, rows and buttons, for Tailwind or
+  other utility CSS. `injectNguLook()` gives custom renderers the same theme and classes.
+- **Density and size.** `density` (`compact`, `normal`, `spacious`) and `size` (`sm`, `md`,
+  `lg`) on `<ngu-form>` or in the config. They change the defaults of the spacing and text
+  tokens; tokens set by the app still win. New token `--ngu-font-size`.
+- **Token list.** `NGU_TOKENS` lists every CSS custom property with its default, its use and
+  whether density or size scales it; a spec keeps it in step with the styles.
+- **Icon adornments.** `prefixIcon` and `suffixIcon` name icons registered with
+  `provideNguIcons` (also on run-time fields); `nguPrefix` and `nguSuffix` templates add
+  anything before or after one field's control. Icons are hidden from screen readers, and a
+  click on one focuses the control.
+- **Test harnesses** (`ngu-form/testing`): `NguFormHarness` (`field`, `fields`, `list`, `fill`,
+  `submit`, `next`, `back`, `getStep`, `getErrors`, `getFormError`, `isBusy`),
+  `NguFieldHarness` (filters by label, path and type; `getValue` and `setValue` for every
+  built-in control) and `NguListHarness`, on Angular CDK testing.
+- **Playwright helper** (`ngu-form/playwright`): `nguForm(page)` with the same calls, typed
+  against Playwright's locator without depending on it.
+- **Model paths in the DOM.** Fields and lists carry `data-ngu-path` (`items.0.sku`) and
+  fields `data-ngu-type`.
+- **Debug panel** (`ngu-form/debug`): `<ngu-form-debug [form]>` shows the value, state, unsaved
+  changes, errors by path and changed fields; `debugRows(form)` returns the same rows.
+- **Schematics.** `ng add ngu-form` (renderer, uploads, sample form);
+  `ng g ngu-form:form --model=Name` (a component from an interface);
+  `ng g ngu-form:from-schema` (a typed model and component from a JSON Schema or an OpenAPI
+  request body); `ng g ngu-form:from-formly` (ngx-formly field arrays to ngu-form specs).
+- **Lazy custom types.** `provideNguFieldTypes({ editor: () => import(...) })` loads a renderer
+  on first use; the field shows its label and a placeholder until then, and server rendering
+  waits for it.
+- **Single fields.** `<ngu-field>` takes a plain spec as `def`, for hand-written Signal Forms
+  forms. Resolved `choices` are also passed to control renderers that declare them.
+- **Diagnostics.** Spec mistakes throw with a code (`NGU-101` to `NGU-111`) and a link to the
+  new Diagnostics page; `NGU-103` suggests the model key a misspelled spec key meant. Development
+  builds warn about template paths that match no field, with the nearest path (`NGU-201`),
+  types without a renderer, naming the provider to add (`NGU-301`), unknown icons (`NGU-302`),
+  registry entries that are not components (`NGU-304`) and two live forms sharing a draft key
+  (`NGU-401`).
+- Exported for renderers: `NguTransform`, `NguStrength`, `FieldTransform`.
+- Docs: Angular Material, PrimeNG, Unstyled and Tailwind, Renderers, Icons, Server dropdown,
+  Testing, Schematics, Debug panel, Single fields, Diagnostics, From ngx-formly, From reactive
+  forms; Theming gained density and size, and its token table now comes from `NGU_TOKENS`.
+
+### Changed
+
+- **Default styles carry one more class of specificity.** Every visual rule is scoped so that
+  `theme="none"` can turn it off. App CSS that overrode ngu-form with a single class may need
+  `.ngu-form` in front; restyling through tokens is unaffected.
+- `NguFieldTypes` values may be loader functions; code that read the registry directly should
+  expect them.
+- Optional peer dependencies: `@angular/cdk`, `@angular/material`, `primeng` and
+  `ngu-dropdown`, each needed only by its entry point.
+
+### Fixed
+
+- A field touched by code, for example by Signal Forms' `submit()` around a lone
+  `<ngu-field>`, now shows its errors. The autofill guard (a touch needs the user's own blur)
+  applies only once autofill has blurred the field.
+
 ## 0.5.0 (unreleased): Complex flows and layout
 
 ### Added

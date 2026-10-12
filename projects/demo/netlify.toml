@@ -7,7 +7,7 @@
   publish = "dist/demo/browser"
   # Exit 0 skips the build: only when nothing this site is built from changed since the last
   # deploy. A build without a cached commit (first deploy, "clear cache") always runs.
-  ignore = 'test "$CACHED_COMMIT_REF" != "$COMMIT_REF" && git diff --quiet "$CACHED_COMMIT_REF" "$COMMIT_REF" -- projects/demo projects/ngu-form projects/docs-kit angular.json package.json package-lock.json tsconfig.json'
+  ignore = 'test "$CACHED_COMMIT_REF" != "$COMMIT_REF" && git diff --quiet "$CACHED_COMMIT_REF" "$COMMIT_REF" -- projects/demo projects/ngu-form projects/ngu-dropdown projects/docs-kit angular.json package.json package-lock.json tsconfig.json'
 
 [build.environment]
   NODE_VERSION = "24"

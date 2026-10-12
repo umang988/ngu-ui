@@ -72,6 +72,14 @@ defineForm({ age: 0 }, {
         code: [{ code: 'npm install ngu-form', lang: 'bash' }],
       },
       {
+        id: 'ng-add',
+        title: 'With ng add',
+        text: [
+          '`ng add ngu-form` installs it and asks whether to render with Angular Material or PrimeNG, whether to add uploads, and whether to create a sample form; it writes the providers into `app.config.ts`. See [Schematics](/schematics) for generating forms from interfaces and API schemas.',
+        ],
+        code: [{ code: 'ng add ngu-form', lang: 'bash' }],
+      },
+      {
         id: 'requirements',
         title: 'Requirements',
         table: {

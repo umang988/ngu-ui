@@ -11,6 +11,7 @@ import {
 } from '@angular/core';
 import { injectNguI18n, type NguI18n } from '../messages';
 import { SR_ONLY } from './choice';
+import { injectNguLook } from '../look';
 
 let nextName = 0;
 
@@ -23,6 +24,7 @@ let nextName = 0;
   selector: 'ngu-rating',
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
+    '[class.ngu-unstyled]': "look().theme === 'none'",
     class: 'ngu-rating',
     '(focusout)': 'onFocusOut($event)',
     '(pointerleave)': 'hover.set(0)',
@@ -52,11 +54,11 @@ let nextName = 0;
     }
   `,
   styles: `
-    :host {
+    :host(:not(.ngu-unstyled)) {
       display: inline-flex;
       gap: 0.125rem;
     }
-    .ngu-star {
+    :host(:where(:not(.ngu-unstyled))) .ngu-star {
       position: relative;
       display: inline-grid;
       place-items: center;
@@ -68,20 +70,21 @@ let nextName = 0;
       color: var(--ngu-hint-color, #6b6b6b);
       cursor: pointer;
     }
-    .ngu-star--on {
+    :host(:where(:not(.ngu-unstyled))) .ngu-star--on {
       color: var(--ngu-rating-color, #b25f00);
     }
-    .ngu-star:has(input:focus-visible) {
+    :host(:where(:not(.ngu-unstyled))) .ngu-star:has(input:focus-visible) {
       outline: 2px solid var(--ngu-focus-color, #1a73e8);
       outline-offset: 1px;
     }
-    .ngu-star:has(input:disabled) {
+    :host(:where(:not(.ngu-unstyled))) .ngu-star:has(input:disabled) {
       cursor: default;
     }
     ${SR_ONLY}
   `,
 })
 export class NguRating {
+  protected readonly look = injectNguLook();
   readonly value = model<number>(0);
   readonly touch = output<void>();
   readonly disabled = input(false);

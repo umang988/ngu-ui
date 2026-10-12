@@ -1,0 +1,25 @@
+{
+  "$schema": "../../../node_modules/@angular-devkit/schematics/collection-schema.json",
+  "schematics": {
+    "ng-add": {
+      "description": "Add ngu-form to a project: renderer, uploads and a sample form.",
+      "factory": "./ng-add/index#ngAdd",
+      "schema": "./ng-add/schema.json"
+    },
+    "form": {
+      "description": "Generate a form component from a TypeScript interface.",
+      "factory": "./form/index#form",
+      "schema": "./form/schema.json"
+    },
+    "from-schema": {
+      "description": "Generate a typed model and form component from a JSON Schema or an OpenAPI request body.",
+      "factory": "./from-schema/index#fromSchema",
+      "schema": "./from-schema/schema.json"
+    },
+    "from-formly": {
+      "description": "Convert ngx-formly field configs in a file to ngu-form specs.",
+      "factory": "./from-formly/index#fromFormly",
+      "schema": "./from-formly/schema.json"
+    }
+  }
+}

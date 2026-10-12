@@ -1,4 +1,5 @@
 import type { DocPage } from 'docs-kit/docs/model';
+import { NGU_TOKENS } from 'ngu-form';
 
 export const PAGES: Record<string, DocPage> = {
   'custom-types': {
@@ -43,6 +44,25 @@ export const PAGES: Record<string, DocPage> = {
         },
         after: [
           'A type registered under a built-in name, such as `rating`, replaces the built-in renderer.',
+        ],
+      },
+      {
+        id: 'lazy',
+        title: 'Loading a type on first use',
+        text: [
+          'A type whose renderer pulls in a large library, such as an editor, can load when a form first needs it. Pass a function that imports the component; the field shows a placeholder with its label until it arrives, and the code loads once for every field of that type.',
+        ],
+        code: [
+          {
+            filename: 'app.config.ts',
+            code: `provideNguFieldTypes({
+  mood: MoodPicker,
+  richText: () => import('./rich-text').then((m) => m.RichText),
+})`,
+          },
+        ],
+        after: [
+          'With server rendering, the server waits for the renderer, but the browser starts from the placeholder; register such types eagerly on server-rendered pages.',
         ],
       },
       {
@@ -197,57 +217,63 @@ export class RichText {
         ],
       },
       {
+        id: 'density',
+        title: 'Density and size',
+        text: [
+          '`density` (`compact`, `normal`, `spacious`) sets the space between and inside fields; `size` (`sm`, `md`, `lg`) sets the text size of controls, labels and buttons, and the paddings follow it. Set them on `<ngu-form>`, or for every form with `provideNguFormConfig`.',
+        ],
+        demo: {
+          src: 'theming/density.ts',
+          load: () => import('../demos/theming/density').then((m) => m.DensityDemo),
+          value: false,
+        },
+        after: [
+          'They change the defaults of the spacing and text tokens marked "scaled" below; a token you set yourself always wins.',
+        ],
+      },
+      {
+        id: 'unstyled',
+        title: 'No styles at all',
+        text: [
+          "`theme=\"none\"` drops ngu-form's CSS and keeps the markup and its classes, for design systems and utility CSS. See [Unstyled and Tailwind](/tailwind).",
+        ],
+      },
+      {
         id: 'list',
         title: 'Every token',
+        text: ['The list is exported as `NGU_TOKENS`, for tools that build themes; a test checks it against the styles.'],
         table: {
           caption: 'CSS custom properties',
           columns: ['Property', 'Default', 'Used for'],
-          rows: [
-            [
-              '`--ngu-primary`',
-              '`#1a73e8`',
-              'Submit button, add buttons, chosen segments, switches',
-            ],
-            ['`--ngu-on-primary`', '`#fff`', 'Text on the submit button and chosen segments'],
-            ['`--ngu-focus-color`', '`#1a73e8`', 'Focus ring'],
-            ['`--ngu-border-color`', '`#c7c7c7`', 'Input borders, list rows, dividers'],
-            ['`--ngu-input-bg`', '`transparent`', 'Input background'],
-            ['`--ngu-readonly-bg`', 'a light grey tint', 'Read-only and computed inputs'],
-            ['`--ngu-radius`', '`0.375rem`', 'Corners of inputs and buttons'],
-            ['`--ngu-gap`', '`1rem`', 'Space between fields'],
-            [
-              '`--ngu-field-gap`',
-              '`0.375rem`',
-              'Space between a label, its control and its message',
-            ],
-            ['`--ngu-input-padding`', '`0.5rem 0.75rem`', 'Padding inside inputs'],
-            ['`--ngu-button-padding`', '`0.5rem 1.25rem`', 'Padding inside buttons'],
-            ['`--ngu-label-size`', '`0.875rem`', 'Label text size'],
-            ['`--ngu-label-color`', '`inherit`', 'Label text color'],
-            ['`--ngu-title-size`', '`1rem`', 'Group, list and heading size'],
-            ['`--ngu-hint-color`', '`#6b6b6b`', 'Hints, counters, descriptions'],
-            ['`--ngu-error-color`', '`#c62828`', 'Error text and invalid borders'],
-            ['`--ngu-error-bg`', '`#fdecea`', 'Form-level error box'],
-            ['`--ngu-warning-color`', '`#8a5300`', 'Warning text, its icon and border'],
-            ['`--ngu-warning-on`', '`#fff`', 'The "!" inside the warning icon'],
-            ['`--ngu-success-color`', '`#1e7a3c`', 'Met password rules and a strong meter'],
-            [
-              '`--ngu-skeleton-color`',
-              'a light grey tint',
-              'Loading placeholders and the empty meter',
-            ],
-            ['`--ngu-notice-bg`', 'a light grey tint', 'The "draft restored" notice'],
-            ['`--ngu-row-padding`', '`0.75rem`', 'Padding inside list rows'],
-            ['`--ngu-textarea-line-height`', '`1.5`', 'Textarea lines, used by autosize'],
-            ['`--ngu-actions-justify`', '`flex-start`', 'Submit button alignment'],
-            ['`--ngu-rating-color`', '`#b25f00`', 'Filled rating stars'],
-            ['`--ngu-switch-off`', '`#767676`', 'A switch that is off'],
-            ['`--ngu-tag-bg`', 'a light grey tint', 'Tags'],
-            ['`--ngu-surface`', '`#fff`', 'The crop dialog'],
-            ['`--ngu-drop-bg`', 'a light blue tint', 'A file drop zone while dragging'],
-            ['`--ngu-mono`', '`ui-monospace`', 'One-time code boxes and color values'],
-          ],
+          rows: NGU_TOKENS.map((t) => [`\`${t.name}\``, t.default.startsWith('rgba') ? 'a grey tint' : `\`${t.default}\``, t.scaled ? `${t.use} (scaled)` : t.use]),
         },
+      },
+    ],
+  },
+
+  icons: {
+    title: 'Icons',
+    description: 'An icon before or after a control, inside its border: by name from a registry, or as a template for one field.',
+    sections: [
+      {
+        id: 'icons',
+        title: 'Icons',
+        text: [
+          'Register icon components with `provideNguIcons`, then name them with `prefixIcon` or `suffixIcon`. Names are plain strings, so run-time fields from JSON can use them too. `nguPrefix` and `nguSuffix` templates put anything next to one field, with the field\'s context.',
+        ],
+        demo: {
+          src: 'icons/icons.ts',
+          load: () => import('../demos/icons/icons').then((m) => m.IconsDemo),
+        },
+      },
+      {
+        id: 'meaning',
+        title: 'Icons and meaning',
+        list: [
+          'Icons are hidden from screen readers. The label must say what the field is; an icon only repeats it.',
+          'A click on an icon focuses the control, as a click on the label does.',
+          'Text that matters, such as a currency, belongs in `prefix` or `suffix`, which screen readers do read.',
+        ],
       },
     ],
   },

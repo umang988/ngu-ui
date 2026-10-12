@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, input, signal } from '@an
 import { FormField, type Field } from '@angular/forms/signals';
 import { codeTransform, NguTransform } from '../transform';
 import type { EnterKeyHint } from '../types';
+import { injectNguLook } from '../look';
 
 /**
  * A one-time code shown as separate boxes. Underneath is a single input with
@@ -12,7 +13,7 @@ import type { EnterKeyHint } from '../types';
   selector: 'ngu-otp',
   imports: [FormField, NguTransform],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: { class: 'ngu-otp', '[style.--ngu-otp-length]': 'length()' },
+  host: { class: 'ngu-otp', '[style.--ngu-otp-length]': 'length()', '[class.ngu-unstyled]': "look().theme === 'none'" },
   template: `
     <input
       type="text"
@@ -49,9 +50,11 @@ import type { EnterKeyHint } from '../types';
     }
     .ngu-otp__boxes {
       display: flex;
+    }
+    :host(:where(:not(.ngu-unstyled))) .ngu-otp__boxes {
       gap: 0.5rem;
     }
-    .ngu-otp__box {
+    :host(:where(:not(.ngu-unstyled))) .ngu-otp__box {
       display: grid;
       place-items: center;
       inline-size: 2.5rem;
@@ -63,11 +66,11 @@ import type { EnterKeyHint } from '../types';
       font-size: 1.25rem;
       font-weight: 600;
     }
-    .ngu-otp__box--active {
+    :host(:where(:not(.ngu-unstyled))) .ngu-otp__box--active {
       outline: 2px solid var(--ngu-focus-color, #1a73e8);
       outline-offset: 1px;
     }
-    :host:has(input[aria-invalid='true']) .ngu-otp__box {
+    :host(:not(.ngu-unstyled)):has(input[aria-invalid='true']) .ngu-otp__box {
       border-color: var(--ngu-error-color, #c62828);
     }
     /* The real input lies over the boxes, invisible, and takes every tap, key and paste. */
@@ -89,21 +92,22 @@ import type { EnterKeyHint } from '../types';
       background: transparent;
     }
     @media (max-width: 22rem) {
-      .ngu-otp__boxes {
+      :host(:where(:not(.ngu-unstyled))) .ngu-otp__boxes {
         gap: 0.25rem;
       }
-      .ngu-otp__box {
+      :host(:where(:not(.ngu-unstyled))) .ngu-otp__box {
         inline-size: 2rem;
       }
     }
     @media (forced-colors: active) {
-      .ngu-otp__box--active {
+      :host(:where(:not(.ngu-unstyled))) .ngu-otp__box--active {
         outline-color: Highlight;
       }
     }
   `,
 })
 export class NguOtp {
+  protected readonly look = injectNguLook();
   readonly field = input.required<Field<string>>();
   readonly id = input.required<string>();
   readonly length = input(6);

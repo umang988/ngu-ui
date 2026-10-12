@@ -9,6 +9,7 @@ import {
 } from '@angular/core';
 import type { Choice } from '../types';
 import { sameChoice } from './choice';
+import { injectNguLook } from '../look';
 
 let nextName = 0;
 
@@ -22,6 +23,7 @@ let nextName = 0;
   selector: 'ngu-choices',
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
+    '[class.ngu-unstyled]': "look().theme === 'none'",
     class: 'ngu-choices',
     '[class.ngu-choices--buttons]': "appearance() === 'buttons'",
     '(focusout)': 'onFocusOut($event)',
@@ -34,6 +36,7 @@ let nextName = 0;
         [class.ngu-choice--disabled]="disabled() || c.disabled"
       >
         <input
+          [class]="look().classes.check"
           [type]="kind()"
           [attr.name]="kind() === 'radio' ? groupName : null"
           [checked]="isChecked(c)"
@@ -49,27 +52,27 @@ let nextName = 0;
     }
   `,
   styles: `
-    :host {
+    :host(:not(.ngu-unstyled)) {
       display: flex;
       flex-wrap: wrap;
       gap: 0.75rem 1rem;
     }
-    .ngu-choice {
+    :host(:where(:not(.ngu-unstyled))) .ngu-choice {
       display: inline-flex;
       align-items: center;
       gap: 0.5rem;
       cursor: pointer;
     }
-    .ngu-choice--disabled {
+    :host(:where(:not(.ngu-unstyled))) .ngu-choice--disabled {
       cursor: default;
       opacity: 0.6;
     }
-    input:focus-visible {
+    :host(:where(:not(.ngu-unstyled))) input:focus-visible {
       outline: 2px solid var(--ngu-focus-color, #1a73e8);
       outline-offset: 2px;
     }
     /* Segmented control: radios as a row of joined buttons. */
-    :host(.ngu-choices--buttons) {
+    :host(.ngu-choices--buttons:not(.ngu-unstyled)) {
       gap: 0;
       flex-wrap: nowrap;
       inline-size: fit-content;
@@ -78,7 +81,7 @@ let nextName = 0;
       border-radius: var(--ngu-radius, 0.375rem);
       overflow: hidden;
     }
-    :host(.ngu-choices--buttons) .ngu-choice {
+    :host(.ngu-choices--buttons:not(.ngu-unstyled)) .ngu-choice {
       position: relative;
       gap: 0;
       padding: 0.5rem 0.875rem;
@@ -87,26 +90,26 @@ let nextName = 0;
       text-align: center;
       background: var(--ngu-input-bg, transparent);
     }
-    :host(.ngu-choices--buttons) .ngu-choice + .ngu-choice {
+    :host(.ngu-choices--buttons:not(.ngu-unstyled)) .ngu-choice + .ngu-choice {
       border-inline-start: 1px solid var(--ngu-border-color, #c7c7c7);
     }
-    :host(.ngu-choices--buttons) .ngu-choice--checked {
+    :host(.ngu-choices--buttons:not(.ngu-unstyled)) .ngu-choice--checked {
       background: var(--ngu-primary, #1a73e8);
       color: var(--ngu-on-primary, #fff);
     }
-    :host(.ngu-choices--buttons) input {
+    :host(.ngu-choices--buttons:not(.ngu-unstyled)) input {
       position: absolute;
       inset: 0;
       margin: 0;
       opacity: 0;
       cursor: inherit;
     }
-    :host(.ngu-choices--buttons) .ngu-choice:has(input:focus-visible) {
+    :host(.ngu-choices--buttons:not(.ngu-unstyled)) .ngu-choice:has(input:focus-visible) {
       outline: 2px solid var(--ngu-focus-color, #1a73e8);
       outline-offset: -4px;
     }
     @media (forced-colors: active) {
-      :host(.ngu-choices--buttons) .ngu-choice--checked {
+      :host(.ngu-choices--buttons:not(.ngu-unstyled)) .ngu-choice--checked {
         background: Highlight;
         color: HighlightText;
         forced-color-adjust: none;
@@ -115,6 +118,7 @@ let nextName = 0;
   `,
 })
 export class NguChoices {
+  protected readonly look = injectNguLook();
   readonly value = model<unknown>(null);
   readonly touch = output<void>();
   readonly disabled = input(false);

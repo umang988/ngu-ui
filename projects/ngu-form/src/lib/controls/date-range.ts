@@ -11,6 +11,7 @@ import {
 import { isDate, isoDate, toDate } from '../internal';
 import { injectNguI18n, type NguI18n } from '../messages';
 import type { LeafDef } from '../types';
+import { injectNguLook } from '../look';
 
 type End = Date | string | null;
 interface Range {
@@ -26,11 +27,12 @@ interface Range {
 @Component({
   selector: 'ngu-date-range',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: { class: 'ngu-date-range', '(focusout)': 'onFocusOut($event)' },
+  host: { class: 'ngu-date-range', '(focusout)': 'onFocusOut($event)', '[class.ngu-unstyled]': "look().theme === 'none'" },
   template: `
     <span class="ngu-date-range__end">
-      <label class="ngu-date-range__label" [for]="id()">{{ fromLabel() }}</label>
+      <label class="ngu-date-range__label" [class]="look().classes.label" [for]="id()">{{ fromLabel() }}</label>
       <input
+        [class]="look().classes.control"
         type="date"
         [id]="id()"
         [value]="text().from"
@@ -45,8 +47,9 @@ interface Range {
       />
     </span>
     <span class="ngu-date-range__end">
-      <label class="ngu-date-range__label" [for]="id() + '-to'">{{ toLabel() }}</label>
+      <label class="ngu-date-range__label" [class]="look().classes.label" [for]="id() + '-to'">{{ toLabel() }}</label>
       <input
+        [class]="look().classes.control"
         type="date"
         [id]="id() + '-to'"
         [value]="text().to"
@@ -62,24 +65,24 @@ interface Range {
     </span>
   `,
   styles: `
-    :host {
+    :host(:not(.ngu-unstyled)) {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
       gap: 0.5rem 0.75rem;
     }
-    .ngu-date-range__end {
+    :host(:where(:not(.ngu-unstyled))) .ngu-date-range__end {
       display: flex;
       flex-direction: column;
       gap: 0.25rem;
       min-inline-size: 0;
     }
-    .ngu-date-range__label {
+    :host(:where(:not(.ngu-unstyled))) .ngu-date-range__label {
       font-size: 0.8125rem;
       color: var(--ngu-hint-color, #6b6b6b);
     }
-    input {
+    :host(:where(:not(.ngu-unstyled))) input {
       font: inherit;
-      padding: var(--ngu-input-padding, 0.5rem 0.75rem);
+      padding: var(--ngu-input-padding, var(--_ngu-input-padding, 0.5rem 0.75rem));
       border: 1px solid var(--ngu-border-color, #c7c7c7);
       border-radius: var(--ngu-radius, 0.375rem);
       background: var(--ngu-input-bg, transparent);
@@ -87,24 +90,25 @@ interface Range {
       inline-size: 100%;
       box-sizing: border-box;
     }
-    input[aria-invalid='true'] {
+    :host(:where(:not(.ngu-unstyled))) input[aria-invalid='true'] {
       border-color: var(--ngu-error-color, #c62828);
     }
-    input[readonly] {
+    :host(:where(:not(.ngu-unstyled))) input[readonly] {
       background: var(--ngu-readonly-bg, rgba(127, 127, 127, 0.08));
     }
-    input:focus-visible {
+    :host(:where(:not(.ngu-unstyled))) input:focus-visible {
       outline: 2px solid var(--ngu-focus-color, #1a73e8);
       outline-offset: 1px;
     }
     @media (forced-colors: active) {
-      input[aria-invalid='true'] {
+      :host(:where(:not(.ngu-unstyled))) input[aria-invalid='true'] {
         border-width: 2px;
       }
     }
   `,
 })
 export class NguDateRange {
+  protected readonly look = injectNguLook();
   readonly value = model<Range>({ from: null, to: null });
   readonly touch = output<void>();
   readonly disabled = input(false);

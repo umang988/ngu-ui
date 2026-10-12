@@ -9,6 +9,9 @@ export const NGU_CHOICES = createMetadataKey<readonly Choice<any>[]>();
 /** The root and the nearest array item of a field, for `onChange` writes. */
 export const NGU_NODES = createMetadataKey<{ readonly root: Field<any>; readonly scope: Field<any> }>();
 
+/** The model path of a field, with numbers for list rows: `items.0.sku`. */
+export const NGU_PATH = createMetadataKey<string>();
+
 /** Messages from `warn`, which never block a submit. */
 export const NGU_WARNINGS = createMetadataKey<readonly ValidationError[]>();
 

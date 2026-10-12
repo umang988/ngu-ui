@@ -14,7 +14,7 @@ import {
   untracked,
   viewChild,
 } from '@angular/core';
-import { injectNguI18n, NguFormContext, type LeafDef } from 'ngu-form';
+import { injectNguI18n, injectNguLook, NguFormContext, type LeafDef } from 'ngu-form';
 import type { NguSignatureOptions } from './types';
 
 /** Fonts that look handwritten, in the order they are tried. */
@@ -29,7 +29,7 @@ const SCRIPT_FONTS =
 @Component({
   selector: 'ngu-signature-pad',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: { class: 'ngu-signature', '[class.ngu-signature--invalid]': 'errorShown()' },
+  host: { class: 'ngu-signature', '[class.ngu-signature--invalid]': 'errorShown()', '[class.ngu-unstyled]': "look().theme === 'none'" },
   template: `
     @if (typing()) {
       <input
@@ -81,41 +81,43 @@ const SCRIPT_FONTS =
     </div>
   `,
   styles: `
-    :host {
+    :host(:not(.ngu-unstyled)) {
       display: flex;
       flex-direction: column;
       gap: 0.5rem;
       min-inline-size: 0;
     }
     .ngu-signature__pad {
+      touch-action: none;
+    }
+    :host(:where(:not(.ngu-unstyled))) .ngu-signature__pad {
       display: block;
       inline-size: 100%;
       border: 1px solid var(--ngu-border-color, #c7c7c7);
       border-radius: var(--ngu-radius, 0.375rem);
       background: var(--ngu-input-bg, transparent);
-      touch-action: none;
       cursor: crosshair;
     }
-    .ngu-signature__pad--typed {
+    :host(:where(:not(.ngu-unstyled))) .ngu-signature__pad--typed {
       cursor: default;
     }
-    :host(.ngu-signature--invalid) .ngu-signature__pad,
-    :host(.ngu-signature--invalid) .ngu-signature__name {
+    :host(.ngu-signature--invalid:not(.ngu-unstyled)) .ngu-signature__pad,
+    :host(.ngu-signature--invalid:not(.ngu-unstyled)) .ngu-signature__name {
       border-color: var(--ngu-error-color, #c62828);
     }
-    .ngu-signature__name {
+    :host(:where(:not(.ngu-unstyled))) .ngu-signature__name {
       font: inherit;
-      padding: var(--ngu-input-padding, 0.5rem 0.75rem);
+      padding: var(--ngu-input-padding, var(--_ngu-input-padding, 0.5rem 0.75rem));
       border: 1px solid var(--ngu-border-color, #c7c7c7);
       border-radius: var(--ngu-radius, 0.375rem);
       background: var(--ngu-input-bg, transparent);
       color: inherit;
     }
-    .ngu-signature__actions {
+    :host(:where(:not(.ngu-unstyled))) .ngu-signature__actions {
       display: flex;
       gap: 0.5rem;
     }
-    .ngu-signature__button {
+    :host(:where(:not(.ngu-unstyled))) .ngu-signature__button {
       padding: 0.25rem 0.625rem;
       border: 0;
       border-radius: var(--ngu-radius, 0.375rem);
@@ -126,18 +128,19 @@ const SCRIPT_FONTS =
       font-weight: 500;
       cursor: pointer;
     }
-    .ngu-signature__button:disabled {
+    :host(:where(:not(.ngu-unstyled))) .ngu-signature__button:disabled {
       color: var(--ngu-hint-color, #6b6b6b);
       cursor: default;
     }
-    .ngu-signature__name:focus-visible,
-    .ngu-signature__button:focus-visible {
+    :host(:where(:not(.ngu-unstyled))) .ngu-signature__name:focus-visible,
+    :host(:where(:not(.ngu-unstyled))) .ngu-signature__button:focus-visible {
       outline: 2px solid var(--ngu-focus-color, #1a73e8);
       outline-offset: 1px;
     }
   `,
 })
 export class NguSignaturePad {
+  protected readonly look = injectNguLook();
   readonly value = model<string>('');
   readonly touch = output<void>();
   readonly disabled = input(false);

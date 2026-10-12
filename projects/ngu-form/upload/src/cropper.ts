@@ -7,7 +7,7 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
-import type { NguI18n } from 'ngu-form';
+import { injectNguLook, type NguI18n } from 'ngu-form';
 import { renderImage } from './image';
 import type { NguImageOptions } from './types';
 
@@ -22,6 +22,7 @@ const MAX_ZOOM = 4;
  */
 @Component({
   selector: 'ngu-image-cropper',
+  host: { '[class.ngu-unstyled]': "look().theme === 'none'" },
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <dialog
@@ -110,7 +111,7 @@ const MAX_ZOOM = 4;
     </dialog>
   `,
   styles: `
-    .ngu-crop {
+    :host(:where(:not(.ngu-unstyled))) .ngu-crop {
       inline-size: min(34rem, calc(100vw - 2rem));
       box-sizing: border-box;
       padding: 1.25rem;
@@ -120,33 +121,35 @@ const MAX_ZOOM = 4;
       color: inherit;
       box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.3);
     }
-    .ngu-crop::backdrop {
+    :host(:where(:not(.ngu-unstyled))) .ngu-crop::backdrop {
       background: rgba(0, 0, 0, 0.55);
     }
-    .ngu-crop__title {
+    :host(:where(:not(.ngu-unstyled))) .ngu-crop__title {
       margin: 0 0 0.25rem;
       font-size: 1.125rem;
       font-weight: 600;
     }
-    .ngu-crop__hint {
+    :host(:where(:not(.ngu-unstyled))) .ngu-crop__hint {
       margin: 0 0 0.75rem;
       font-size: 0.875rem;
       color: var(--ngu-hint-color, #6b6b6b);
     }
-    .ngu-crop__frame {
+    :host(:where(:not(.ngu-unstyled))) .ngu-crop__frame {
       display: flex;
       justify-content: center;
     }
     .ngu-crop__stage {
       position: relative;
       overflow: hidden;
-      border-radius: var(--ngu-radius, 0.375rem);
-      background: var(--ngu-skeleton-color, rgba(127, 127, 127, 0.16));
       touch-action: none;
-      cursor: grab;
       user-select: none;
     }
-    .ngu-crop__stage:active {
+    :host(:where(:not(.ngu-unstyled))) .ngu-crop__stage {
+      border-radius: var(--ngu-radius, 0.375rem);
+      background: var(--ngu-skeleton-color, rgba(127, 127, 127, 0.16));
+      cursor: grab;
+    }
+    :host(:where(:not(.ngu-unstyled))) .ngu-crop__stage:active {
       cursor: grabbing;
     }
     /* Physical left on purpose: the image is moved with a physical translate. */
@@ -157,32 +160,32 @@ const MAX_ZOOM = 4;
       max-inline-size: none;
       pointer-events: none;
     }
-    .ngu-crop__controls {
+    :host(:where(:not(.ngu-unstyled))) .ngu-crop__controls {
       display: grid;
       gap: 0.5rem;
       margin-block: 1rem;
     }
-    .ngu-crop__slider {
+    :host(:where(:not(.ngu-unstyled))) .ngu-crop__slider {
       display: grid;
       grid-template-columns: 9rem 1fr;
       align-items: center;
       gap: 0.75rem;
       font-size: 0.875rem;
     }
-    .ngu-crop__slider input {
+    :host(:where(:not(.ngu-unstyled))) .ngu-crop__slider input {
       accent-color: var(--ngu-primary, #1a73e8);
     }
-    .ngu-crop__slider input:focus-visible,
-    .ngu-crop__button:focus-visible {
+    :host(:where(:not(.ngu-unstyled))) .ngu-crop__slider input:focus-visible,
+    :host(:where(:not(.ngu-unstyled))) .ngu-crop__button:focus-visible {
       outline: 2px solid var(--ngu-focus-color, #1a73e8);
       outline-offset: 2px;
     }
-    .ngu-crop__actions {
+    :host(:where(:not(.ngu-unstyled))) .ngu-crop__actions {
       display: flex;
       justify-content: flex-end;
       gap: 0.5rem;
     }
-    .ngu-crop__button {
+    :host(:where(:not(.ngu-unstyled))) .ngu-crop__button {
       padding: 0.5rem 1rem;
       border: 1px solid var(--ngu-border-color, #c7c7c7);
       border-radius: var(--ngu-radius, 0.375rem);
@@ -192,25 +195,26 @@ const MAX_ZOOM = 4;
       font-weight: 500;
       cursor: pointer;
     }
-    .ngu-crop__button--primary {
+    :host(:where(:not(.ngu-unstyled))) .ngu-crop__button--primary {
       border-color: var(--ngu-primary, #1a73e8);
       background: var(--ngu-primary, #1a73e8);
       color: var(--ngu-on-primary, #fff);
     }
     @media (max-width: 30rem) {
-      .ngu-crop__slider {
+      :host(:where(:not(.ngu-unstyled))) .ngu-crop__slider {
         grid-template-columns: 1fr;
         gap: 0.25rem;
       }
     }
     @media (forced-colors: active) {
-      .ngu-crop {
+      :host(:where(:not(.ngu-unstyled))) .ngu-crop {
         border: 1px solid CanvasText;
       }
     }
   `,
 })
 export class NguImageCropper {
+  protected readonly look = injectNguLook();
   readonly i18n = input.required<NguI18n>();
 
   protected readonly titleId = `ngu-crop-title-${nextId}`;

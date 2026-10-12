@@ -7,14 +7,17 @@ import {
   DestroyRef,
   effect,
   ElementRef,
+  ErrorHandler,
   inject,
   input,
   isSignal,
   reflectComponentType,
   linkedSignal,
+  PendingTasks,
   signal,
   untracked,
   viewChild,
+  type TemplateRef,
   type Type,
 } from '@angular/core';
 import { FormField, type Field } from '@angular/forms/signals';
@@ -29,8 +32,19 @@ import { NguRange } from '../controls/range';
 import { NguRating } from '../controls/rating';
 import { NguSelect } from '../controls/select';
 import { NguTags } from '../controls/tags';
-import { NGU_FIELD_TYPES } from '../field-types';
-import { deepMerge, NGU_CHOICES, NGU_NODES, NGU_WARNINGS } from '../internal';
+import {
+  findFieldType,
+  isComponentType,
+  loadedFieldType,
+  loadFieldType,
+  NGU_FIELD_TYPES,
+  type NguFieldTypeLoader,
+} from '../field-types';
+import { findIcon, NGU_ICONS } from '../icons';
+import { NGU_FIELD_RENDERERS, type NguFieldRenderContext } from '../renderers';
+import { isDevMode, nguWarn } from '../diagnostics';
+import { injectNguLook } from '../look';
+import { deepMerge, NGU_CHOICES, NGU_NODES, NGU_PATH, NGU_WARNINGS } from '../internal';
 import { injectNguI18n } from '../messages';
 import { DEFAULT_PASSWORD_LENGTH, strengthOptions } from '../strength';
 import { withScheme } from '../rules';
@@ -43,7 +57,7 @@ import {
   parseLocalNumber,
   type FieldTransform,
 } from '../transform';
-import type { ChangeContext, Choice, InputMode, LeafDef } from '../types';
+import { toLeafDef, type ChangeContext, type Choice, type InputMode, type LeafDef, type NguFieldSpec } from '../types';
 import { NguFormContext } from './ngu-form-context';
 import { NguSection } from './ngu-section';
 import { NguStrength } from './ngu-strength';
@@ -69,6 +83,35 @@ const NATIVE_TYPES = new Set([
   'month',
   'week',
 ]);
+
+/** Every type ngu-form renders without a registered renderer. */
+const BUILT_IN_TYPES = new Set([
+  ...NATIVE_TYPES,
+  'textarea',
+  'checkbox',
+  'select',
+  'radio',
+  'color',
+  'range',
+  'switch',
+  'segmented',
+  'currency',
+  'rating',
+  'daterange',
+  'otp',
+  'phone',
+  'tags',
+  'consent',
+  'captcha',
+]);
+
+/** Where the renderers of types from ngu-form's own entry points come from. */
+const PROVIDER_HINTS: Readonly<Record<string, string>> = {
+  file: "Add provideNguUpload() from 'ngu-form/upload'.",
+  image: "Add provideNguUpload() from 'ngu-form/upload'.",
+  signature: "Add provideNguUpload() from 'ngu-form/upload'.",
+  dropdown: "Add provideNguDropdown() from 'ngu-form/dropdown'.",
+};
 
 /** True on devices with a mouse or trackpad; read once. */
 const FINE_POINTER = typeof matchMedia === 'function' && matchMedia('(pointer: fine)').matches;
@@ -119,6 +162,10 @@ function isAutofilled(el: Element): boolean {
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     class: 'ngu-field',
+    '[attr.data-ngu-path]': 'modelPath()',
+    '[attr.data-ngu-type]': 'def().type',
+    '[class]': 'look().classes.field',
+    '[class.ngu-unstyled]': "look().theme === 'none'",
     '[class.ngu-field--invalid]': 'showErrors()',
     '[class.ngu-field--warning]': '!!warning()',
     '[class.ngu-field--loading]': 'loading()',
@@ -138,12 +185,14 @@ function isAutofilled(el: Element): boolean {
         <span class="ngu-check"><span class="ngu-skeleton ngu-skeleton--box" aria-hidden="true"></span>{{ label() }}</span>
       } @else {
         @if (label()) {
-          <span class="ngu-label">{{ label() }}@if (state().required()) {<span class="ngu-required" aria-hidden="true">*</span>}</span>
+          <span class="ngu-label" [class]="look().classes.label">{{ label() }}@if (state().required()) {<span class="ngu-required" aria-hidden="true">*</span>}</span>
         }
         <span class="ngu-skeleton" [class.ngu-skeleton--area]="d.type === 'textarea'" aria-hidden="true"></span>
       }
     } @else if (fieldTemplate(); as tpl) {
       <ng-container *ngTemplateOutlet="tpl; context: templateContext()" />
+    } @else if (slot() === 'whole') {
+      <ng-container *ngComponentOutlet="wholeRenderer()!; inputs: { context: renderContext() }" />
     } @else {
       @switch (slot()) {
         @case ('template') {
@@ -154,20 +203,24 @@ function isAutofilled(el: Element): boolean {
           <ng-container *ngTemplateOutlet="labelTpl" />
           <ng-container *ngComponentOutlet="customRenderer()!; inputs: rendererInputs()" />
         }
+        @case ('loading') {
+          <ng-container *ngTemplateOutlet="labelTpl" />
+          <span class="ngu-skeleton" aria-hidden="true"></span>
+        }
         @default {
           @switch (layout()) {
             @case ('check') {
               <span class="ngu-check-row">
-                <label class="ngu-check" [class.ngu-switch]="d.type === 'switch'" [for]="id">
+                <label class="ngu-check" [class]="look().classes.label" [class.ngu-switch]="d.type === 'switch'" [for]="id">
                   @switch (d.type) {
                     @case ('consent') {
-                      <input type="checkbox" nguConsent [id]="id" [formField]="field()" [attr.aria-invalid]="invalidAttr()" [attr.aria-describedby]="describedBy()" />
+                      <input type="checkbox" nguConsent [class]="look().classes.check" [id]="id" [formField]="field()" [attr.aria-invalid]="invalidAttr()" [attr.aria-describedby]="describedBy()" />
                     }
                     @case ('switch') {
-                      <input type="checkbox" role="switch" [id]="id" [formField]="field()" [attr.aria-invalid]="invalidAttr()" [attr.aria-describedby]="describedBy()" />
+                      <input type="checkbox" role="switch" [class]="look().classes.check" [id]="id" [formField]="field()" [attr.aria-invalid]="invalidAttr()" [attr.aria-describedby]="describedBy()" />
                     }
                     @default {
-                      <input type="checkbox" [id]="id" [formField]="field()" [attr.aria-invalid]="invalidAttr()" [attr.aria-describedby]="describedBy()" />
+                      <input type="checkbox" [class]="look().classes.check" [id]="id" [formField]="field()" [attr.aria-invalid]="invalidAttr()" [attr.aria-describedby]="describedBy()" />
                     }
                   }
                   <span class="ngu-check__text">{{ label() }}@if (d.type !== 'checkbox' && state().required()) {<span class="ngu-required" aria-hidden="true">*</span>}</span>
@@ -187,7 +240,7 @@ function isAutofilled(el: Element): boolean {
                 [attr.aria-describedby]="d.type === 'daterange' ? null : describedBy()"
               >
                 @if (label()) {
-                  <legend class="ngu-label" [id]="id + '-legend'">{{ label() }}@if (state().required()) {<span class="ngu-required" aria-hidden="true">*</span>}</legend>
+                  <legend class="ngu-label" [class]="look().classes.label" [id]="id + '-legend'">{{ label() }}@if (state().required()) {<span class="ngu-required" aria-hidden="true">*</span>}</legend>
                 }
                 @switch (d.type) {
                   @case ('rating') {
@@ -225,7 +278,7 @@ function isAutofilled(el: Element): boolean {
                 [attr.aria-describedby]="describedBy()"
               >
                 @if (label()) {
-                  <span class="ngu-label" [id]="id + '-label'">{{ label() }}</span>
+                  <span class="ngu-label" [class]="look().classes.label" [id]="id + '-label'">{{ label() }}</span>
                 }
                 @defer (on immediate) {
                   <ngu-captcha [id]="id" [formField]="field()" [field]="field()" [adapter]="d.captcha" [i18n]="i18n" />
@@ -301,6 +354,11 @@ function isAutofilled(el: Element): boolean {
                 }
                 @default {
                   <div class="ngu-control" [class.ngu-control--adorned]="adorned()">
+                    @if (prefixIcon(); as icon) {
+                      <span class="ngu-icon ngu-icon--prefix" aria-hidden="true" (click)="focusInput()">
+                        <ng-container *ngTemplateOutlet="adornmentTpl; context: { $implicit: icon }" />
+                      </span>
+                    }
                     @if (prefix()) {
                       <span class="ngu-affix ngu-prefix" [id]="id + '-prefix'">{{ prefix() }}</span>
                     }
@@ -309,6 +367,7 @@ function isAutofilled(el: Element): boolean {
                         @if (transform(); as t) {
                           <textarea
                             #textarea
+                            [class]="look().classes.control"
                             [nguTransform]="t"
                             [id]="id"
                             [class.ngu-autosize]="!!d.maxRows"
@@ -325,6 +384,7 @@ function isAutofilled(el: Element): boolean {
                         } @else {
                           <textarea
                             #textarea
+                            [class]="look().classes.control"
                             [id]="id"
                             [class.ngu-autosize]="!!d.maxRows"
                             [class.ngu-rows]="!!d.rows"
@@ -342,6 +402,7 @@ function isAutofilled(el: Element): boolean {
                       @case ('select') {
                         <select
                           [nguSelect]="choices()"
+                          [class]="look().classes.control"
                           [id]="id"
                           [multiple]="!!d.multiple"
                           [attr.size]="selectSize()"
@@ -362,6 +423,7 @@ function isAutofilled(el: Element): boolean {
                         @if (transform(); as t) {
                           <input
                             [nguTransform]="t"
+                            [class]="look().classes.control"
                             [id]="id"
                             [type]="inputType()"
                             [placeholder]="placeholder()"
@@ -375,6 +437,7 @@ function isAutofilled(el: Element): boolean {
                           />
                         } @else {
                           <input
+                            [class]="look().classes.control"
                             [id]="id"
                             [type]="inputType()"
                             [placeholder]="placeholder()"
@@ -395,10 +458,16 @@ function isAutofilled(el: Element): boolean {
                     @if (suffix()) {
                       <span class="ngu-affix ngu-suffix" [id]="id + '-suffix'">{{ suffix() }}</span>
                     }
+                    @if (suffixIcon(); as icon) {
+                      <span class="ngu-icon ngu-icon--suffix" aria-hidden="true" (click)="focusInput()">
+                        <ng-container *ngTemplateOutlet="adornmentTpl; context: { $implicit: icon }" />
+                      </span>
+                    }
                     @if (revealable()) {
                       <button
                         type="button"
                         class="ngu-reveal"
+                        [class]="look().classes.button"
                         [attr.aria-controls]="id"
                         [attr.aria-label]="revealed() ? i18n.message('hidePasswordLabel') : i18n.message('showPasswordLabel')"
                         [disabled]="state().disabled()"
@@ -410,7 +479,7 @@ function isAutofilled(el: Element): boolean {
                     }
                   </div>
                   @if (multiHint()) {
-                    <p class="ngu-hint" [id]="id + '-multi'">{{ i18n.message('multiSelectHint') }}</p>
+                    <p class="ngu-hint" [class]="look().classes.hint" [id]="id + '-multi'">{{ i18n.message('multiSelectHint') }}</p>
                   }
                   @if (counter(); as c) {
                     <p class="ngu-counter" [class.ngu-counter--over]="c.left < 0" aria-hidden="true">{{ c.length }} / {{ c.max }}</p>
@@ -426,43 +495,51 @@ function isAutofilled(el: Element): boolean {
         }
       }
       @if (showErrors()) {
-        <p class="ngu-error" [id]="id + '-msg'">{{ message() }}</p>
+        <p class="ngu-error" [class]="look().classes.error" [id]="id + '-msg'">{{ message() }}</p>
       } @else if (state().pending()) {
         <p class="ngu-pending" [id]="id + '-msg'" aria-live="polite">{{ pendingText() }}</p>
       } @else if (warning(); as w) {
         <p class="ngu-warning" [id]="id + '-msg'"><span class="ngu-warning__mark" aria-hidden="true">!</span><span class="ngu-sr-only">{{ i18n.message('warningPrefix') }} </span>{{ w }}</p>
       } @else if (hint()) {
-        <p class="ngu-hint" [id]="id + '-msg'">{{ hint() }}</p>
+        <p class="ngu-hint" [class]="look().classes.hint" [id]="id + '-msg'">{{ hint() }}</p>
       }
     }
 
+    <ng-template #adornmentTpl let-icon>
+      @if (icon.template) {
+        <ng-container *ngTemplateOutlet="icon.template; context: templateContext()" />
+      } @else {
+        <ng-container *ngComponentOutlet="icon.component" />
+      }
+    </ng-template>
+
     <ng-template #labelTpl>
       @if (label()) {
-        <label class="ngu-label" [id]="id + '-label'" [for]="id">{{ label() }}@if (state().required()) {<span class="ngu-required" aria-hidden="true">*</span>}</label>
+        <label class="ngu-label" [class]="look().classes.label" [id]="id + '-label'" [for]="id">{{ label() }}@if (state().required()) {<span class="ngu-required" aria-hidden="true">*</span>}</label>
       }
     </ng-template>
   `,
   styles: `
-    :host {
+    :host(:not(.ngu-unstyled)) {
       display: flex;
       flex-direction: column;
-      gap: var(--ngu-field-gap, 0.375rem);
+      gap: var(--ngu-field-gap, var(--_ngu-field-gap, 0.375rem));
       min-inline-size: 0;
     }
-    .ngu-label {
-      font-size: var(--ngu-label-size, 0.875rem);
+    :host(:where(:not(.ngu-unstyled))) .ngu-label {
+      font-size: var(--ngu-label-size, var(--_ngu-label-size, 0.875rem));
       font-weight: 500;
       color: var(--ngu-label-color, inherit);
     }
-    .ngu-required {
+    :host(:where(:not(.ngu-unstyled))) .ngu-required {
       color: var(--ngu-error-color, #c62828);
       margin-inline-start: 0.125rem;
     }
-    input:not([type='checkbox']):not([type='radio']),
-    select,
-    textarea {
+    :host(:where(:not(.ngu-unstyled))) input:not([type='checkbox']):not([type='radio']),
+    :host(:where(:not(.ngu-unstyled))) select,
+    :host(:where(:not(.ngu-unstyled))) textarea {
       font: inherit;
-      padding: var(--ngu-input-padding, 0.5rem 0.75rem);
+      padding: var(--ngu-input-padding, var(--_ngu-input-padding, 0.5rem 0.75rem));
       border: 1px solid var(--ngu-border-color, #c7c7c7);
       border-radius: var(--ngu-radius, 0.375rem);
       background: var(--ngu-input-bg, transparent);
@@ -470,89 +547,108 @@ function isAutofilled(el: Element): boolean {
       inline-size: 100%;
       box-sizing: border-box;
     }
-    input[readonly],
-    textarea[readonly] {
+    :host(:where(:not(.ngu-unstyled))) input[readonly],
+    :host(:where(:not(.ngu-unstyled))) textarea[readonly] {
       background: var(--ngu-readonly-bg, rgba(127, 127, 127, 0.08));
     }
-    textarea {
+    :host(:where(:not(.ngu-unstyled))) textarea {
       min-block-size: 5rem;
       resize: vertical;
       line-height: var(--ngu-textarea-line-height, 1.5);
     }
-    textarea.ngu-rows {
+    :host(:where(:not(.ngu-unstyled))) textarea.ngu-rows {
       min-block-size: 0;
     }
-    textarea.ngu-autosize {
+    :host(:where(:not(.ngu-unstyled))) textarea.ngu-autosize {
       resize: none;
     }
-    input:focus-visible,
-    select:focus-visible,
-    textarea:focus-visible {
+    :host(:where(:not(.ngu-unstyled))) input:focus-visible,
+    :host(:where(:not(.ngu-unstyled))) select:focus-visible,
+    :host(:where(:not(.ngu-unstyled))) textarea:focus-visible {
       outline: 2px solid var(--ngu-focus-color, #1a73e8);
       outline-offset: 1px;
     }
-    :host(.ngu-field--invalid) input,
-    :host(.ngu-field--invalid) select,
-    :host(.ngu-field--invalid) textarea,
-    :host(.ngu-field--invalid) .ngu-control--adorned {
+    :host(.ngu-field--invalid:not(.ngu-unstyled)) input,
+    :host(.ngu-field--invalid:not(.ngu-unstyled)) select,
+    :host(.ngu-field--invalid:not(.ngu-unstyled)) textarea,
+    :host(.ngu-field--invalid:not(.ngu-unstyled)) .ngu-control--adorned {
       border-color: var(--ngu-error-color, #c62828);
     }
-    :host(.ngu-field--disabled) {
+    :host(.ngu-field--disabled:not(.ngu-unstyled)) {
       opacity: 0.6;
     }
-    .ngu-control {
+    :host(:where(:not(.ngu-unstyled))) .ngu-control {
       display: flex;
       align-items: stretch;
       min-inline-size: 0;
     }
-    .ngu-control > input,
-    .ngu-control > select,
-    .ngu-control > textarea {
+    :host(:where(:not(.ngu-unstyled))) .ngu-control > input,
+    :host(:where(:not(.ngu-unstyled))) .ngu-control > select,
+    :host(:where(:not(.ngu-unstyled))) .ngu-control > textarea {
       flex: 1 1 auto;
       min-inline-size: 0;
     }
-    .ngu-control--adorned {
+    :host(:where(:not(.ngu-unstyled))) .ngu-control--adorned {
       border: 1px solid var(--ngu-border-color, #c7c7c7);
       border-radius: var(--ngu-radius, 0.375rem);
       background: var(--ngu-input-bg, transparent);
     }
-    .ngu-control--adorned > input,
-    .ngu-control--adorned > select,
-    .ngu-control--adorned > textarea {
+    :host(:where(:not(.ngu-unstyled))) .ngu-control--adorned > input,
+    :host(:where(:not(.ngu-unstyled))) .ngu-control--adorned > select,
+    :host(:where(:not(.ngu-unstyled))) .ngu-control--adorned > textarea {
       border: 0;
       background: transparent;
     }
-    .ngu-control--adorned:has(> input:focus-visible, > select:focus-visible, > textarea:focus-visible) {
+    :host(:where(:not(.ngu-unstyled))) .ngu-control--adorned:has(> input:focus-visible, > select:focus-visible, > textarea:focus-visible) {
       outline: 2px solid var(--ngu-focus-color, #1a73e8);
       outline-offset: 1px;
     }
-    .ngu-control--adorned > input:focus-visible,
-    .ngu-control--adorned > select:focus-visible,
-    .ngu-control--adorned > textarea:focus-visible {
+    :host(:where(:not(.ngu-unstyled))) .ngu-control--adorned > input:focus-visible,
+    :host(:where(:not(.ngu-unstyled))) .ngu-control--adorned > select:focus-visible,
+    :host(:where(:not(.ngu-unstyled))) .ngu-control--adorned > textarea:focus-visible {
       outline: none;
     }
-    .ngu-affix {
+    :host(:where(:not(.ngu-unstyled))) .ngu-affix {
       display: flex;
       align-items: center;
       padding-inline: 0.75rem;
       color: var(--ngu-hint-color, #6b6b6b);
       white-space: nowrap;
     }
-    .ngu-prefix {
+    :host(:where(:not(.ngu-unstyled))) .ngu-icon {
+      display: flex;
+      align-items: center;
+      padding-inline: 0.75rem 0;
+      color: var(--ngu-hint-color, #6b6b6b);
+      font-size: 1.125em;
+      line-height: 0;
+      cursor: text;
+    }
+    :host(:where(:not(.ngu-unstyled))) .ngu-icon--suffix {
+      padding-inline: 0 0.75rem;
+    }
+    :host(:where(:not(.ngu-unstyled))) .ngu-control--adorned > .ngu-icon--prefix + input,
+    :host(:where(:not(.ngu-unstyled))) .ngu-control--adorned > .ngu-icon--prefix + select,
+    :host(:where(:not(.ngu-unstyled))) .ngu-control--adorned > .ngu-icon--prefix + .ngu-prefix {
+      padding-inline-start: 0.5rem;
+    }
+    :host(:where(:not(.ngu-unstyled))) .ngu-prefix {
       padding-inline-end: 0;
     }
-    .ngu-suffix {
+    :host(:where(:not(.ngu-unstyled))) .ngu-suffix {
       padding-inline-start: 0;
     }
-    .ngu-control--adorned > .ngu-prefix + input,
-    .ngu-control--adorned > .ngu-prefix + select {
+    :host(:where(:not(.ngu-unstyled))) .ngu-control--adorned > .ngu-prefix + input,
+    :host(:where(:not(.ngu-unstyled))) .ngu-control--adorned > .ngu-prefix + select {
       padding-inline-start: 0.375rem;
     }
-    .ngu-control--adorned > input:has(+ .ngu-suffix),
-    .ngu-control--adorned > select:has(+ .ngu-suffix) {
+    :host(:where(:not(.ngu-unstyled))) .ngu-control--adorned > input:has(+ .ngu-suffix),
+    :host(:where(:not(.ngu-unstyled))) .ngu-control--adorned > select:has(+ .ngu-suffix),
+    :host(:where(:not(.ngu-unstyled))) .ngu-control--adorned > input:has(+ .ngu-icon--suffix),
+    :host(:where(:not(.ngu-unstyled))) .ngu-control--adorned > select:has(+ .ngu-icon--suffix) {
       padding-inline-end: 0.375rem;
     }
-    .ngu-reveal {
+    :host(:where(:not(.ngu-unstyled))) .ngu-reveal {
       font: inherit;
       font-size: 0.875rem;
       font-weight: 500;
@@ -563,36 +659,36 @@ function isAutofilled(el: Element): boolean {
       color: var(--ngu-primary, #1a73e8);
       cursor: pointer;
     }
-    .ngu-reveal:focus-visible {
+    :host(:where(:not(.ngu-unstyled))) .ngu-reveal:focus-visible {
       outline: 2px solid var(--ngu-focus-color, #1a73e8);
       outline-offset: -2px;
     }
-    .ngu-check {
+    :host(:where(:not(.ngu-unstyled))) .ngu-check {
       display: inline-flex;
       align-items: center;
       gap: 0.5rem;
       cursor: pointer;
     }
-    .ngu-fieldset {
+    :host(:where(:not(.ngu-unstyled))) .ngu-fieldset {
       min-inline-size: 0;
       border: 0;
       padding: 0;
       margin: 0;
     }
-    .ngu-fieldset legend {
+    :host(:where(:not(.ngu-unstyled))) .ngu-fieldset legend {
       padding: 0;
       margin-block-end: 0.375rem;
     }
-    .ngu-check-row {
+    :host(:where(:not(.ngu-unstyled))) .ngu-check-row {
       display: flex;
       flex-wrap: wrap;
       align-items: center;
       gap: 0.25rem 0.75rem;
     }
-    .ngu-policy {
+    :host(:where(:not(.ngu-unstyled))) .ngu-policy {
       color: var(--ngu-primary, #1a73e8);
     }
-    .ngu-switch input {
+    :host(:where(:not(.ngu-unstyled))) .ngu-switch input {
       appearance: none;
       position: relative;
       flex: none;
@@ -605,7 +701,7 @@ function isAutofilled(el: Element): boolean {
       cursor: pointer;
       transition: background-color 0.15s;
     }
-    .ngu-switch input::before {
+    :host(:where(:not(.ngu-unstyled))) .ngu-switch input::before {
       content: '';
       position: absolute;
       inset-block-start: 0.125rem;
@@ -616,45 +712,45 @@ function isAutofilled(el: Element): boolean {
       background: #fff;
       transition: translate 0.15s;
     }
-    .ngu-switch input:checked {
+    :host(:where(:not(.ngu-unstyled))) .ngu-switch input:checked {
       border-color: var(--ngu-primary, #1a73e8);
       background: var(--ngu-primary, #1a73e8);
     }
-    .ngu-switch input:checked::before {
+    :host(:where(:not(.ngu-unstyled))) .ngu-switch input:checked::before {
       translate: 1rem;
     }
-    .ngu-switch input:checked:dir(rtl)::before {
+    :host(:where(:not(.ngu-unstyled))) .ngu-switch input:checked:dir(rtl)::before {
       translate: -1rem;
     }
-    .ngu-switch input:focus-visible {
+    :host(:where(:not(.ngu-unstyled))) .ngu-switch input:focus-visible {
       outline: 2px solid var(--ngu-focus-color, #1a73e8);
       outline-offset: 2px;
     }
-    .ngu-error,
-    .ngu-hint,
-    .ngu-pending,
-    .ngu-counter {
+    :host(:where(:not(.ngu-unstyled))) .ngu-error,
+    :host(:where(:not(.ngu-unstyled))) .ngu-hint,
+    :host(:where(:not(.ngu-unstyled))) .ngu-pending,
+    :host(:where(:not(.ngu-unstyled))) .ngu-counter {
       margin: 0;
       font-size: 0.8125rem;
     }
-    .ngu-error,
-    .ngu-counter--over {
+    :host(:where(:not(.ngu-unstyled))) .ngu-error,
+    :host(:where(:not(.ngu-unstyled))) .ngu-counter--over {
       color: var(--ngu-error-color, #c62828);
     }
-    .ngu-hint,
-    .ngu-pending,
-    .ngu-counter {
+    :host(:where(:not(.ngu-unstyled))) .ngu-hint,
+    :host(:where(:not(.ngu-unstyled))) .ngu-pending,
+    :host(:where(:not(.ngu-unstyled))) .ngu-counter {
       color: var(--ngu-hint-color, #6b6b6b);
     }
-    .ngu-counter {
+    :host(:where(:not(.ngu-unstyled))) .ngu-counter {
       align-self: flex-end;
       font-variant-numeric: tabular-nums;
     }
     /* Masked values such as phone numbers stay left to right, aligned to the start in RTL forms. */
-    .ngu-control:dir(rtl) > input[dir='ltr'] {
+    :host(:where(:not(.ngu-unstyled))) .ngu-control:dir(rtl) > input[dir='ltr'] {
       text-align: right;
     }
-    .ngu-warning {
+    :host(:where(:not(.ngu-unstyled))) .ngu-warning {
       margin: 0;
       font-size: 0.8125rem;
       color: var(--ngu-warning-color, #8a5300);
@@ -662,7 +758,7 @@ function isAutofilled(el: Element): boolean {
       gap: 0.375rem;
       align-items: baseline;
     }
-    .ngu-warning__mark {
+    :host(:where(:not(.ngu-unstyled))) .ngu-warning__mark {
       flex: none;
       display: inline-grid;
       place-items: center;
@@ -675,22 +771,22 @@ function isAutofilled(el: Element): boolean {
       font-weight: 700;
       line-height: 1;
     }
-    :host(.ngu-field--warning) input,
-    :host(.ngu-field--warning) textarea,
-    :host(.ngu-field--warning) .ngu-control--adorned {
+    :host(.ngu-field--warning:not(.ngu-unstyled)) input,
+    :host(.ngu-field--warning:not(.ngu-unstyled)) textarea,
+    :host(.ngu-field--warning:not(.ngu-unstyled)) .ngu-control--adorned {
       border-color: var(--ngu-warning-color, #8a5300);
     }
-    .ngu-skeleton {
+    :host(:where(:not(.ngu-unstyled))) .ngu-skeleton {
       display: block;
       block-size: 2.375rem;
       border-radius: var(--ngu-radius, 0.375rem);
       background: var(--ngu-skeleton-color, rgba(127, 127, 127, 0.16));
       animation: ngu-pulse 1.4s ease-in-out infinite;
     }
-    .ngu-skeleton--area {
+    :host(:where(:not(.ngu-unstyled))) .ngu-skeleton--area {
       block-size: 5rem;
     }
-    .ngu-skeleton--box {
+    :host(:where(:not(.ngu-unstyled))) .ngu-skeleton--box {
       inline-size: 1rem;
       block-size: 1rem;
       border-radius: 0.25rem;
@@ -701,22 +797,22 @@ function isAutofilled(el: Element): boolean {
       }
     }
     @media (prefers-reduced-motion: reduce) {
-      .ngu-skeleton {
+      :host(:where(:not(.ngu-unstyled))) .ngu-skeleton {
         animation: none;
       }
     }
     /* Windows high contrast: colors (outlines included) are forced, so states use borders. */
     @media (forced-colors: active) {
-      .ngu-skeleton {
+      :host(:where(:not(.ngu-unstyled))) .ngu-skeleton {
         border: 1px dashed GrayText;
       }
-      .ngu-warning__mark {
+      :host(:where(:not(.ngu-unstyled))) .ngu-warning__mark {
         border: 1px solid CanvasText;
       }
-      :host(.ngu-field--invalid) input,
-      :host(.ngu-field--invalid) select,
-      :host(.ngu-field--invalid) textarea,
-      :host(.ngu-field--invalid) .ngu-control--adorned {
+      :host(.ngu-field--invalid:not(.ngu-unstyled)) input,
+      :host(.ngu-field--invalid:not(.ngu-unstyled)) select,
+      :host(.ngu-field--invalid:not(.ngu-unstyled)) textarea,
+      :host(.ngu-field--invalid:not(.ngu-unstyled)) .ngu-control--adorned {
         border-width: 2px;
       }
     }
@@ -735,16 +831,16 @@ function isAutofilled(el: Element): boolean {
       border: 0;
     }
     @media print {
-      :host {
+      :host(:not(.ngu-unstyled)) {
         break-inside: avoid;
       }
-      .ngu-reveal,
-      .ngu-counter {
+      :host(:where(:not(.ngu-unstyled))) .ngu-reveal,
+      :host(:where(:not(.ngu-unstyled))) .ngu-counter {
         display: none;
       }
-      input,
-      select,
-      textarea {
+      :host(:where(:not(.ngu-unstyled))) input,
+      :host(:where(:not(.ngu-unstyled))) select,
+      :host(:where(:not(.ngu-unstyled))) textarea {
         background: none !important;
         color: #000 !important;
       }
@@ -752,7 +848,8 @@ function isAutofilled(el: Element): boolean {
   `,
 })
 export class NguField {
-  readonly def = input.required<LeafDef>();
+  /** The field's definition: from a form, or a plain spec when the field is used on its own. */
+  readonly def = input.required<LeafDef, LeafDef | NguFieldSpec>({ transform: toLeafDef });
   readonly field = input.required<Field<any>>();
   /** Dot path of this field inside the form, for template overrides. */
   readonly path = input<string>('');
@@ -760,13 +857,19 @@ export class NguField {
   readonly compact = input(false);
 
   protected readonly id = `ngu-field-${nextId++}`;
+  /** The field's model path, `items.0.sku`; for tests, tools and the debug panel. */
+  protected readonly modelPath = computed(() => this.state().metadata(NGU_PATH)?.() ?? (this.path() || null));
   protected readonly state = computed(() => this.field()());
 
   private readonly context = inject(NguFormContext, { optional: true });
   private readonly section = inject(NguSection, { optional: true });
   protected readonly i18n = this.context?.i18n ?? injectNguI18n();
   private readonly registeredTypes = inject(NGU_FIELD_TYPES, { optional: true });
+  private readonly fieldRenderers = inject(NGU_FIELD_RENDERERS, { optional: true });
+  private readonly icons = inject(NGU_ICONS, { optional: true });
+  protected readonly look = injectNguLook();
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
+  private readonly errorHandler = inject(ErrorHandler);
   private readonly textarea = viewChild<ElementRef<HTMLTextAreaElement>>('textarea');
 
   // --- texts, through the app's translations ------------------------------
@@ -791,6 +894,15 @@ export class NguField {
     source: () => this.context?.resets() ?? 0,
     computation: () => false,
   });
+  /**
+   * True once autofill blurred the field. Only then does a touch need the user's own blur:
+   * a field touched by code, such as Signal Forms' `submit()` around a lone `<ngu-field>`,
+   * shows its errors.
+   */
+  private readonly autofillBlurred = linkedSignal({
+    source: () => this.context?.resets() ?? 0,
+    computation: () => false,
+  });
 
   /** Whether messages may show yet: after a submit attempt, or per `errorsOn` once the user left the field. */
   private readonly messagesDue = computed(() => {
@@ -798,7 +910,7 @@ export class NguField {
       return true;
     }
     const s = this.state();
-    if (!s.touched() || !this.interacted()) {
+    if (!s.touched() || (!this.interacted() && this.autofillBlurred())) {
       return false;
     }
     switch (this.def().errorsOn ?? this.context?.errorsOn() ?? 'dirty') {
@@ -895,9 +1007,11 @@ export class NguField {
   });
   protected readonly revealStatus = signal('');
   protected readonly revealable = computed(() => this.def().type === 'password' && this.def().reveal !== false);
+  protected readonly prefixIcon = computed(() => this.adornment('prefix'));
+  protected readonly suffixIcon = computed(() => this.adornment('suffix'));
   protected readonly adorned = computed(() => {
     const d = this.def();
-    return Boolean(d.prefix || d.suffix || this.revealable());
+    return Boolean(d.prefix || d.suffix || this.prefixIcon() || this.suffixIcon() || this.revealable());
   });
 
   protected readonly counter = computed(() => {
@@ -1031,25 +1145,70 @@ export class NguField {
 
   protected readonly fieldTemplate = computed(() => this.context?.fieldTemplates().get(this.path()));
   protected readonly controlTemplate = computed(() => this.context?.controlTemplates().get(this.path()));
+  /** The registered control renderer for this type: a component, or a loader for one. */
+  private readonly registeredRenderer = computed(() => findFieldType(this.registeredTypes, this.def().type));
+  /** The registered whole-field renderer for this type, such as a Material form field. */
+  private readonly registeredWhole = computed(() => findFieldType(this.fieldRenderers, this.def().type));
+  /** Renderers that loaded while this field was on screen. */
+  private readonly loadedRenderers = signal<ReadonlyMap<NguFieldTypeLoader, Type<unknown>>>(new Map());
   protected readonly customRenderer = computed<Type<unknown> | undefined>(() => {
-    const type = this.def().type;
-    const registries = this.registeredTypes ?? [];
-    for (let i = registries.length - 1; i >= 0; i--) {
-      const cmp = registries[i][type];
-      if (cmp) {
-        return cmp;
-      }
+    const entry = this.registeredRenderer();
+    if (!entry) {
+      return undefined;
     }
-    return undefined;
+    if (isComponentType(entry)) {
+      return entry;
+    }
+    return loadedFieldType(entry) ?? this.loadedRenderers().get(entry);
   });
-  protected readonly slot = computed<'template' | 'custom' | 'builtin'>(() => {
+  protected readonly wholeRenderer = computed<Type<unknown> | undefined>(() => {
+    const entry = this.registeredWhole();
+    if (!entry) {
+      return undefined;
+    }
+    if (isComponentType(entry)) {
+      return entry;
+    }
+    return loadedFieldType(entry) ?? this.loadedRenderers().get(entry);
+  });
+  protected readonly slot = computed<'template' | 'whole' | 'custom' | 'loading' | 'builtin'>(() => {
     if (this.controlTemplate()) {
       return 'template';
+    }
+    if (this.wholeRenderer()) {
+      return 'whole';
     }
     if (this.customRenderer()) {
       return 'custom';
     }
-    return 'builtin';
+    return this.registeredWhole() || this.registeredRenderer() ? 'loading' : 'builtin';
+  });
+  /** What a whole-field renderer receives. */
+  protected readonly renderContext = computed<NguFieldRenderContext>(() => {
+    const state = this.state();
+    const showErrors = this.showErrors();
+    return {
+      field: this.field(),
+      state,
+      def: this.def(),
+      id: this.id,
+      label: this.label(),
+      hint: this.hint(),
+      placeholder: this.placeholder(),
+      prefix: this.prefix(),
+      suffix: this.suffix(),
+      choices: this.choices(),
+      error: showErrors ? this.message() : undefined,
+      warning: this.warning(),
+      pending: state.pending() ? this.pendingText() : undefined,
+      showErrors,
+      required: state.required(),
+      transform: this.transform(),
+      counter: this.counter(),
+      i18n: this.i18n,
+      look: this.look(),
+      touch: () => this.touch(),
+    };
   });
   protected readonly templateContext = computed<NguFieldContext>(() => {
     const field = this.field();
@@ -1077,6 +1236,7 @@ export class NguField {
       id: this.id,
       invalid: this.showErrors(),
       describedBy: this.describedBy() ?? undefined,
+      choices: this.choices(),
     };
     return Object.fromEntries(Object.entries(all).filter(([k]) => declared.has(k)));
   });
@@ -1103,6 +1263,30 @@ export class NguField {
       });
       inject(DestroyRef).onDestroy(unregister);
     }
+
+    if (isDevMode()) {
+      this.checkRenderers();
+    }
+
+    // Lazy renderers: load on first use. Server rendering waits for them.
+    const pendingTasks = inject(PendingTasks);
+    effect(() => {
+      const entry = this.registeredWhole() ?? this.registeredRenderer();
+      if (!entry || isComponentType(entry) || loadedFieldType(entry) || isClass(entry)) {
+        return;
+      }
+      const done = pendingTasks.add();
+      loadFieldType(entry).then(
+        (type) => {
+          this.loadedRenderers.update((map) => new Map(map).set(entry, type));
+          done();
+        },
+        (error) => {
+          done();
+          this.errorHandler.handleError(error);
+        },
+      );
+    });
 
     // `onChange` fires for value changes that follow the user's own input in this field.
     // Writes from code (patch, reset, compute, another field's onChange) have no gesture,
@@ -1131,8 +1315,62 @@ export class NguField {
     });
   }
 
+  /** Marks the field touched and interacted, as leaving it does. */
+  private touch(): void {
+    this.interacted.set(true);
+    this.state().markAsTouched();
+  }
+
   protected onGesture(): void {
     this.gestureAt = now();
+  }
+
+  /** An `nguPrefix`/`nguSuffix` template for this path, else the icon named in the spec. */
+  private adornment(side: 'prefix' | 'suffix'): Adornment | undefined {
+    const templates = side === 'prefix' ? this.context?.prefixTemplates() : this.context?.suffixTemplates();
+    const template = templates?.get(this.path());
+    if (template) {
+      return { template };
+    }
+    const d = this.def();
+    const component = findIcon(this.icons, side === 'prefix' ? d.prefixIcon : d.suffixIcon);
+    return component ? { component } : undefined;
+  }
+
+  /**
+   * Development builds warn about types without a renderer (NGU-301), unregistered icon names
+   * (NGU-302) and registry entries that are neither components nor loaders (NGU-304).
+   */
+  private checkRenderers(): void {
+    effect(() => {
+      const d = this.def();
+      const entry = this.registeredRenderer();
+      const overridden = this.fieldTemplate() || this.controlTemplate() || this.registeredWhole();
+      if (!entry && !overridden && !BUILT_IN_TYPES.has(d.type)) {
+        nguWarn(
+          'NGU-301',
+          `no renderer for type "${d.type}" (at "${this.path() || 'a field'}"); it renders as a text input. ${
+            PROVIDER_HINTS[d.type] ?? `Register one with provideNguFieldTypes({ '${d.type}': YourComponent }).`
+          }`,
+          d.type,
+        );
+      }
+      if (entry && !isComponentType(entry) && isClass(entry)) {
+        nguWarn('NGU-304', `type "${d.type}" is registered with ${entry.name}, which is not a component.`, d.type);
+      }
+      for (const side of ['prefix', 'suffix'] as const) {
+        const name = side === 'prefix' ? d.prefixIcon : d.suffixIcon;
+        const templates = side === 'prefix' ? this.context?.prefixTemplates() : this.context?.suffixTemplates();
+        if (name && !findIcon(this.icons, name) && !templates?.has(this.path())) {
+          nguWarn('NGU-302', `no icon named "${name}" for ${side}Icon. Register it with provideNguIcons({ '${name}': YourIcon }).`, name);
+        }
+      }
+    });
+  }
+
+  /** A click on an icon focuses the control, as a click on the label does. */
+  protected focusInput(): void {
+    this.host.nativeElement.querySelector<HTMLElement>(`#${this.id}`)?.focus();
   }
 
   protected toggleReveal(): void {
@@ -1154,7 +1392,11 @@ export class NguField {
 
   protected onFocusOut(event: FocusEvent): void {
     const target = event.target;
-    if (!(target instanceof Element) || isAutofilled(target)) {
+    if (!(target instanceof Element)) {
+      return;
+    }
+    if (isAutofilled(target)) {
+      this.autofillBlurred.set(true);
       return;
     }
     this.interacted.set(true);
@@ -1195,6 +1437,16 @@ export class NguField {
     };
     onChange(value, ctx);
   }
+}
+
+/** A class that is not a component: a mistake in the registry, never a loader. */
+function isClass(fn: unknown): boolean {
+  return typeof fn === 'function' && /^class[\s{]/.test(Function.prototype.toString.call(fn));
+}
+
+interface Adornment {
+  readonly template?: TemplateRef<NguFieldContext>;
+  readonly component?: Type<unknown>;
 }
 
 function now(): number {

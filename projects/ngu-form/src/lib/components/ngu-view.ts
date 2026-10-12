@@ -5,6 +5,8 @@ import { injectNguI18n, type NguI18n } from '../messages';
 import { isLeafDef, type AnyFieldDef, type ArrayDef, type FormDef, type FormDefinition, type LeafDef } from '../types';
 import { UNVIEWED_TYPES, viewValue, type ViewValue } from '../view';
 import { NguFormContext } from './ngu-form-context';
+import { NGU_FORM_CONFIG } from '../config';
+import { injectNguLook, NGU_LOOK, resolveLook, type NguLook, type NguTheme } from '../look';
 
 type Item =
   | { readonly kind: 'leaf'; readonly key: string; readonly def: LeafDef; readonly field: Field<any> }
@@ -12,35 +14,35 @@ type Item =
   | { readonly kind: 'array'; readonly key: string; readonly def: ArrayDef; readonly field: Field<any> };
 
 const VIEW_STYLES = `
-  .ngu-view {
+  :host(:where(:not(.ngu-unstyled))) .ngu-view {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(min(var(--ngu-view-column, 14rem), 100%), 1fr));
     gap: 0.875rem 1.5rem;
     margin: 0;
   }
-  .ngu-view__item {
+  :host(:where(:not(.ngu-unstyled))) .ngu-view__item {
     min-inline-size: 0;
   }
-  .ngu-view__item--section {
+  :host(:where(:not(.ngu-unstyled))) .ngu-view__item--section {
     grid-column: 1 / -1;
   }
-  .ngu-view__label {
-    font-size: var(--ngu-label-size, 0.875rem);
+  :host(:where(:not(.ngu-unstyled))) .ngu-view__label {
+    font-size: var(--ngu-label-size, var(--_ngu-label-size, 0.875rem));
     color: var(--ngu-hint-color, #6b6b6b);
   }
-  .ngu-view__heading {
+  :host(:where(:not(.ngu-unstyled))) .ngu-view__heading {
     font-size: var(--ngu-title-size, 1rem);
     font-weight: 600;
     margin-block-end: 0.5rem;
   }
-  .ngu-view__value {
+  :host(:where(:not(.ngu-unstyled))) .ngu-view__value {
     margin: 0.125rem 0 0;
     overflow-wrap: anywhere;
   }
-  .ngu-view__multiline {
+  :host(:where(:not(.ngu-unstyled))) .ngu-view__multiline {
     white-space: pre-line;
   }
-  .ngu-view__swatch {
+  :host(:where(:not(.ngu-unstyled))) .ngu-view__swatch {
     display: inline-block;
     inline-size: 0.875rem;
     block-size: 0.875rem;
@@ -49,14 +51,14 @@ const VIEW_STYLES = `
     border: 1px solid var(--ngu-border-color, #c7c7c7);
     border-radius: 0.125rem;
   }
-  .ngu-view__image {
+  :host(:where(:not(.ngu-unstyled))) .ngu-view__image {
     max-inline-size: 16rem;
     max-block-size: 6rem;
     background: #fff;
     border: 1px solid var(--ngu-border-color, #c7c7c7);
     border-radius: var(--ngu-radius, 0.375rem);
   }
-  .ngu-view__empty {
+  :host(:where(:not(.ngu-unstyled))) .ngu-view__empty {
     color: var(--ngu-hint-color, #6b6b6b);
   }
   .ngu-sr-only {
@@ -138,6 +140,7 @@ function pushItem(out: Item[], key: string, def: AnyFieldDef, field: Field<any>)
 @Component({
   selector: 'ngu-view-rows',
   imports: [forwardRef(() => NguViewList)],
+  host: { '[class.ngu-unstyled]': "look().theme === 'none'" },
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     @let d = def();
@@ -193,45 +196,46 @@ function pushItem(out: Item[], key: string, def: AnyFieldDef, field: Field<any>)
   `,
   styles: `
     ${VIEW_STYLES}
-    .ngu-view__bullets {
+    :host(:where(:not(.ngu-unstyled))) .ngu-view__bullets {
       margin: 0;
       padding-inline-start: 1.25rem;
     }
-    .ngu-view__rows {
+    :host(:where(:not(.ngu-unstyled))) .ngu-view__rows {
       display: flex;
       flex-direction: column;
       gap: 0.75rem;
       margin: 0;
       padding-inline-start: 1.5rem;
     }
-    .ngu-view__row::marker {
+    :host(:where(:not(.ngu-unstyled))) .ngu-view__row::marker {
       color: var(--ngu-hint-color, #6b6b6b);
     }
-    .ngu-view__scroll {
+    :host(:where(:not(.ngu-unstyled))) .ngu-view__scroll {
       overflow-x: auto;
     }
-    .ngu-view__table {
+    :host(:where(:not(.ngu-unstyled))) .ngu-view__table {
       inline-size: 100%;
       border-collapse: collapse;
       font-size: 0.875rem;
     }
-    .ngu-view__table th,
-    .ngu-view__table td {
+    :host(:where(:not(.ngu-unstyled))) .ngu-view__table th,
+    :host(:where(:not(.ngu-unstyled))) .ngu-view__table td {
       padding: 0.375rem 0.5rem;
       text-align: start;
       vertical-align: top;
       border-block-end: 1px solid var(--ngu-border-color, #c7c7c7);
     }
-    .ngu-view__table thead th {
+    :host(:where(:not(.ngu-unstyled))) .ngu-view__table thead th {
       font-weight: 600;
     }
-    .ngu-view__table tbody th {
+    :host(:where(:not(.ngu-unstyled))) .ngu-view__table tbody th {
       font-weight: 500;
       color: var(--ngu-hint-color, #6b6b6b);
     }
   `,
 })
 export class NguViewRows {
+  protected readonly look = injectNguLook();
   readonly def = input.required<ArrayDef>();
   readonly tree = input.required<Field<any>>();
   readonly model = input<unknown>();
@@ -263,6 +267,7 @@ export class NguViewRows {
   selector: 'ngu-view-list',
   imports: [NguViewRows],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: { '[class.ngu-unstyled]': "look().theme === 'none'" },
   template: `
     <dl class="ngu-view">
       @for (item of items(); track item.key) {
@@ -301,6 +306,7 @@ export class NguViewRows {
   styles: VIEW_STYLES,
 })
 export class NguViewList {
+  protected readonly look = injectNguLook();
   readonly fields = input.required<FormDefinition>();
   readonly tree = input.required<Field<any>>();
   readonly model = input<unknown>();
@@ -325,8 +331,9 @@ export class NguViewList {
 @Component({
   selector: 'ngu-view',
   imports: [NguViewList, NguViewRows],
+  providers: [{ provide: NGU_LOOK, useFactory: () => inject(NguView).look }],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: { class: 'ngu-view-host' },
+  host: { class: 'ngu-view-host', '[class.ngu-unstyled]': "look().theme === 'none'" },
   template: `
     @if (sectionArray(); as array) {
       <ngu-view-rows [def]="array" [tree]="sectionTree()!" [model]="model()" [i18n]="i18n" />
@@ -335,7 +342,7 @@ export class NguViewList {
     }
   `,
   styles: `
-    :host {
+    :host(:not(.ngu-unstyled)) {
       display: block;
     }
   `,
@@ -349,6 +356,17 @@ export class NguView<TModel extends object = any> {
    * does under each step's heading.
    */
   readonly section = input<string>();
+  /** `'none'` drops ngu-form's CSS. Defaults to the surrounding form's theme, else the app-wide one. */
+  readonly theme = input<NguTheme>();
+
+  private readonly outerLook = inject(NGU_LOOK, { optional: true, skipSelf: true });
+  private readonly config = inject(NGU_FORM_CONFIG, { optional: true });
+  /** The look of the surrounding form, or the app-wide one, with this view's `theme`. */
+  readonly look = computed<NguLook>(() => {
+    const outer = this.outerLook?.() ?? resolveLook(this.config);
+    const theme = this.theme();
+    return theme ? { ...outer, theme } : outer;
+  });
 
   protected readonly i18n = inject(NguFormContext, { optional: true })?.i18n ?? injectNguI18n();
   protected readonly tree = computed(() => this.form().tree as unknown as Field<any>);

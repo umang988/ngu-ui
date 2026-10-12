@@ -64,6 +64,9 @@ export class NguFormContext {
   fieldTemplates: Signal<TemplateMap> = signal(new Map());
   /** `nguControl` templates by path. */
   controlTemplates: Signal<TemplateMap> = signal(new Map());
+  /** `nguPrefix` and `nguSuffix` icon templates by path. */
+  prefixTemplates: Signal<TemplateMap> = signal(new Map());
+  suffixTemplates: Signal<TemplateMap> = signal(new Map());
   /** Messages and translations for this form. */
   i18n: NguI18n = createNguI18n();
   /**

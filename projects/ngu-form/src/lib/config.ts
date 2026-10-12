@@ -1,7 +1,8 @@
 import { InjectionToken, type Provider } from '@angular/core';
+import type { NguLookConfig } from './look';
 import type { Breakpoint, Cols } from './types';
 
-export interface NguFormConfig {
+export interface NguFormConfig extends NguLookConfig {
   /**
    * Minimum form widths, in CSS pixels, for responsive `cols`. Measured on `<ngu-form>`
    * itself, not the viewport, so a form in a narrow panel collapses too.

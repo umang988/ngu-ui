@@ -64,11 +64,9 @@ describe('App', () => {
   });
 
   it('renders every documentation page with its title and live demos', async () => {
-    // A demo shows a form, or a form's values in view mode; a review step's view is part of its form.
+    // A demo shows a form, a form's values in view mode, or fields of a hand-written form.
     const shown = (el: HTMLElement) =>
-      Array.from(el.querySelectorAll('.demo ngu-form, .demo ngu-view')).filter(
-        (n) => !n.parentElement?.closest('ngu-form, ngu-view'),
-      ).length;
+      Array.from(el.querySelectorAll('.demo')).filter((d) => d.querySelector('ngu-form, ngu-view, ngu-field')).length;
     const count = (sections: readonly DocSection[]): number =>
       sections.reduce((n, s) => n + (s.demo ? 1 : 0) + count(s.children ?? []), 0);
     for (const entry of NAV_ENTRIES.filter((e) => e.load)) {

@@ -1,0 +1,34 @@
+// The Material theme of the docs' Material page, loaded only there (inject: false in angular.json).
+// An app puts `@include mat.theme(...)` on `html` instead; overlays then pick it up too.
+@use '@angular/material' as mat;
+
+.ngu-material-demo,
+.cdk-overlay-container {
+  @include mat.theme(
+    (
+      color: (
+        primary: mat.$azure-palette,
+        tertiary: mat.$blue-palette,
+        theme-type: color-scheme,
+      ),
+      typography: (
+        plain-family: 'Public Sans',
+        brand-family: 'Public Sans',
+      ),
+      density: 0,
+    )
+  );
+}
+
+// ngu-form's own parts (buttons, lists, the one-time code) in Material's colors.
+.ngu-material-demo {
+  --ngu-primary: var(--mat-sys-primary);
+  --ngu-on-primary: var(--mat-sys-on-primary);
+  --ngu-focus-color: var(--mat-sys-primary);
+  --ngu-border-color: var(--mat-sys-outline);
+  --ngu-error-color: var(--mat-sys-error);
+  --ngu-hint-color: var(--mat-sys-on-surface-variant);
+  --ngu-surface: var(--mat-sys-surface-container);
+  --ngu-radius: var(--mat-sys-corner-extra-small);
+  --ngu-button-padding: 0.625rem 1.5rem;
+}

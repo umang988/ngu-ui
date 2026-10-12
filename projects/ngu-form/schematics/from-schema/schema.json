@@ -1,0 +1,50 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "$id": "NguFormFromSchema",
+  "title": "Generate a typed ngu-form component from a JSON Schema or an OpenAPI document",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Name of the form, such as \"signup\".",
+      "$default": { "$source": "argv", "index": 0 },
+      "x-prompt": "What is the form called?"
+    },
+    "schema": {
+      "type": "string",
+      "description": "Path of a JSON Schema or OpenAPI 3 document (JSON), relative to the workspace.",
+      "x-prompt": "Path of the JSON Schema or OpenAPI document?"
+    },
+    "pointer": {
+      "type": "string",
+      "description": "JSON pointer to the object schema, such as \"#/components/schemas/Signup\". Defaults to the document itself."
+    },
+    "operation": {
+      "type": "string",
+      "description": "OpenAPI operationId, or \"post /users\", whose JSON request body the form edits."
+    },
+    "model": {
+      "type": "string",
+      "description": "Name of the generated interface. Defaults to the schema's name, else the form name."
+    },
+    "path": {
+      "type": "string",
+      "format": "path",
+      "description": "Folder for the component. Defaults to src/app/<name>-form.",
+      "visible": false
+    },
+    "project": {
+      "type": "string",
+      "$default": { "$source": "projectName" }
+    },
+    "submitLabel": {
+      "type": "string",
+      "default": "Save"
+    },
+    "skipTests": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "required": ["name", "schema"]
+}

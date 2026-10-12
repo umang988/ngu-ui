@@ -217,6 +217,12 @@ export interface BaseFieldSpec<V, TModel, TScope = TModel> extends ValidationSpe
   /** Text shown before or after the control, such as a currency sign or a unit. */
   prefix?: string;
   suffix?: string;
+  /**
+   * Name of an icon registered with `provideNguIcons`, shown before or after the control,
+   * inside its border. Icons are decorative; the label still names the field.
+   */
+  prefixIcon?: string;
+  suffixIcon?: string;
   /** Mobile keyboard. Inferred for `email` and for number fields that cannot go negative. */
   inputmode?: InputMode;
   /** Label of the Enter key on mobile keyboards. */
@@ -565,6 +571,9 @@ export interface DynamicField<V = any, TModel = any> {
   required?: boolean | string;
   prefix?: string;
   suffix?: string;
+  /** Icons registered with `provideNguIcons`, by name. */
+  prefixIcon?: string;
+  suffixIcon?: string;
   inputmode?: InputMode;
   enterkeyhint?: EnterKeyHint;
   counter?: boolean;
@@ -848,6 +857,27 @@ export interface LeafDef
   max?: number | Date | string;
   step?: number;
   strength?: boolean | StrengthOptions;
+}
+
+/**
+ * How `<ngu-field>` used on its own describes its field: the options of a spec, as plain data.
+ * Rules such as `required` or `maxLength` still come from your form's schema; here they only
+ * shape the markup (the asterisk, the counter, `min` and `max` attributes).
+ */
+export type NguFieldSpec = Omit<Partial<LeafDef>, '__ngu' | 'choices'> & {
+  /** Defaults to `text`. */
+  readonly type?: LeafDef['type'];
+  /** Choices for `select`, `radio`, `segmented` and checkbox groups. */
+  readonly options?: LeafDef['choices'];
+};
+
+/** Turns a plain field spec into the definition `<ngu-field>` renders. */
+export function toLeafDef(spec: LeafDef | NguFieldSpec): LeafDef {
+  if ((spec as LeafDef).__ngu === 'leaf') {
+    return spec as LeafDef;
+  }
+  const { options, type, ...rest } = spec as NguFieldSpec;
+  return { ...rest, __ngu: 'leaf', type: type ?? 'text', choices: options ?? (spec as Partial<LeafDef>).choices };
 }
 
 export interface GroupDef {

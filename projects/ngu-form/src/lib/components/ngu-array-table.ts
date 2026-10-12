@@ -4,6 +4,7 @@ import type { Field } from '@angular/forms/signals';
 import type { NguI18n } from '../messages';
 import type { ArrayDef, LeafDef } from '../types';
 import { NguField } from './ngu-field';
+import { injectNguLook } from '../look';
 
 /** One rendered row of a list. */
 export interface ArrayRow {
@@ -46,7 +47,7 @@ export interface ArrayTableHost {
   selector: 'ngu-array-table',
   imports: [NgTemplateOutlet, NguField],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: { class: 'ngu-array-table' },
+  host: { class: 'ngu-array-table', '[class.ngu-unstyled]': "look().theme === 'none'" },
   template: `
     @let a = host();
     @let d = a.def();
@@ -110,65 +111,65 @@ export interface ArrayTableHost {
     </table>
   `,
   styles: `
-    :host {
+    :host(:not(.ngu-unstyled)) {
       display: block;
     }
-    .ngu-table {
+    :host(:where(:not(.ngu-unstyled))) .ngu-table {
       inline-size: 100%;
       border-collapse: collapse;
       font-size: 0.875rem;
     }
-    th {
+    :host(:where(:not(.ngu-unstyled))) th {
       font-weight: 600;
       text-align: start;
       white-space: nowrap;
     }
-    thead th {
+    :host(:where(:not(.ngu-unstyled))) thead th {
       padding: 0.375rem 0.25rem;
-      font-size: var(--ngu-label-size, 0.875rem);
+      font-size: var(--ngu-label-size, var(--_ngu-label-size, 0.875rem));
       border-block-end: 1px solid var(--ngu-border-color, #c7c7c7);
     }
-    .ngu-table--sticky thead th {
+    :host(:where(:not(.ngu-unstyled))) .ngu-table--sticky thead th {
       position: sticky;
       inset-block-start: 0;
       z-index: 1;
       background: var(--ngu-surface, Canvas);
     }
-    td,
-    tbody th {
+    :host(:where(:not(.ngu-unstyled))) td,
+    :host(:where(:not(.ngu-unstyled))) tbody th {
       padding: 0.375rem 0.25rem;
       vertical-align: top;
       border-block-end: 1px solid var(--ngu-border-color, #c7c7c7);
     }
-    tbody th {
+    :host(:where(:not(.ngu-unstyled))) tbody th {
       padding-block-start: 0.875rem;
       color: var(--ngu-hint-color, #6b6b6b);
       font-weight: 500;
     }
-    td ngu-field {
+    :host(:where(:not(.ngu-unstyled))) td ngu-field {
       min-inline-size: 5rem;
     }
-    .ngu-table__num,
-    .ngu-table__actions {
+    :host(:where(:not(.ngu-unstyled))) .ngu-table__num,
+    :host(:where(:not(.ngu-unstyled))) .ngu-table__actions {
       inline-size: 1%;
     }
-    .ngu-table__empty {
+    :host(:where(:not(.ngu-unstyled))) .ngu-table__empty {
       color: var(--ngu-hint-color, #6b6b6b);
     }
-    .ngu-spacer td {
+    :host(:where(:not(.ngu-unstyled))) .ngu-spacer td {
       padding: 0;
       border: 0;
     }
-    .ngu-array__row--picked {
+    :host(:where(:not(.ngu-unstyled))) .ngu-array__row--picked {
       opacity: 0.55;
     }
-    .ngu-array__row--drop-before {
+    :host(:where(:not(.ngu-unstyled))) .ngu-array__row--drop-before {
       box-shadow: 0 -3px 0 var(--ngu-primary, #1a73e8);
     }
-    .ngu-array__row--drop-after {
+    :host(:where(:not(.ngu-unstyled))) .ngu-array__row--drop-after {
       box-shadow: 0 3px 0 var(--ngu-primary, #1a73e8);
     }
-    .ngu-required {
+    :host(:where(:not(.ngu-unstyled))) .ngu-required {
       color: var(--ngu-error-color, #c62828);
       margin-inline-start: 0.125rem;
     }
@@ -182,21 +183,22 @@ export interface ArrayTableHost {
       white-space: nowrap;
     }
     @media (forced-colors: active) {
-      .ngu-array__row--drop-before {
+      :host(:where(:not(.ngu-unstyled))) .ngu-array__row--drop-before {
         outline: 2px solid Highlight;
       }
     }
     @media print {
-      .ngu-table__actions {
+      :host(:where(:not(.ngu-unstyled))) .ngu-table__actions {
         display: none;
       }
-      tr {
+      :host(:where(:not(.ngu-unstyled))) tr {
         break-inside: avoid;
       }
     }
   `,
 })
 export class NguArrayTable {
+  protected readonly look = injectNguLook();
   readonly host = input.required<ArrayTableHost>();
   /** The row buttons, rendered by the list. */
   readonly actions = input.required<TemplateRef<{ $implicit: ArrayRow }>>();

@@ -21,6 +21,7 @@ import { NguField } from './ngu-field';
 import { NguFormContext } from './ngu-form-context';
 import { NguSection } from './ngu-section';
 import { NguPanel, NguTabs } from './ngu-sections';
+import { injectNguLook } from '../look';
 
 let nextGroupId = 0;
 
@@ -50,6 +51,8 @@ interface Entry {
   imports: [NguField, NguTabs, NguPanel, forwardRef(() => NguArray), forwardRef(() => NguDynamic)],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
+    '[class.ngu-unstyled]': "look().theme === 'none'",
+    '[class]': 'look().classes.group',
     class: 'ngu-group',
     '[class.ngu-group--invalid]': 'showErrors()',
     '[attr.role]': "title() ? 'group' : null",
@@ -58,7 +61,7 @@ interface Entry {
   },
   template: `
     @if (title()) {
-      <h3 class="ngu-group__title" [id]="titleId">{{ i18n.text(title()) }}</h3>
+      <h3 class="ngu-group__title" [class]="look().classes.title" [id]="titleId">{{ i18n.text(title()) }}</h3>
     }
     @if (description()) {
       <p class="ngu-group__description">{{ i18n.text(description()) }}</p>
@@ -147,49 +150,51 @@ interface Entry {
       </div>
     }
     @if (showErrors()) {
-      <p class="ngu-error" [id]="titleId + '-msg'" tabindex="-1">{{ message() }}</p>
+      <p class="ngu-error" [class]="look().classes.error" [id]="titleId + '-msg'" tabindex="-1">{{ message() }}</p>
     }
   `,
   styles: `
-    :host {
+    :host(:not(.ngu-unstyled)) {
       display: block;
       min-inline-size: 0;
     }
     .ngu-grid {
       display: grid;
       grid-template-columns: repeat(var(--ngu-cols, 1), minmax(0, 1fr));
-      gap: var(--ngu-gap, 1rem);
     }
-    .ngu-group__title {
+    :host(:where(:not(.ngu-unstyled))) .ngu-grid {
+      gap: var(--ngu-gap, var(--_ngu-gap, 1rem));
+    }
+    :host(:where(:not(.ngu-unstyled))) .ngu-group__title {
       margin-block: 0 0.5rem;
       margin-inline: 0;
       font-size: var(--ngu-title-size, 1rem);
       font-weight: 600;
     }
-    .ngu-error {
+    :host(:where(:not(.ngu-unstyled))) .ngu-error {
       margin-block: 0.5rem 0;
       margin-inline: 0;
       font-size: 0.8125rem;
       color: var(--ngu-error-color, #c62828);
     }
-    .ngu-group__description {
+    :host(:where(:not(.ngu-unstyled))) .ngu-group__description {
       margin-block: 0 0.75rem;
       margin-inline: 0;
       font-size: 0.875rem;
       color: var(--ngu-hint-color, #6b6b6b);
     }
-    .ngu-static {
+    :host(:where(:not(.ngu-unstyled))) .ngu-static {
       margin: 0;
     }
-    .ngu-static__heading {
+    :host(:where(:not(.ngu-unstyled))) .ngu-static__heading {
       font-size: var(--ngu-title-size, 1rem);
       font-weight: 600;
     }
-    .ngu-static__text {
+    :host(:where(:not(.ngu-unstyled))) .ngu-static__text {
       font-size: 0.875rem;
       color: var(--ngu-hint-color, #6b6b6b);
     }
-    .ngu-divider {
+    :host(:where(:not(.ngu-unstyled))) .ngu-divider {
       border: 0;
       border-block-start: 1px solid var(--ngu-border-color, #c7c7c7);
       inline-size: 100%;
@@ -197,6 +202,7 @@ interface Entry {
   `,
 })
 export class NguGroup {
+  protected readonly look = injectNguLook();
   readonly fields = input.required<FormDefinition>();
   readonly tree = input.required<Field<any>>();
   readonly cols = input<Cols>(1);

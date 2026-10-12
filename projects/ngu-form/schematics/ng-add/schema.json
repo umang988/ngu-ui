@@ -1,0 +1,46 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "$id": "NguFormNgAdd",
+  "title": "Add ngu-form to a project",
+  "type": "object",
+  "properties": {
+    "project": {
+      "type": "string",
+      "description": "The project to set up.",
+      "$default": { "$source": "projectName" }
+    },
+    "renderer": {
+      "type": "string",
+      "enum": ["none", "material", "primeng"],
+      "default": "none",
+      "description": "Render fields with a design system.",
+      "x-prompt": {
+        "message": "Render fields with a design system?",
+        "type": "list",
+        "items": [
+          { "value": "none", "label": "No, use ngu-form's own look (themed with CSS variables)" },
+          { "value": "material", "label": "Angular Material" },
+          { "value": "primeng", "label": "PrimeNG" }
+        ]
+      }
+    },
+    "uploads": {
+      "type": "boolean",
+      "default": false,
+      "description": "Register file, image and signature fields (ngu-form/upload).",
+      "x-prompt": "Add file, image and signature fields?"
+    },
+    "sample": {
+      "type": "boolean",
+      "default": true,
+      "description": "Create a sample form component.",
+      "x-prompt": "Create a sample form component?"
+    },
+    "skipInstall": {
+      "type": "boolean",
+      "default": false,
+      "description": "Do not install the packages the renderer needs.",
+      "visible": false
+    }
+  }
+}

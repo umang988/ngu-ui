@@ -1,5 +1,6 @@
 import type { ValidationError } from '@angular/forms/signals';
 import type { SubmitResult } from './types';
+import { isDevMode, nguWarn } from './diagnostics';
 
 type ServerError = ValidationError.WithOptionalFieldTree;
 
@@ -27,8 +28,8 @@ export function toSubmissionErrors(tree: unknown, result: SubmitResult<any>): Se
     if (fieldTree) {
       errors.push({ kind: 'server', message, fieldTree: fieldTree as ServerError['fieldTree'] });
     } else {
-      if (typeof ngDevMode === 'undefined' || ngDevMode) {
-        console.warn(`ngu-form: submit error path "${path}" does not match a field; shown as a form error.`);
+      if (isDevMode()) {
+        nguWarn('NGU-202', `submit error path "${path}" does not match a field; shown as a form error.`);
       }
       errors.push({ kind: 'server', message });
     }

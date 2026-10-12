@@ -12,6 +12,7 @@ import {
 } from '@angular/core';
 import { injectNguI18n, type NguI18n } from '../messages';
 import { SR_ONLY } from './choice';
+import { injectNguLook } from '../look';
 
 /**
  * Free-text tags for a `string[]` value. Enter or a separator adds the typed text, pasting a
@@ -23,6 +24,7 @@ import { SR_ONLY } from './choice';
   selector: 'ngu-tags',
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
+    '[class.ngu-unstyled]': "look().theme === 'none'",
     class: 'ngu-tags',
     '[class.ngu-tags--disabled]': 'disabled()',
     '[class.ngu-tags--invalid]': 'errorShown()',
@@ -52,6 +54,7 @@ import { SR_ONLY } from './choice';
       #input
       type="text"
       class="ngu-tags__input"
+      [class]="look().classes.control"
       [id]="id()"
       [value]="draft()"
       [placeholder]="placeholder() ?? ''"
@@ -70,7 +73,7 @@ import { SR_ONLY } from './choice';
     <span class="ngu-sr-only" aria-live="polite">{{ status() }}</span>
   `,
   styles: `
-    :host {
+    :host(:not(.ngu-unstyled)) {
       display: flex;
       flex-wrap: wrap;
       align-items: center;
@@ -82,17 +85,17 @@ import { SR_ONLY } from './choice';
       cursor: text;
       min-inline-size: 0;
     }
-    :host(.ngu-tags--invalid) {
+    :host(.ngu-tags--invalid:not(.ngu-unstyled)) {
       border-color: var(--ngu-error-color, #c62828);
     }
-    :host(.ngu-tags--disabled) {
+    :host(.ngu-tags--disabled:not(.ngu-unstyled)) {
       cursor: default;
     }
-    :host:has(.ngu-tags__input:focus-visible) {
+    :host(:not(.ngu-unstyled)):has(.ngu-tags__input:focus-visible) {
       outline: 2px solid var(--ngu-focus-color, #1a73e8);
       outline-offset: 1px;
     }
-    .ngu-tags__list {
+    :host(:where(:not(.ngu-unstyled))) .ngu-tags__list {
       display: flex;
       flex-wrap: wrap;
       gap: 0.375rem;
@@ -101,7 +104,7 @@ import { SR_ONLY } from './choice';
       list-style: none;
       min-inline-size: 0;
     }
-    .ngu-tag {
+    :host(:where(:not(.ngu-unstyled))) .ngu-tag {
       display: inline-flex;
       align-items: center;
       gap: 0.125rem;
@@ -112,15 +115,15 @@ import { SR_ONLY } from './choice';
       background: var(--ngu-tag-bg, rgba(127, 127, 127, 0.14));
       font-size: 0.875rem;
     }
-    .ngu-tag__text {
+    :host(:where(:not(.ngu-unstyled))) .ngu-tag__text {
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
     }
-    .ngu-tag:not(:has(.ngu-tag__remove)) {
+    :host(:where(:not(.ngu-unstyled))) .ngu-tag:not(:has(.ngu-tag__remove)) {
       padding-inline-end: 0.5rem;
     }
-    .ngu-tag__remove {
+    :host(:where(:not(.ngu-unstyled))) .ngu-tag__remove {
       display: inline-grid;
       place-items: center;
       inline-size: 1.5rem;
@@ -135,14 +138,14 @@ import { SR_ONLY } from './choice';
       line-height: 1;
       cursor: pointer;
     }
-    .ngu-tag__remove:hover {
+    :host(:where(:not(.ngu-unstyled))) .ngu-tag__remove:hover {
       background: rgba(127, 127, 127, 0.2);
     }
-    .ngu-tag__remove:focus-visible {
+    :host(:where(:not(.ngu-unstyled))) .ngu-tag__remove:focus-visible {
       outline: 2px solid var(--ngu-focus-color, #1a73e8);
       outline-offset: 0;
     }
-    .ngu-tags__input {
+    :host(:where(:not(.ngu-unstyled))) .ngu-tags__input {
       flex: 1 1 8rem;
       min-inline-size: 6rem;
       padding: 0.1875rem 0.25rem;
@@ -151,14 +154,14 @@ import { SR_ONLY } from './choice';
       color: inherit;
       font: inherit;
     }
-    .ngu-tags__input:focus {
+    :host(:where(:not(.ngu-unstyled))) .ngu-tags__input:focus {
       outline: none;
     }
     @media (forced-colors: active) {
-      .ngu-tag {
+      :host(:where(:not(.ngu-unstyled))) .ngu-tag {
         border: 1px solid CanvasText;
       }
-      :host(.ngu-tags--invalid) {
+      :host(.ngu-tags--invalid:not(.ngu-unstyled)) {
         border-width: 2px;
       }
     }
@@ -166,6 +169,7 @@ import { SR_ONLY } from './choice';
   `,
 })
 export class NguTags {
+  protected readonly look = injectNguLook();
   readonly value = model<readonly string[]>([]);
   readonly touch = output<void>();
   readonly disabled = input(false);

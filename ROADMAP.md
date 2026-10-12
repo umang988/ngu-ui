@@ -212,7 +212,8 @@ built-in with keyboard support, labels and validation. Heavier ones ship in thei
 point.
 
 Status: everything except the combobox built on 2026-10-11 and listed in
-`projects/ngu-form/CHANGELOG.md` under 0.4.0 (not yet published). The combobox is postponed.
+`projects/ngu-form/CHANGELOG.md` under 0.4.0 (not yet published). The combobox followed in
+Phase 5 as `ngu-form/dropdown`.
 214 library specs pass; axe reports no violations on every demo page in light and dark, and
 on the "Every field type" example right to left, with errors showing and with the crop dialog
 open. Heavier inputs load on first use through `@defer`, and uploads live in the
@@ -226,9 +227,10 @@ open. Heavier inputs load on first use through `@defer`, and uploads live in the
       `type: 'select'` on a list; the Ctrl or ⌘ hint shows on devices with a mouse.
 - [x] **Toggle switch** (S). A boolean rendered as `role="switch"`.
 - [x] **Segmented control** (S). A radio group styled as buttons, for two to five options.
-- [ ] **Autocomplete / combobox** (L). Static or async search with debounce, keyboard
-      navigation and the ARIA combobox pattern; built on Angular Aria where possible.
-      Postponed on 2026-10-11; the rest of the phase shipped without it.
+- [x] **Autocomplete / combobox** (L). Static or async search with debounce, keyboard
+      navigation and the ARIA combobox pattern. Postponed on 2026-10-11, then closed in Phase 5
+      as `type: 'dropdown'` from `ngu-form/dropdown`, on top of the `ngu-dropdown` package
+      (server paging, search, virtual scrolling) instead of Angular Aria.
 - [x] **Tags input** (M). Free text chips for `string[]`, with paste splitting and limits.
 
 **Numbers, dates and ranges**
@@ -318,37 +320,48 @@ keyboard path for dragging), and the read-only view is its own component, `<ngu-
 
 Goal: make adoption easy for teams with an existing design system and test setup.
 
+Status: all items built on 2026-10-12 and listed in `projects/ngu-form/CHANGELOG.md` under
+0.6.0 (not yet published), together with the Phase 3 combobox as `ngu-form/dropdown`. Choices
+that differ from the first wording: renderers take over the whole field (label, control and
+messages) through a new contract, `provideNguFieldRenderers`, rather than only the control;
+PrimeNG controls are bound with a new `nguBind` directive because `[formField]` would mark them
+invalid too early; the JSON Schema and OpenAPI import is a schematic that writes typed code, not
+a run-time converter; Playwright gets its own small helper (`ngu-form/playwright`) because CDK
+harnesses do not run there; the formly codemod writes a side file and leaves the original as it
+is. The docs' initial bundle warning moved from 570 to 650 kB: about 31 kB is the new core,
+the rest is reactive-forms code that esbuild hoists out of the lazy Material and PrimeNG demos.
+
 **Styling and renderers**
 
-- [ ] **Unstyled mode** (S). `theme="none"` keeps structure and class hooks without default CSS.
-- [ ] **Tailwind preset** (S). Documented class map and an example with Tailwind 4.
-- [ ] **Angular Material renderer** (L). `ngu-form/material` maps every built-in type to
+- [x] **Unstyled mode** (S). `theme="none"` keeps structure and class hooks without default CSS.
+- [x] **Tailwind preset** (S). Documented class map and an example with Tailwind 4.
+- [x] **Angular Material renderer** (L). `ngu-form/material` maps every built-in type to
       Material form fields.
-- [ ] **PrimeNG renderer** (L). `ngu-form/primeng`, same contract.
-- [ ] **Design tokens** (S). Publish the CSS variables as a documented token list, with density
+- [x] **PrimeNG renderer** (L). `ngu-form/primeng`, same contract.
+- [x] **Design tokens** (S). Publish the CSS variables as a documented token list, with density
       and size variants.
-- [ ] **Icon adornments** (S). Template slots for an icon before or after a control, such as a
+- [x] **Icon adornments** (S). Template slots for an icon before or after a control, such as a
       search icon. v0.2 ships text prefixes and suffixes only.
 
 **Developer tools**
 
-- [ ] **Test harness** (M). `NguFormHarness` on Angular CDK testing: `fill()`, `submit()`,
+- [x] **Test harness** (M). `NguFormHarness` on Angular CDK testing: `fill()`, `submit()`,
       `errors()`, `field(path)`. Works in unit and Playwright component tests.
-- [ ] **Debug panel** (S). `<ngu-form-debug>` showing model, validity, dirty paths and errors.
-- [ ] **`ng add ngu-form`** (M). Schematic that installs, adds providers and a sample form.
-- [ ] **Form generator schematic** (M). `ng g ngu-form:form signup --model=Signup` creates a
+- [x] **Debug panel** (S). `<ngu-form-debug>` showing model, validity, dirty paths and errors.
+- [x] **`ng add ngu-form`** (M). Schematic that installs, adds providers and a sample form.
+- [x] **Form generator schematic** (M). `ng g ngu-form:form signup --model=Signup` creates a
       component with a spec skeleton from an interface.
-- [ ] **JSON Schema and OpenAPI import** (L). Generate a spec from a JSON Schema or an OpenAPI
+- [x] **JSON Schema and OpenAPI import** (L). Generate a spec from a JSON Schema or an OpenAPI
       request body.
-- [ ] **Lazy custom types** (S). `provideNguFieldTypes({ editor: () => import(...) })`.
-- [ ] **Dev-mode diagnostics** (S). Clear errors for typos in paths, missing providers and
+- [x] **Lazy custom types** (S). `provideNguFieldTypes({ editor: () => import(...) })`.
+- [x] **Dev-mode diagnostics** (S). Clear errors for typos in paths, missing providers and
       duplicate keys, with links to the docs.
-- [ ] **Single-field rendering** (S). Document using `ngu-field` alone in a hand-written form.
+- [x] **Single-field rendering** (S). Document using `ngu-field` alone in a hand-written form.
 
 **Migration**
 
-- [ ] **From ngx-formly** (M). Mapping table and a codemod for common field configs.
-- [ ] **From reactive forms** (S). Side-by-side guide for `FormGroup`-based forms.
+- [x] **From ngx-formly** (M). Mapping table and a codemod for common field configs.
+- [x] **From reactive forms** (S). Side-by-side guide for `FormGroup`-based forms.
 
 **Done when** a team can install with `ng add`, render with Material, and test with the harness
 without reading source code.

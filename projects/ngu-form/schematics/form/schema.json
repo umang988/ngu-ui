@@ -1,0 +1,41 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "$id": "NguFormGenerate",
+  "title": "Generate an ngu-form component from an interface",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Name of the form, such as \"signup\". The component is SignupForm in signup-form.ts.",
+      "$default": { "$source": "argv", "index": 0 },
+      "x-prompt": "What is the form called?"
+    },
+    "model": {
+      "type": "string",
+      "description": "Interface or type alias that describes the value, such as \"Signup\". It is looked up in the project's source files.",
+      "x-prompt": "Which interface describes its value?"
+    },
+    "path": {
+      "type": "string",
+      "format": "path",
+      "description": "Folder for the component, relative to the workspace. Defaults to src/app/<name>-form.",
+      "visible": false
+    },
+    "project": {
+      "type": "string",
+      "description": "The project to add the component to.",
+      "$default": { "$source": "projectName" }
+    },
+    "submitLabel": {
+      "type": "string",
+      "default": "Save",
+      "description": "Label of the submit button."
+    },
+    "skipTests": {
+      "type": "boolean",
+      "default": false,
+      "description": "Do not create a spec file."
+    }
+  },
+  "required": ["name", "model"]
+}

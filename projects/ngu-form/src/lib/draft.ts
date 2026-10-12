@@ -2,6 +2,7 @@ import { computed, effect, signal, untracked, type CreateEffectOptions, type Sig
 import type { Field } from '@angular/forms/signals';
 import { clone, deepEqual, isDate, isPlainObject } from './internal';
 import type { DraftOptions, DraftStorage, FormDefinition, FormDraft, LeafDef } from './types';
+import { isDevMode, nguWarn } from './diagnostics';
 
 const PREFIX = 'ngu-form:draft:';
 const VERSION = 1;
@@ -267,6 +268,31 @@ export interface DraftHandle extends FormDraft {
  * Restores a saved draft once the form is ready (after `load`, if any), then saves changes
  * after a pause and removes the draft when nothing is left unsaved.
  */
+/** Draft keys of the forms alive now, with a count, to spot two forms writing one draft. */
+const liveKeys = new Map<string, number>();
+
+function watchDraftKey(options: DraftOptions, onDestroy: (fn: () => void) => void): void {
+  const where = typeof options.storage === 'object' ? 'custom' : (options.storage ?? 'local');
+  const id = `${where}:${options.key}`;
+  const count = (liveKeys.get(id) ?? 0) + 1;
+  liveKeys.set(id, count);
+  if (count > 1) {
+    nguWarn(
+      'NGU-401',
+      `two forms use the draft key "${options.key}" at the same time, so each overwrites the other's draft. Include the record id, as in "profile:42".`,
+      id,
+    );
+  }
+  onDestroy(() => {
+    const left = (liveKeys.get(id) ?? 1) - 1;
+    if (left > 0) {
+      liveKeys.set(id, left);
+    } else {
+      liveKeys.delete(id);
+    }
+  });
+}
+
 export function setupDraft(args: {
   readonly options: DraftOptions;
   readonly fields: FormDefinition;
@@ -280,6 +306,9 @@ export function setupDraft(args: {
 }): DraftHandle {
   const { options, fields, root, model, changed, ready } = args;
   const storage = resolveStorage(options.storage);
+  if (isDevMode()) {
+    watchDraftKey(options, args.onDestroy);
+  }
   const delay = options.debounce ?? 800;
   const restoredAt = signal<Date | undefined>(undefined);
   const savedAt = signal<Date | undefined>(undefined);

@@ -10,6 +10,12 @@
     "paths": {
       "ngu-form": ["./projects/ngu-form/src/public-api.ts"],
       "ngu-form/upload": ["./projects/ngu-form/upload/src/public-api.ts"],
+      "ngu-form/debug": ["./projects/ngu-form/debug/src/public-api.ts"],
+      "ngu-form/testing": ["./projects/ngu-form/testing/src/public-api.ts"],
+      "ngu-form/playwright": ["./projects/ngu-form/playwright/src/public-api.ts"],
+      "ngu-form/material": ["./projects/ngu-form/material/src/public-api.ts"],
+      "ngu-form/primeng": ["./projects/ngu-form/primeng/src/public-api.ts"],
+      "ngu-form/dropdown": ["./projects/ngu-form/dropdown/src/public-api.ts"],
       "ngu-dropdown": ["./projects/ngu-dropdown/src/public-api.ts"],
       "docs-kit/*": ["./projects/docs-kit/src/*"]
     },

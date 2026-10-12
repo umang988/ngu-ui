@@ -16,6 +16,8 @@ import { transformedValue, type Field } from '@angular/forms/signals';
 import { NGU_CAPTCHA, type NguCaptchaAdapter, type NguCaptchaWidget } from '../captcha';
 import { NguFormContext } from '../components/ngu-form-context';
 import { injectNguI18n, type NguI18n } from '../messages';
+import { injectNguLook } from '../look';
+import { nguError } from '../diagnostics';
 
 interface CaptchaState {
   readonly token: string;
@@ -31,21 +33,22 @@ interface CaptchaState {
 @Component({
   selector: 'ngu-captcha',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: { class: 'ngu-captcha', tabindex: '-1' },
+  host: { class: 'ngu-captcha', tabindex: '-1', '[class.ngu-unstyled]': "look().theme === 'none'" },
   template: `<div #slot class="ngu-captcha__slot"></div>`,
   styles: `
-    :host {
+    :host(:not(.ngu-unstyled)) {
       display: block;
       min-block-size: 4rem;
       outline: none;
     }
-    :host(:focus-visible) {
+    :host(:focus-visible:not(.ngu-unstyled)) {
       outline: 2px solid var(--ngu-focus-color, #1a73e8);
       outline-offset: 2px;
     }
   `,
 })
 export class NguCaptcha {
+  protected readonly look = injectNguLook();
   readonly value = model<string>('');
   readonly touch = output<void>();
   /** The field, to clear the token without marking it as changed by the user. */
@@ -90,9 +93,7 @@ export class NguCaptcha {
   private async render(): Promise<void> {
     const adapter = this.adapter() ?? this.provided;
     if (!adapter) {
-      throw new Error(
-        'ngu-form: a "captcha" field needs `captcha` in its spec or provideNguCaptcha().',
-      );
+      throw nguError('NGU-303', 'a "captcha" field needs `captcha` in its spec or provideNguCaptcha().');
     }
     try {
       const widget = await adapter.render(

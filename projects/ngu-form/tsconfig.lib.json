@@ -7,7 +7,12 @@
     "rootDir": "./src",
     "declaration": true,
     "declarationMap": true,
-    "types": []
+    "types": [],
+    // ngu-form/dropdown builds against the published shape of ngu-dropdown (build it first),
+    // not its source: the source is outside this package.
+    "paths": {
+      "ngu-dropdown": ["../../dist/ngu-dropdown"]
+    }
   },
   "include": ["src/**/*.ts"],
   "exclude": ["**/*.spec.ts"]

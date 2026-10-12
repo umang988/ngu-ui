@@ -7,6 +7,7 @@ import { NguDynamic } from './ngu-dynamic';
 import { NguFormContext } from './ngu-form-context';
 import { NguGroup } from './ngu-group';
 import { NguSection } from './ngu-section';
+import { injectNguLook } from '../look';
 
 /** A group or list shown under a tab or a panel header. */
 export interface SectionEntry {
@@ -47,7 +48,7 @@ const BADGE = `
 `;
 
 const SHARED_STYLES = `
-  .ngu-badge {
+  :host(:where(:not(.ngu-unstyled))) .ngu-badge {
     min-inline-size: 1.25rem;
     padding: 0 0.375rem;
     border-radius: 999px;
@@ -67,12 +68,12 @@ const SHARED_STYLES = `
     white-space: nowrap;
   }
   @media (forced-colors: active) {
-    .ngu-badge {
+    :host(:where(:not(.ngu-unstyled))) .ngu-badge {
       border: 1px solid CanvasText;
     }
   }
   @media print {
-    .ngu-badge {
+    :host(:where(:not(.ngu-unstyled))) .ngu-badge {
       display: none;
     }
   }
@@ -106,7 +107,7 @@ abstract class SectionBase {
   selector: 'ngu-tabs',
   imports: [NguSection, forwardRef(() => NguGroup), forwardRef(() => NguArray), forwardRef(() => NguDynamic)],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: { class: 'ngu-tabs' },
+  host: { class: 'ngu-tabs', '[class.ngu-unstyled]': "look().theme === 'none'" },
   template: `
     @let current = active();
     <div class="ngu-tabs__list" role="tablist" [attr.aria-labelledby]="labelledBy()" (keydown)="onKeydown($event)">
@@ -144,17 +145,17 @@ abstract class SectionBase {
     }
   `,
   styles: `
-    :host {
+    :host(:not(.ngu-unstyled)) {
       display: block;
     }
-    .ngu-tabs__list {
+    :host(:where(:not(.ngu-unstyled))) .ngu-tabs__list {
       display: flex;
       gap: 0.25rem;
       overflow-x: auto;
       border-block-end: 1px solid var(--ngu-border-color, #c7c7c7);
-      margin-block-end: var(--ngu-gap, 1rem);
+      margin-block-end: var(--ngu-gap, var(--_ngu-gap, 1rem));
     }
-    .ngu-tab {
+    :host(:where(:not(.ngu-unstyled))) .ngu-tab {
       flex: none;
       display: inline-flex;
       align-items: center;
@@ -169,30 +170,30 @@ abstract class SectionBase {
       border-block-end: 2px solid transparent;
       cursor: pointer;
     }
-    .ngu-tab[aria-selected='true'] {
+    :host(:where(:not(.ngu-unstyled))) .ngu-tab[aria-selected='true'] {
       color: inherit;
       border-block-end-color: var(--ngu-primary, #1a73e8);
     }
-    .ngu-tab:focus-visible {
+    :host(:where(:not(.ngu-unstyled))) .ngu-tab:focus-visible {
       outline: 2px solid var(--ngu-focus-color, #1a73e8);
       outline-offset: -2px;
     }
-    .ngu-print-title {
+    :host(:where(:not(.ngu-unstyled))) .ngu-print-title {
       display: none;
     }
     @media (forced-colors: active) {
-      .ngu-tab[aria-selected='true'] {
+      :host(:where(:not(.ngu-unstyled))) .ngu-tab[aria-selected='true'] {
         border-block-end-color: Highlight;
       }
     }
     @media print {
-      .ngu-tabs__list {
+      :host(:where(:not(.ngu-unstyled))) .ngu-tabs__list {
         display: none;
       }
-      .ngu-tabs__panel[hidden] {
+      :host(:where(:not(.ngu-unstyled))) .ngu-tabs__panel[hidden] {
         display: block !important;
       }
-      .ngu-print-title {
+      :host(:where(:not(.ngu-unstyled))) .ngu-print-title {
         display: block;
         margin: 1rem 0 0.5rem;
         font-weight: 600;
@@ -202,6 +203,7 @@ abstract class SectionBase {
   `,
 })
 export class NguTabs extends SectionBase {
+  protected readonly look = injectNguLook();
   readonly tabs = input.required<readonly SectionEntry[]>();
   /** Key of the selected tab. */
   readonly active = input<string>();
@@ -250,10 +252,10 @@ export class NguTabs extends SectionBase {
   selector: 'ngu-panel',
   imports: [NguSection, forwardRef(() => NguGroup), forwardRef(() => NguArray), forwardRef(() => NguDynamic)],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: { class: 'ngu-panel', '[class.ngu-panel--open]': 'open()' },
+  host: { class: 'ngu-panel', '[class.ngu-panel--open]': 'open()', '[class.ngu-unstyled]': "look().theme === 'none'" },
   template: `
     @let entry = section();
-    <h3 class="ngu-panel__heading">
+    <h3 class="ngu-panel__heading" [class]="look().classes.title">
       <button
         type="button"
         class="ngu-panel__toggle"
@@ -281,17 +283,17 @@ export class NguTabs extends SectionBase {
     </div>
   `,
   styles: `
-    :host {
+    :host(:not(.ngu-unstyled)) {
       display: block;
       min-inline-size: 0;
       border: 1px solid var(--ngu-border-color, #c7c7c7);
       border-radius: var(--ngu-radius, 0.375rem);
     }
-    .ngu-panel__heading {
+    :host(:where(:not(.ngu-unstyled))) .ngu-panel__heading {
       margin: 0;
       font-size: var(--ngu-title-size, 1rem);
     }
-    .ngu-panel__toggle {
+    :host(:where(:not(.ngu-unstyled))) .ngu-panel__toggle {
       display: flex;
       align-items: center;
       gap: 0.5rem;
@@ -305,15 +307,15 @@ export class NguTabs extends SectionBase {
       border: 0;
       cursor: pointer;
     }
-    .ngu-panel__toggle:focus-visible {
+    :host(:where(:not(.ngu-unstyled))) .ngu-panel__toggle:focus-visible {
       outline: 2px solid var(--ngu-focus-color, #1a73e8);
       outline-offset: -2px;
     }
-    .ngu-panel__title {
+    :host(:where(:not(.ngu-unstyled))) .ngu-panel__title {
       flex: 1;
     }
     /* Physical borders on purpose: the rotations below assume the right and bottom edges. */
-    .ngu-panel__chevron {
+    :host(:where(:not(.ngu-unstyled))) .ngu-panel__chevron {
       inline-size: 0.5rem;
       block-size: 0.5rem;
       border-right: 2px solid currentColor;
@@ -321,32 +323,32 @@ export class NguTabs extends SectionBase {
       transform: rotate(-45deg);
       transition: transform 0.15s;
     }
-    .ngu-panel__chevron:dir(rtl) {
+    :host(:where(:not(.ngu-unstyled))) .ngu-panel__chevron:dir(rtl) {
       transform: rotate(135deg);
     }
-    :host(.ngu-panel--open) .ngu-panel__chevron {
+    :host(.ngu-panel--open:not(.ngu-unstyled)) .ngu-panel__chevron {
       transform: rotate(45deg);
     }
-    .ngu-panel__body {
+    :host(:where(:not(.ngu-unstyled))) .ngu-panel__body {
       padding: 0 0.75rem 0.75rem;
     }
     @media (prefers-reduced-motion: reduce) {
-      .ngu-panel__chevron {
+      :host(:where(:not(.ngu-unstyled))) .ngu-panel__chevron {
         transition: none;
       }
     }
     @media print {
-      :host {
+      :host(:not(.ngu-unstyled)) {
         border: 0;
       }
-      .ngu-panel__chevron {
+      :host(:where(:not(.ngu-unstyled))) .ngu-panel__chevron {
         display: none;
       }
-      .ngu-panel__body[hidden] {
+      :host(:where(:not(.ngu-unstyled))) .ngu-panel__body[hidden] {
         display: block !important;
       }
-      .ngu-panel__toggle,
-      .ngu-panel__body {
+      :host(:where(:not(.ngu-unstyled))) .ngu-panel__toggle,
+      :host(:where(:not(.ngu-unstyled))) .ngu-panel__body {
         padding-inline: 0;
       }
     }
@@ -354,6 +356,7 @@ export class NguTabs extends SectionBase {
   `,
 })
 export class NguPanel extends SectionBase {
+  protected readonly look = injectNguLook();
   readonly section = input.required<SectionEntry>();
   readonly open = input(false);
   readonly idPrefix = input.required<string>();

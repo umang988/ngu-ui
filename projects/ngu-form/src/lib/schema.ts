@@ -29,7 +29,7 @@ import {
   type SchemaPathRules,
   type ValidationError,
 } from '@angular/forms/signals';
-import { NGU_CHOICES, NGU_NODES, NGU_STATIC_HIDDEN, NGU_WARNINGS, toDate, toDateBound } from './internal';
+import { NGU_CHOICES, NGU_NODES, NGU_PATH, NGU_STATIC_HIDDEN, NGU_WARNINGS, toDate, toDateBound } from './internal';
 import { hasTypeRules, typeError } from './rules';
 import { passwordScore, strengthOptions } from './strength';
 import { maskIncomplete } from './transform';
@@ -94,6 +94,7 @@ function applyEntry(root: AnyPath, scope: AnyPath, path: AnyPath, def: AnyFieldD
 }
 
 function applyArray(root: AnyPath, scope: AnyPath, path: AnyPath, def: ArrayDef): void {
+  metadata(path, NGU_PATH, ({ pathKeys }) => pathKeys().join('.'));
   applyLogic(root, scope, path, def.hidden, hidden);
   if (def.min != null) {
     minLength(path, def.min);
@@ -157,6 +158,7 @@ function applyDynamic(root: AnyPath, path: AnyPath, def: DynamicDef): void {
       return entry ? dateBoundsError(value(), entry.minDate, entry.maxDate) : undefined;
     });
     // Date bounds also reach the input's min and max attributes; MIN and MAX pick the key.
+    metadata(child, NGU_PATH, ({ pathKeys }) => pathKeys().join('.'));
     metadata(child, MIN_DATE, ({ key }) => entryOf(key())?.minDate);
     metadata(child, MAX_DATE, ({ key }) => entryOf(key())?.maxDate);
     metadata(child, MIN, ({ key }) => (entryOf(key())?.minDate ? MIN_DATE : MIN_NUMBER));
@@ -203,6 +205,7 @@ function applyDynamic(root: AnyPath, path: AnyPath, def: DynamicDef): void {
 }
 
 function applyLeaf(root: AnyPath, scope: AnyPath, path: AnyPath, def: LeafDef): void {
+  metadata(path, NGU_PATH, ({ pathKeys }) => pathKeys().join('.'));
   const req = def.required;
   if (typeof req === 'function') {
     const result = (ctx: Ctx) => req(ctx.valueOf(root), ctx.valueOf(scope));

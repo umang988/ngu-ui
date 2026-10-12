@@ -1,0 +1,15 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "$id": "NguFormFromFormly",
+  "title": "Convert ngx-formly field configs to ngu-form",
+  "type": "object",
+  "properties": {
+    "path": {
+      "type": "string",
+      "description": "The TypeScript file that holds FormlyFieldConfig[] arrays, relative to the workspace.",
+      "$default": { "$source": "argv", "index": 0 },
+      "x-prompt": "Which file has the formly fields?"
+    }
+  },
+  "required": ["path"]
+}

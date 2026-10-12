@@ -911,4 +911,76 @@ providers: [provideNguCaptcha(nguTurnstile({ siteKey: '0x4AAAA...', theme: 'auto
       ]),
     ],
   },
+
+  dropdown: {
+    title: 'Server dropdown',
+    description:
+      'A select that pages through the server as you scroll, with search, from the `ngu-dropdown` package. For long lists that cannot be loaded at once.',
+    sections: [
+      {
+        id: 'setup',
+        title: 'Setup',
+        text: ['Install `ngu-dropdown` and register the type. `ngu-form/dropdown` also teaches TypeScript the type and its options.'],
+        code: [
+          { code: 'npm install ngu-dropdown', lang: 'bash' },
+          {
+            filename: 'app.config.ts',
+            code: `import { provideNguDropdown } from 'ngu-form/dropdown';
+
+providers: [provideNguDropdown()]`,
+          },
+        ],
+      },
+      {
+        id: 'demo',
+        title: 'Server paging',
+        text: [
+          '`fetch` gets one page per call (`{ page, size, search, filters }`) and returns an Observable or a Promise of `{ content, totalElements }`, the shape of a Spring Data page. The scrollbar covers the whole result set; rows load as you reach them. A list value makes it a multiple select with chips.',
+        ],
+        demo: {
+          src: 'dropdown/dropdown.ts',
+          files: ['dropdown/cities.ts'],
+          load: () => import('../demos/dropdown/dropdown').then((m) => m.DropdownDemo),
+        },
+      },
+      {
+        id: 'saved',
+        title: 'Saved values',
+        text: [
+          'A saved record holds a key whose row may not be on a loaded page. `lookup` loads the rows of such keys, so the label shows at once.',
+        ],
+        code: [
+          {
+            code: `city: {
+  label: 'Home city',
+  type: 'dropdown',
+  fetch: (query, { signal }) => this.http.get<Page<City>>('/api/cities', { params: toParams(query) }),
+  lookup: (ids) => this.http.get<City[]>('/api/cities', { params: { ids: ids.join(',') } }),
+  optionValue: 'id',
+  optionLabel: 'name',
+}`,
+          },
+        ],
+      },
+      a11y([
+        'The ARIA combobox pattern with a listbox; arrow keys, Home, End, Page Up and Page Down move through the whole result set.',
+        'The label, hint and errors are ngu-form\'s own, linked to the control. The dropdown shows its error state exactly when ngu-form shows the error.',
+      ]),
+    ],
+    api: [
+      options([
+        { name: 'type', type: "'dropdown'", description: 'On any value; a list value makes it multiple.' },
+        { name: 'fetch', type: '(query, { signal }) => Observable | Promise', description: 'One page of rows from the server.' },
+        { name: 'options', type: 'rows | Signal | (model) => rows', description: 'A static list instead of `fetch`.' },
+        { name: 'lookup', type: '(keys, { signal }) => Observable | Promise', description: 'Rows of values that are not on a loaded page.' },
+        { name: 'optionValue', type: 'string', default: "'value'", description: 'Path of the value in a row.' },
+        { name: 'optionLabel', type: 'string | (row) => string', default: "'label'", description: 'Path of the label, or a function.' },
+        { name: 'filters', type: 'Record | Signal<Record>', description: 'Sent with every query; a signal re-queries on change.' },
+        { name: 'search', type: 'boolean', description: 'Show the search box. Default: with `fetch`, or more than 10 options.' },
+        { name: 'pageSize', type: 'number', default: '50', description: 'Rows per request.' },
+        { name: 'clearable', type: 'boolean', default: 'true', description: 'A clear button.' },
+        { name: 'maxChips', type: 'number', default: '2', description: 'Chips before "+3 more" in multiple mode.' },
+      ]),
+    ],
+  },
 };

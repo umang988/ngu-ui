@@ -15,6 +15,7 @@ import {
 import { safeLocale } from '../internal';
 import { injectNguI18n, type NguI18n } from '../messages';
 import { PHONE_COUNTRIES, phoneCountry, splitPhone, toE164, type PhoneCountry } from '../phone';
+import { injectNguLook } from '../look';
 
 interface CountryOption extends PhoneCountry {
   readonly name: string;
@@ -44,6 +45,7 @@ function regionNames(locale: string): Intl.DisplayNames | null {
   selector: 'ngu-phone',
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
+    '[class.ngu-unstyled]': "look().theme === 'none'",
     class: 'ngu-phone',
     '[class.ngu-phone--invalid]': 'errorShown()',
     '(focusout)': 'onFocusOut($event)',
@@ -51,6 +53,7 @@ function regionNames(locale: string): Intl.DisplayNames | null {
   template: `
     <select
       class="ngu-phone__country"
+      [class]="look().classes.control"
       [attr.aria-label]="i18n().message('countryCode')"
       [disabled]="disabled() || readonly()"
       (change)="pick($event)"
@@ -64,6 +67,7 @@ function regionNames(locale: string): Intl.DisplayNames | null {
     <input
       type="tel"
       class="ngu-phone__number"
+      [class]="look().classes.control"
       [id]="id()"
       [value]="text()"
       [placeholder]="placeholder() ?? ''"
@@ -78,51 +82,52 @@ function regionNames(locale: string): Intl.DisplayNames | null {
     />
   `,
   styles: `
-    :host {
+    :host(:not(.ngu-unstyled)) {
       display: flex;
       min-inline-size: 0;
       border: 1px solid var(--ngu-border-color, #c7c7c7);
       border-radius: var(--ngu-radius, 0.375rem);
       background: var(--ngu-input-bg, transparent);
     }
-    :host(.ngu-phone--invalid) {
+    :host(.ngu-phone--invalid:not(.ngu-unstyled)) {
       border-color: var(--ngu-error-color, #c62828);
     }
-    select,
-    input {
+    :host(:where(:not(.ngu-unstyled))) select,
+    :host(:where(:not(.ngu-unstyled))) input {
       font: inherit;
       color: inherit;
       background: transparent;
       border: 0;
-      padding: var(--ngu-input-padding, 0.5rem 0.75rem);
+      padding: var(--ngu-input-padding, var(--_ngu-input-padding, 0.5rem 0.75rem));
       min-inline-size: 0;
     }
-    select {
+    :host(:where(:not(.ngu-unstyled))) select {
       flex: 0 1 auto;
       max-inline-size: 45%;
       border-inline-end: 1px solid var(--ngu-border-color, #c7c7c7);
     }
-    input {
+    :host(:where(:not(.ngu-unstyled))) input {
       flex: 1 1 auto;
     }
     /* Numbers stay left to right; aligned to the start in RTL forms. */
-    input:dir(rtl) {
+    :host(:where(:not(.ngu-unstyled))) input:dir(rtl) {
       text-align: right;
     }
-    select:focus-visible,
-    input:focus-visible {
+    :host(:where(:not(.ngu-unstyled))) select:focus-visible,
+    :host(:where(:not(.ngu-unstyled))) input:focus-visible {
       outline: 2px solid var(--ngu-focus-color, #1a73e8);
       outline-offset: -2px;
       border-radius: var(--ngu-radius, 0.375rem);
     }
     @media (forced-colors: active) {
-      :host(.ngu-phone--invalid) {
+      :host(.ngu-phone--invalid:not(.ngu-unstyled)) {
         border-width: 2px;
       }
     }
   `,
 })
 export class NguPhone {
+  protected readonly look = injectNguLook();
   readonly value = model<string>('');
   readonly touch = output<void>();
   readonly disabled = input(false);

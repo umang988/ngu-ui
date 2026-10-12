@@ -105,7 +105,17 @@
             "styles": [
               "projects/docs-kit/styles/base.scss",
               "projects/docs-kit/styles/docs.scss",
-              "projects/demo/src/styles.scss"
+              "projects/demo/src/styles.scss",
+              {
+                "input": "projects/demo/src/material-theme.scss",
+                "bundleName": "material-theme",
+                "inject": false
+              },
+              {
+                "input": "projects/demo/src/tailwind-demo.css",
+                "bundleName": "tailwind-demo",
+                "inject": false
+              }
             ]
           },
           "configurations": {
@@ -113,13 +123,13 @@
               "budgets": [
                 {
                   "type": "initial",
-                  "maximumWarning": "570kB",
+                  "maximumWarning": "650kB",
                   "maximumError": "1MB"
                 },
                 {
                   "type": "anyComponentStyle",
-                  "maximumWarning": "6kB",
-                  "maximumError": "8kB"
+                  "maximumWarning": "10kB",
+                  "maximumError": "12kB"
                 }
               ],
               "outputHashing": "all"

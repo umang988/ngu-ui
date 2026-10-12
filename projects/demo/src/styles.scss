@@ -114,3 +114,55 @@
   block-size: 1.125rem;
   accent-color: var(--brand);
 }
+
+.demo-rule {
+  margin: 1.25rem 0;
+  border: 0;
+  border-top: 1px dashed var(--rule);
+}
+
+.demo-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.demo-button {
+  align-self: flex-start;
+  font: inherit;
+  font-weight: 500;
+  padding: 0.5rem 1.25rem;
+  border: 0;
+  border-radius: 0.5rem;
+  background: var(--brand);
+  color: var(--brand-ink);
+  cursor: pointer;
+}
+
+.demo-button:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+}
+
+/* PrimeNG's Aura theme on this site's surfaces: two colors a step darker (lighter in dark mode)
+   so small text keeps a 4.5:1 contrast. */
+.ngu-prime-demo {
+  --p-togglebutton-color: #475569;
+  /* ngu-form's own parts (buttons, tags, the one-time code) in PrimeNG's colors. */
+  /* Aura's primary under white text is 2.5:1; a darker shade keeps the buttons at 4.5:1. */
+  --ngu-primary: var(--p-primary-700);
+  --ngu-on-primary: #ffffff;
+  --ngu-focus-color: var(--p-primary-color);
+  --ngu-border-color: var(--p-inputtext-border-color);
+  --ngu-input-bg: var(--p-inputtext-background);
+  --ngu-error-color: var(--p-message-error-simple-color);
+  --ngu-hint-color: var(--p-text-muted-color);
+  --ngu-radius: var(--p-inputtext-border-radius);
+}
+.ngu-prime-dark .ngu-prime-demo {
+  --ngu-primary: var(--p-primary-color);
+  --ngu-on-primary: var(--p-primary-contrast-color);
+  --p-togglebutton-color: #cbd5e1;
+  --p-message-error-simple-color: #f87171;
+  --p-message-warn-simple-color: #fbbf24;
+}

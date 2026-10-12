@@ -8,6 +8,7 @@ import { NguFormContext } from './ngu-form-context';
 import { NguGroup } from './ngu-group';
 import { NguSection } from './ngu-section';
 import { NguView } from './ngu-view';
+import { injectNguLook } from '../look';
 
 let nextWizardId = 0;
 
@@ -29,6 +30,7 @@ interface StepView {
   imports: [NguGroup, NguSection, NguView],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
+    '[class.ngu-unstyled]': "look().theme === 'none'",
     class: 'ngu-wizard',
     '[class.ngu-wizard--reviewing]': 'reviewing()',
   },
@@ -70,7 +72,7 @@ interface StepView {
         [nguSectionTried]="s.attempted().has(step.key)"
         (nguSectionReveal)="navigate.emit(step.key)"
       >
-        <h2 class="ngu-step__title" [id]="step.headingId" tabindex="-1">
+        <h2 class="ngu-step__title" [class]="look().classes.title" [id]="step.headingId" tabindex="-1">
           <span class="ngu-step__count">{{ i18n.message('stepProgress', { index: i + 1, count: s.count() }) }}</span>&ngsp;<span>{{ step.title }}</span>
         </h2>
         @if (step.review) {
@@ -92,12 +94,12 @@ interface StepView {
     }
   `,
   styles: `
-    :host {
+    :host(:not(.ngu-unstyled)) {
       display: flex;
       flex-direction: column;
-      gap: var(--ngu-gap, 1rem);
+      gap: var(--ngu-gap, var(--_ngu-gap, 1rem));
     }
-    .ngu-steps__list {
+    :host(:where(:not(.ngu-unstyled))) .ngu-steps__list {
       display: flex;
       flex-wrap: wrap;
       gap: 0.25rem 1rem;
@@ -105,7 +107,7 @@ interface StepView {
       padding: 0;
       list-style: none;
     }
-    .ngu-steps__button {
+    :host(:where(:not(.ngu-unstyled))) .ngu-steps__button {
       display: flex;
       align-items: center;
       gap: 0.5rem;
@@ -117,10 +119,10 @@ interface StepView {
       border: 0;
       cursor: pointer;
     }
-    .ngu-steps__button:disabled {
+    :host(:where(:not(.ngu-unstyled))) .ngu-steps__button:disabled {
       cursor: default;
     }
-    .ngu-steps__marker {
+    :host(:where(:not(.ngu-unstyled))) .ngu-steps__marker {
       display: inline-grid;
       place-items: center;
       inline-size: 1.75rem;
@@ -129,28 +131,28 @@ interface StepView {
       border-radius: 50%;
       font-weight: 600;
     }
-    .ngu-steps__item--done .ngu-steps__button,
-    .ngu-steps__item--current .ngu-steps__button {
+    :host(:where(:not(.ngu-unstyled))) .ngu-steps__item--done .ngu-steps__button,
+    :host(:where(:not(.ngu-unstyled))) .ngu-steps__item--current .ngu-steps__button {
       color: inherit;
     }
-    .ngu-steps__item--current .ngu-steps__marker {
+    :host(:where(:not(.ngu-unstyled))) .ngu-steps__item--current .ngu-steps__marker {
       background: var(--ngu-primary, #1a73e8);
       border-color: var(--ngu-primary, #1a73e8);
       color: var(--ngu-on-primary, #fff);
     }
-    .ngu-steps__item--current .ngu-steps__title {
+    :host(:where(:not(.ngu-unstyled))) .ngu-steps__item--current .ngu-steps__title {
       font-weight: 600;
     }
-    .ngu-step {
+    :host(:where(:not(.ngu-unstyled))) .ngu-step {
       display: flex;
       flex-direction: column;
-      gap: var(--ngu-gap, 1rem);
+      gap: var(--ngu-gap, var(--_ngu-gap, 1rem));
     }
     /* An author display value beats the hidden attribute, so restate it. */
-    .ngu-step[hidden] {
+    :host(:where(:not(.ngu-unstyled))) .ngu-step[hidden] {
       display: none;
     }
-    .ngu-step__title {
+    :host(:where(:not(.ngu-unstyled))) .ngu-step__title {
       display: flex;
       flex-direction: column;
       gap: 0.125rem;
@@ -158,31 +160,31 @@ interface StepView {
       font-size: calc(var(--ngu-title-size, 1rem) * 1.25);
       font-weight: 600;
     }
-    .ngu-step__title:focus {
+    :host(:where(:not(.ngu-unstyled))) .ngu-step__title:focus {
       outline: none;
     }
-    .ngu-step__count {
+    :host(:where(:not(.ngu-unstyled))) .ngu-step__count {
       font-size: 0.8125rem;
       font-weight: 500;
       color: var(--ngu-hint-color, #6b6b6b);
     }
-    .ngu-review {
-      padding-block-end: var(--ngu-gap, 1rem);
+    :host(:where(:not(.ngu-unstyled))) .ngu-review {
+      padding-block-end: var(--ngu-gap, var(--_ngu-gap, 1rem));
       border-block-end: 1px solid var(--ngu-border-color, #c7c7c7);
     }
-    .ngu-review__head {
+    :host(:where(:not(.ngu-unstyled))) .ngu-review__head {
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 1rem;
       margin-block-end: 0.75rem;
     }
-    .ngu-review__title {
+    :host(:where(:not(.ngu-unstyled))) .ngu-review__title {
       margin: 0;
       font-size: var(--ngu-title-size, 1rem);
       font-weight: 600;
     }
-    .ngu-review__edit {
+    :host(:where(:not(.ngu-unstyled))) .ngu-review__edit {
       font: inherit;
       font-weight: 500;
       padding: 0.25rem 0.75rem;
@@ -192,9 +194,9 @@ interface StepView {
       color: var(--ngu-primary, #1a73e8);
       cursor: pointer;
     }
-    .ngu-steps__button:focus-visible,
-    .ngu-step__title:focus-visible,
-    .ngu-review__edit:focus-visible {
+    :host(:where(:not(.ngu-unstyled))) .ngu-steps__button:focus-visible,
+    :host(:where(:not(.ngu-unstyled))) .ngu-step__title:focus-visible,
+    :host(:where(:not(.ngu-unstyled))) .ngu-review__edit:focus-visible {
       outline: 2px solid var(--ngu-focus-color, #1a73e8);
       outline-offset: 2px;
     }
@@ -208,27 +210,28 @@ interface StepView {
       white-space: nowrap;
     }
     @media (forced-colors: active) {
-      .ngu-steps__item--current .ngu-steps__marker {
+      :host(:where(:not(.ngu-unstyled))) .ngu-steps__item--current .ngu-steps__marker {
         border-color: Highlight;
       }
     }
     /* Print every step, or only the review once the user reached it. */
     @media print {
-      .ngu-steps,
-      .ngu-step__count,
-      .ngu-review__edit {
+      :host(:where(:not(.ngu-unstyled))) .ngu-steps,
+      :host(:where(:not(.ngu-unstyled))) .ngu-step__count,
+      :host(:where(:not(.ngu-unstyled))) .ngu-review__edit {
         display: none;
       }
-      :host(:not(.ngu-wizard--reviewing)) .ngu-step[hidden]:not(.ngu-step--review) {
+      :host(:not(.ngu-wizard--reviewing):not(.ngu-unstyled)) .ngu-step[hidden]:not(.ngu-step--review) {
         display: flex !important;
       }
-      :host(:not(.ngu-wizard--reviewing)) .ngu-step--review {
+      :host(:not(.ngu-wizard--reviewing):not(.ngu-unstyled)) .ngu-step--review {
         display: none !important;
       }
     }
   `,
 })
 export class NguWizard {
+  protected readonly look = injectNguLook();
   readonly form = input.required<FormDef<any, any>>();
   /** A step in the step list was chosen, or a summary link asked for a hidden step. */
   readonly navigate = output<string>();

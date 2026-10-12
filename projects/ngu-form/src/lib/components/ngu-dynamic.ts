@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, forwardRef, input } from 
 import type { Field } from '@angular/forms/signals';
 import type { DynamicDef, FormDefinition, LeafDef } from '../types';
 import { NguGroup } from './ngu-group';
+import { injectNguLook } from '../look';
 
 /**
  * Renders a run-time field list. Fields appear in list order once the model holds a value
@@ -12,6 +13,7 @@ import { NguGroup } from './ngu-group';
   imports: [forwardRef(() => NguGroup)],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
+    '[class.ngu-unstyled]': "look().theme === 'none'",
     class: 'ngu-dynamic',
   },
   template: `
@@ -26,13 +28,14 @@ import { NguGroup } from './ngu-group';
     />
   `,
   styles: `
-    :host {
+    :host(:not(.ngu-unstyled)) {
       display: block;
       min-inline-size: 0;
     }
   `,
 })
 export class NguDynamic {
+  protected readonly look = injectNguLook();
   readonly def = input.required<DynamicDef>();
   readonly tree = input.required<Field<any>>();
   readonly path = input<string>('');

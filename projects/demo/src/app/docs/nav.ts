@@ -7,6 +7,9 @@ const types = (key: string) => () => import('./content/field-types').then((m) =>
 const uploads = (key: string) => () => import('./content/uploads').then((m) => m.PAGES[key]);
 const custom = (key: string) => () => import('./content/customization').then((m) => m.PAGES[key]);
 const api = (key: string) => () => import('./content/api').then((m) => m.PAGES[key]);
+const systems = (key: string) => () => import('./content/design-systems').then((m) => m.PAGES[key]);
+const tools = (key: string) => () => import('./content/tools').then((m) => m.PAGES[key]);
+const migration = (key: string) => () => import('./content/migration').then((m) => m.PAGES[key]);
 
 /** The sidebar, in reading order. Previous and next links follow it too. */
 export const NAV: readonly NavGroup[] = [
@@ -59,6 +62,7 @@ export const NAV: readonly NavGroup[] = [
       { title: 'URL, search and color', path: 'url', load: types('url') },
       { title: 'Consent', path: 'consent', load: types('consent') },
       { title: 'Captcha', path: 'captcha', load: types('captcha') },
+      { title: 'Server dropdown', path: 'dropdown', load: types('dropdown') },
     ],
   },
   {
@@ -75,8 +79,35 @@ export const NAV: readonly NavGroup[] = [
       { title: 'Custom types', path: 'custom-types', load: custom('custom-types') },
       { title: 'Overrides', path: 'overrides', load: custom('overrides') },
       { title: 'Theming', path: 'theming', load: custom('theming') },
+      { title: 'Icons', path: 'icons', load: custom('icons') },
       { title: 'Messages and languages', path: 'languages', load: custom('languages') },
       { title: 'Accessibility', path: 'accessibility', load: custom('accessibility') },
+    ],
+  },
+  {
+    title: 'Design systems',
+    items: [
+      { title: 'Angular Material', path: 'material', load: systems('material') },
+      { title: 'PrimeNG', path: 'primeng', load: systems('primeng') },
+      { title: 'Unstyled and Tailwind', path: 'tailwind', load: systems('tailwind') },
+      { title: 'Renderers', path: 'renderers', load: systems('renderers') },
+    ],
+  },
+  {
+    title: 'Tools',
+    items: [
+      { title: 'Testing', path: 'testing', load: tools('testing') },
+      { title: 'Schematics', path: 'schematics', load: tools('schematics') },
+      { title: 'Debug panel', path: 'debug', load: tools('debug') },
+      { title: 'Single fields', path: 'single-field', load: tools('single-field') },
+      { title: 'Diagnostics', path: 'diagnostics', load: tools('diagnostics') },
+    ],
+  },
+  {
+    title: 'Migration',
+    items: [
+      { title: 'From ngx-formly', path: 'from-formly', load: migration('from-formly') },
+      { title: 'From reactive forms', path: 'from-reactive-forms', load: migration('from-reactive-forms') },
     ],
   },
   {

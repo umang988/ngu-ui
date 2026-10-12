@@ -1,0 +1,20 @@
+/*
+ * Tailwind for the docs' Tailwind page only (inject: false in angular.json). It scans just that
+ * demo and skips Tailwind's base reset, so the rest of the site is untouched. An app writes
+ * `@import "tailwindcss";` in styles.css instead.
+ */
+@layer theme, base, components, utilities;
+@import 'tailwindcss/theme.css' layer(theme);
+@import 'tailwindcss/utilities.css' layer(utilities) source(none);
+@source './app/docs/demos/tailwind';
+/* Dark like the rest of the site: the reader's choice, else the system's. */
+@custom-variant dark {
+  &:where([data-theme='dark'] *) {
+    @slot;
+  }
+  @media (prefers-color-scheme: dark) {
+    &:where(:root:not([data-theme='light']) *) {
+      @slot;
+    }
+  }
+}
