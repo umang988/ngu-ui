@@ -32,6 +32,7 @@ let nextName = 0;
     @for (c of choices(); track $index) {
       <label
         class="ngu-choice"
+        [class]="look().classes.option"
         [class.ngu-choice--checked]="isChecked(c)"
         [class.ngu-choice--disabled]="disabled() || c.disabled"
       >

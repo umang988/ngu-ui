@@ -34,7 +34,7 @@ import { injectNguLook } from '../look';
     @if (tags().length) {
       <ul class="ngu-tags__list">
         @for (tag of tags(); track $index) {
-          <li class="ngu-tag">
+          <li class="ngu-tag" [class]="look().classes.chip">
             <span class="ngu-tag__text">{{ tag }}</span>
             @if (!disabled() && !readonly()) {
               <button

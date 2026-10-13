@@ -16,6 +16,7 @@
       "ngu-form/material": ["./projects/ngu-form/material/src/public-api.ts"],
       "ngu-form/primeng": ["./projects/ngu-form/primeng/src/public-api.ts"],
       "ngu-form/dropdown": ["./projects/ngu-form/dropdown/src/public-api.ts"],
+      "ngu-form/tailwind": ["./projects/ngu-form/tailwind/src/public-api.ts"],
       "ngu-dropdown": ["./projects/ngu-dropdown/src/public-api.ts"],
       "docs-kit/*": ["./projects/docs-kit/src/*"]
     },

@@ -231,6 +231,8 @@ const GROUP_OPTION_KEYS = new Set([
   'order',
   'layout',
   'collapsed',
+  'class',
+  'classes',
 ]);
 
 /**
@@ -385,12 +387,12 @@ function staticEntry(spec: unknown, path: string): StaticDef {
   if (!isPlainObject(spec)) {
     throw nguError('NGU-108', `"${path}" is static content and needs { heading }, { text } or { divider: true }.`);
   }
-  const { heading, text, divider, level, span, hidden, order } = spec as Record<string, any>;
+  const { heading, text, divider, level, span, hidden, order, class: cls } = spec as Record<string, any>;
   const kind = typeof heading === 'string' ? 'heading' : typeof text === 'string' ? 'text' : divider ? 'divider' : undefined;
   if (!kind) {
     throw nguError('NGU-108', `"${path}" is static content and needs { heading }, { text } or { divider: true }.`);
   }
-  return { __ngu: 'static', kind, text: heading ?? text ?? '', level: level ?? 3, span, hidden, order };
+  return { __ngu: 'static', kind, text: heading ?? text ?? '', level: level ?? 3, span, hidden, order, class: cls };
 }
 
 function leaf(spec: Record<string, unknown>, value: unknown, path: string): LeafDef {

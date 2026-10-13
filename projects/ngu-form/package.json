@@ -38,6 +38,12 @@
   "dependencies": {
     "tslib": "^2.3.0"
   },
+  "exports": {
+    "./tailwind.css": {
+      "style": "./tailwind.css",
+      "default": "./tailwind.css"
+    }
+  },
   "schematics": "./schematics/collection.json",
   "ng-add": {
     "save": "dependencies"

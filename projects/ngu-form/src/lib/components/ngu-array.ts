@@ -27,7 +27,7 @@ import { NguArrayTable } from './ngu-array-table';
 import type { ArrayColumn, ArrayRow } from './ngu-array-table';
 import { NguGroup } from './ngu-group';
 import { NguSection } from './ngu-section';
-import { injectNguLook } from '../look';
+import { extendLook, injectOuterLook, NGU_LOOK, slotClass } from '../look';
 
 let nextArrayId = 0;
 let nextRowId = 0;
@@ -54,12 +54,14 @@ interface Drag {
  */
 @Component({
   selector: 'ngu-array',
+  providers: [{ provide: NGU_LOOK, useFactory: () => inject(NguArray).look }],
   imports: [NgTemplateOutlet, NguField, NguSection, NguArrayTable, forwardRef(() => NguGroup)],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '[class.ngu-unstyled]': "look().theme === 'none'",
-    '[class]': 'look().classes.list',
+    '[class]': 'hostClass()',
     class: 'ngu-array',
+    '[attr.data-invalid]': "showErrors() ? '' : null",
     '[attr.data-ngu-path]': 'modelPath()',
     '[class.ngu-array--invalid]': 'showErrors()',
     '[class.ngu-array--table]': 'table()',
@@ -74,7 +76,7 @@ interface Drag {
       <h3 class="ngu-array__title" [class]="look().classes.title" [id]="titleId">{{ i18n.text(d.title) }}</h3>
     }
     @if (d.description) {
-      <p class="ngu-array__description">{{ i18n.text(d.description) }}</p>
+      <p class="ngu-array__description" [class]="look().classes.description">{{ i18n.text(d.description) }}</p>
     }
     <div
       #viewport
@@ -508,7 +510,10 @@ interface Drag {
   `,
 })
 export class NguArray {
-  protected readonly look = injectNguLook();
+  private readonly outerLook = injectOuterLook();
+  /** The look around this list with the `classes` of its spec; its rows read this one. */
+  readonly look = computed(() => extendLook(this.outerLook(), this.def().classes));
+  protected readonly hostClass = computed(() => slotClass(this.look(), 'list', this.def().class));
   readonly def = input.required<ArrayDef>();
   readonly tree = input.required<Field<any>>();
   /** Dot path of this list inside the form. */

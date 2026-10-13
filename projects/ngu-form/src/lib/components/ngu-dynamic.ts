@@ -1,8 +1,8 @@
-import { ChangeDetectionStrategy, Component, computed, forwardRef, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, forwardRef, inject, input } from '@angular/core';
 import type { Field } from '@angular/forms/signals';
 import type { DynamicDef, FormDefinition, LeafDef } from '../types';
 import { NguGroup } from './ngu-group';
-import { injectNguLook } from '../look';
+import { extendLook, injectOuterLook, NGU_LOOK } from '../look';
 
 /**
  * Renders a run-time field list. Fields appear in list order once the model holds a value
@@ -10,11 +10,13 @@ import { injectNguLook } from '../look';
  */
 @Component({
   selector: 'ngu-dynamic',
+  providers: [{ provide: NGU_LOOK, useFactory: () => inject(NguDynamic).look }],
   imports: [forwardRef(() => NguGroup)],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '[class.ngu-unstyled]': "look().theme === 'none'",
     class: 'ngu-dynamic',
+    '[class]': "def().class ?? ''",
   },
   template: `
     @let d = def();
@@ -35,8 +37,10 @@ import { injectNguLook } from '../look';
   `,
 })
 export class NguDynamic {
-  protected readonly look = injectNguLook();
   readonly def = input.required<DynamicDef>();
+  private readonly outerLook = injectOuterLook();
+  /** The look around this field list with the `classes` of its spec. */
+  readonly look = computed(() => extendLook(this.outerLook(), this.def().classes));
   readonly tree = input.required<Field<any>>();
   readonly path = input<string>('');
 

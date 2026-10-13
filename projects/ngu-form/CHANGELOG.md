@@ -30,9 +30,26 @@
   `provideNguFormConfig({ theme: 'none' })`, drops ngu-form's visual CSS and keeps the markup,
   its classes and its behavior (screen-reader text, the `cols` grid, long-list scrolling,
   overlays and drag handles keep working).
-- **Class map.** `provideNguFormConfig({ classes })` adds classes to the form, fields, labels,
-  controls, checkboxes, hints, errors, groups, titles, lists, rows and buttons, for Tailwind or
-  other utility CSS. `injectNguLook()` gives custom renderers the same theme and classes.
+- **Class map.** `provideNguFormConfig({ classes })` adds classes to the elements ngu-form
+  renders, for Tailwind or other utility CSS: 28 slots, from `form`, `field`, `label` and
+  `control` to `adorned` and `affix` (controls with a prefix, suffix or icon), `option`,
+  `chip`, `warning`, `description`, `tabs` and `tab`, `panel`, `steps` and `step`, `actions`,
+  `errorSummary`, `notice` and `value` (view mode). `injectNguLook()` gives custom renderers
+  the same theme and classes.
+- **Classes per form, group and field.** `[classes]` on `<ngu-form>` and `<ngu-view>` adds to
+  the app-wide map, slot by slot. `classes` on a group, list or run-time field list reaches
+  everything inside it; on a field, only that field. `class` puts classes on the element itself:
+  the `<ngu-field>`, `<ngu-group>`, `<ngu-array>` or `<ngu-dynamic>`, or static content.
+  Run-time fields take both as plain JSON. `mergeClasses` in the config joins the levels, for
+  example with `twMerge`, so an inner utility replaces an outer one.
+- **State attributes.** Fields carry `data-invalid` (while an error shows), `data-warning`,
+  `data-required`, `data-disabled`, `data-readonly` and `data-pending`; groups and lists
+  `data-invalid`; open panels `data-open`; finished wizard steps `data-done`; and a control in an
+  adorned box `data-adorned`. Utility variants such as `data-invalid:` style them.
+- **Tailwind preset** (`ngu-form/tailwind`). `nguTailwind` is a complete class map for
+  Tailwind 4, light and dark. `ngu-form/tailwind.css`, imported after Tailwind, points Tailwind
+  at the preset's classes in `node_modules`, adds the `ngu-accent` theme color, and draws the
+  parts without a slot (chevrons, step markers, problem badges, the warning mark).
 - **Density and size.** `density` (`compact`, `normal`, `spacious`) and `size` (`sm`, `md`,
   `lg`) on `<ngu-form>` or in the config. They change the defaults of the spacing and text
   tokens; tokens set by the app still win. New token `--ngu-font-size`.
@@ -84,6 +101,7 @@
 
 ### Fixed
 
+- In unstyled forms, each tab panel no longer shows its print-only title on screen.
 - A field touched by code, for example by Signal Forms' `submit()` around a lone
   `<ngu-field>`, now shows its errors. The autofill guard (a touch needs the user's own blur)
   applies only once autofill has blurred the field.

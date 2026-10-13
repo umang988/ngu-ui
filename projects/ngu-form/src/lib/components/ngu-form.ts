@@ -23,7 +23,15 @@ import { submit, type Field } from '@angular/forms/signals';
 import { DEFAULT_BREAKPOINTS, NGU_FORM_CONFIG } from '../config';
 import { closest, fieldPaths, isDevMode, matchesField, nguWarn } from '../diagnostics';
 import { internalsOf } from '../internal';
-import { NGU_LOOK, resolveLook, type NguDensity, type NguLook, type NguSize, type NguTheme } from '../look';
+import {
+  NGU_LOOK,
+  resolveLook,
+  type NguClassMap,
+  type NguDensity,
+  type NguLook,
+  type NguSize,
+  type NguTheme,
+} from '../look';
 import { injectNguI18n } from '../messages';
 import { REVIEW_STEP, type StepsHandle } from '../steps';
 import { resolvePath, toSubmissionErrors } from '../submit-errors';
@@ -91,7 +99,7 @@ function focusProblem(el: HTMLElement | null | undefined): void {
       [attr.aria-busy]="submitting() || loading() || null"
     >
       @if (summary().length) {
-        <div class="ngu-error-summary" tabindex="-1">
+        <div class="ngu-error-summary" [class]="look().classes.errorSummary" tabindex="-1">
           <div role="alert">
             <h2 class="ngu-error-summary__title">{{ i18n.message('errorSummaryTitle', { count: summary().length }) }}</h2>
             <ul class="ngu-error-summary__list">
@@ -105,9 +113,9 @@ function focusProblem(el: HTMLElement | null | undefined): void {
         </div>
       }
       @if (d.draft.restoredAt(); as at) {
-        <div class="ngu-notice" role="status">
+        <div class="ngu-notice" [class]="look().classes.notice" role="status">
           <span>{{ i18n.message('draftRestored', { time: when(at) }) }}</span>
-          <button type="button" class="ngu-notice__action" (click)="discardDraft()">{{ i18n.message('discardDraft') }}</button>
+          <button type="button" class="ngu-notice__action" [class]="look().classes.button" (click)="discardDraft()">{{ i18n.message('discardDraft') }}</button>
         </div>
       }
       @if (d.loadError() !== undefined) {
@@ -125,7 +133,7 @@ function focusProblem(el: HTMLElement | null | undefined): void {
         <p class="ngu-form-error" [class]="look().classes.error" [id]="formErrorId" role="alert" tabindex="-1">{{ message }}</p>
       }
       @if (steps(); as s) {
-        <div class="ngu-actions ngu-actions--steps">
+        <div class="ngu-actions ngu-actions--steps" [class]="look().classes.actions">
           @if (!s.first()) {
             <button type="button" class="ngu-back" [class]="look().classes.button" (click)="back()">{{ i18n.message('back') }}</button>
           }
@@ -140,7 +148,7 @@ function focusProblem(el: HTMLElement | null | undefined): void {
           }
         </div>
       } @else if (submitLabel()) {
-        <div class="ngu-actions">
+        <div class="ngu-actions" [class]="look().classes.actions">
           <!-- aria-disabled, not disabled: a disabled button drops keyboard focus to the page -->
           <button type="submit" class="ngu-submit" [class]="look().classes.submit" [attr.aria-disabled]="blocked() || null">
             {{ i18n.text(submitLabel()) }}
@@ -362,6 +370,11 @@ export class NguForm<TModel extends object, TPayload = TModel> {
   readonly density = input<NguDensity>();
   /** Text size of controls, labels and buttons: `'sm'`, `'md'` (default) or `'lg'`. */
   readonly size = input<NguSize>();
+  /**
+   * Classes for this form, added to the app-wide class map slot by slot, for example
+   * `{ submit: 'w-full' }`.
+   */
+  readonly classes = input<NguClassMap>();
 
   /** Emits the payload (the model, unless `mapValue` is set) after a successful submit. */
   readonly submitted = output<TPayload>();
@@ -376,7 +389,12 @@ export class NguForm<TModel extends object, TPayload = TModel> {
   private readonly config = inject(NGU_FORM_CONFIG, { optional: true });
   /** Theme, density, size and class map, from the inputs and then the app-wide config. */
   readonly look = computed<NguLook>(() =>
-    resolveLook(this.config, { theme: this.theme(), density: this.density(), size: this.size() }),
+    resolveLook(this.config, {
+      theme: this.theme(),
+      density: this.density(),
+      size: this.size(),
+      classes: this.classes(),
+    }),
   );
   private readonly fieldTemplates = contentChildren(NguFieldTemplate);
   private readonly controlTemplates = contentChildren(NguControlTemplate);

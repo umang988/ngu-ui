@@ -43,7 +43,7 @@ import {
 import { findIcon, NGU_ICONS } from '../icons';
 import { NGU_FIELD_RENDERERS, type NguFieldRenderContext } from '../renderers';
 import { isDevMode, nguWarn } from '../diagnostics';
-import { injectNguLook } from '../look';
+import { extendLook, injectOuterLook, NGU_LOOK, slotClass } from '../look';
 import { deepMerge, NGU_CHOICES, NGU_NODES, NGU_PATH, NGU_WARNINGS } from '../internal';
 import { injectNguI18n } from '../messages';
 import { DEFAULT_PASSWORD_LENGTH, strengthOptions } from '../strength';
@@ -141,6 +141,7 @@ function isAutofilled(el: Element): boolean {
  */
 @Component({
   selector: 'ngu-field',
+  providers: [{ provide: NGU_LOOK, useFactory: () => inject(NguField).look }],
   imports: [
     FormField,
     NgTemplateOutlet,
@@ -164,8 +165,14 @@ function isAutofilled(el: Element): boolean {
     class: 'ngu-field',
     '[attr.data-ngu-path]': 'modelPath()',
     '[attr.data-ngu-type]': 'def().type',
-    '[class]': 'look().classes.field',
+    '[class]': 'hostClass()',
     '[class.ngu-unstyled]': "look().theme === 'none'",
+    '[attr.data-invalid]': "showErrors() ? '' : null",
+    '[attr.data-warning]': "warning() ? '' : null",
+    '[attr.data-required]': "state().required() ? '' : null",
+    '[attr.data-disabled]': "state().disabled() ? '' : null",
+    '[attr.data-readonly]': "state().readonly() ? '' : null",
+    '[attr.data-pending]': "state().pending() ? '' : null",
     '[class.ngu-field--invalid]': 'showErrors()',
     '[class.ngu-field--warning]': '!!warning()',
     '[class.ngu-field--loading]': 'loading()',
@@ -353,14 +360,14 @@ function isAutofilled(el: Element): boolean {
                   }
                 }
                 @default {
-                  <div class="ngu-control" [class.ngu-control--adorned]="adorned()">
+                  <div class="ngu-control" [class]="adorned() ? look().classes.adorned : ''" [class.ngu-control--adorned]="adorned()">
                     @if (prefixIcon(); as icon) {
-                      <span class="ngu-icon ngu-icon--prefix" aria-hidden="true" (click)="focusInput()">
+                      <span class="ngu-icon ngu-icon--prefix" [class]="look().classes.affix" aria-hidden="true" (click)="focusInput()">
                         <ng-container *ngTemplateOutlet="adornmentTpl; context: { $implicit: icon }" />
                       </span>
                     }
                     @if (prefix()) {
-                      <span class="ngu-affix ngu-prefix" [id]="id + '-prefix'">{{ prefix() }}</span>
+                      <span class="ngu-affix ngu-prefix" [class]="look().classes.affix" [id]="id + '-prefix'">{{ prefix() }}</span>
                     }
                     @switch (d.type) {
                       @case ('textarea') {
@@ -368,6 +375,7 @@ function isAutofilled(el: Element): boolean {
                           <textarea
                             #textarea
                             [class]="look().classes.control"
+                            [attr.data-adorned]="adorned() ? '' : null"
                             [nguTransform]="t"
                             [id]="id"
                             [class.ngu-autosize]="!!d.maxRows"
@@ -385,6 +393,7 @@ function isAutofilled(el: Element): boolean {
                           <textarea
                             #textarea
                             [class]="look().classes.control"
+                            [attr.data-adorned]="adorned() ? '' : null"
                             [id]="id"
                             [class.ngu-autosize]="!!d.maxRows"
                             [class.ngu-rows]="!!d.rows"
@@ -403,6 +412,7 @@ function isAutofilled(el: Element): boolean {
                         <select
                           [nguSelect]="choices()"
                           [class]="look().classes.control"
+                          [attr.data-adorned]="adorned() ? '' : null"
                           [id]="id"
                           [multiple]="!!d.multiple"
                           [attr.size]="selectSize()"
@@ -424,6 +434,7 @@ function isAutofilled(el: Element): boolean {
                           <input
                             [nguTransform]="t"
                             [class]="look().classes.control"
+                            [attr.data-adorned]="adorned() ? '' : null"
                             [id]="id"
                             [type]="inputType()"
                             [placeholder]="placeholder()"
@@ -438,6 +449,7 @@ function isAutofilled(el: Element): boolean {
                         } @else {
                           <input
                             [class]="look().classes.control"
+                            [attr.data-adorned]="adorned() ? '' : null"
                             [id]="id"
                             [type]="inputType()"
                             [placeholder]="placeholder()"
@@ -456,10 +468,10 @@ function isAutofilled(el: Element): boolean {
                       }
                     }
                     @if (suffix()) {
-                      <span class="ngu-affix ngu-suffix" [id]="id + '-suffix'">{{ suffix() }}</span>
+                      <span class="ngu-affix ngu-suffix" [class]="look().classes.affix" [id]="id + '-suffix'">{{ suffix() }}</span>
                     }
                     @if (suffixIcon(); as icon) {
-                      <span class="ngu-icon ngu-icon--suffix" aria-hidden="true" (click)="focusInput()">
+                      <span class="ngu-icon ngu-icon--suffix" [class]="look().classes.affix" aria-hidden="true" (click)="focusInput()">
                         <ng-container *ngTemplateOutlet="adornmentTpl; context: { $implicit: icon }" />
                       </span>
                     }
@@ -482,7 +494,7 @@ function isAutofilled(el: Element): boolean {
                     <p class="ngu-hint" [class]="look().classes.hint" [id]="id + '-multi'">{{ i18n.message('multiSelectHint') }}</p>
                   }
                   @if (counter(); as c) {
-                    <p class="ngu-counter" [class.ngu-counter--over]="c.left < 0" aria-hidden="true">{{ c.length }} / {{ c.max }}</p>
+                    <p class="ngu-counter" [class]="look().classes.hint" [class.ngu-counter--over]="c.left < 0" aria-hidden="true">{{ c.length }} / {{ c.max }}</p>
                     <span class="ngu-sr-only" [id]="id + '-count'">{{ c.text }}</span>
                   }
                   @if (strength(); as s) {
@@ -497,9 +509,9 @@ function isAutofilled(el: Element): boolean {
       @if (showErrors()) {
         <p class="ngu-error" [class]="look().classes.error" [id]="id + '-msg'">{{ message() }}</p>
       } @else if (state().pending()) {
-        <p class="ngu-pending" [id]="id + '-msg'" aria-live="polite">{{ pendingText() }}</p>
+        <p class="ngu-pending" [class]="look().classes.hint" [id]="id + '-msg'" aria-live="polite">{{ pendingText() }}</p>
       } @else if (warning(); as w) {
-        <p class="ngu-warning" [id]="id + '-msg'"><span class="ngu-warning__mark" aria-hidden="true">!</span><span class="ngu-sr-only">{{ i18n.message('warningPrefix') }} </span>{{ w }}</p>
+        <p class="ngu-warning" [class]="look().classes.warning" [id]="id + '-msg'"><span class="ngu-warning__mark" aria-hidden="true">!</span><span class="ngu-sr-only">{{ i18n.message('warningPrefix') }} </span>{{ w }}</p>
       } @else if (hint()) {
         <p class="ngu-hint" [class]="look().classes.hint" [id]="id + '-msg'">{{ hint() }}</p>
       }
@@ -867,7 +879,10 @@ export class NguField {
   private readonly registeredTypes = inject(NGU_FIELD_TYPES, { optional: true });
   private readonly fieldRenderers = inject(NGU_FIELD_RENDERERS, { optional: true });
   private readonly icons = inject(NGU_ICONS, { optional: true });
-  protected readonly look = injectNguLook();
+  private readonly outerLook = injectOuterLook();
+  /** The look around this field with the `classes` of its spec; controls inside it read this one. */
+  readonly look = computed(() => extendLook(this.outerLook(), this.def().classes));
+  protected readonly hostClass = computed(() => slotClass(this.look(), 'field', this.def().class));
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly errorHandler = inject(ErrorHandler);
   private readonly textarea = viewChild<ElementRef<HTMLTextAreaElement>>('textarea');

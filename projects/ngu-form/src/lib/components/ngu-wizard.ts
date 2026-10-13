@@ -39,14 +39,16 @@ interface StepView {
     @let current = s.current();
     <!-- A labelled list rather than a nav landmark: a page can hold several wizards. -->
     <div class="ngu-steps">
-      <ol class="ngu-steps__list" [attr.aria-label]="i18n.message('stepsLabel')">
+      <ol class="ngu-steps__list" [class]="look().classes.steps" [attr.aria-label]="i18n.message('stepsLabel')">
         @for (step of views(); track step.key; let i = $index) {
           @let done = isDone(step.key);
           <li class="ngu-steps__item" [class.ngu-steps__item--current]="step.key === current" [class.ngu-steps__item--done]="done">
             <button
               type="button"
               class="ngu-steps__button"
+              [class]="look().classes.step"
               [attr.aria-current]="step.key === current ? 'step' : null"
+              [attr.data-done]="done ? '' : null"
               [disabled]="!s.canGoTo(step.key)"
               (click)="navigate.emit(step.key)"
             >
@@ -79,8 +81,8 @@ interface StepView {
           @for (part of reviewParts(); track part.key) {
             <div class="ngu-review">
               <div class="ngu-review__head">
-                <h3 class="ngu-review__title">{{ part.title }}</h3>
-                <button type="button" class="ngu-review__edit" (click)="edit.emit(part.key)">
+                <h3 class="ngu-review__title" [class]="look().classes.title">{{ part.title }}</h3>
+                <button type="button" class="ngu-review__edit" [class]="look().classes.button" (click)="edit.emit(part.key)">
                   {{ i18n.message('edit') }}<span class="ngu-sr-only"> {{ part.title }}</span>
                 </button>
               </div>

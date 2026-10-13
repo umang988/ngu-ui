@@ -1,12 +1,17 @@
 /*
- * Tailwind for the docs' Tailwind page only (inject: false in angular.json). It scans just that
- * demo and skips Tailwind's base reset, so the rest of the site is untouched. An app writes
- * `@import "tailwindcss";` in styles.css instead.
+ * Tailwind for the docs' Tailwind page only (inject: false in angular.json). It scans just those
+ * demos and the preset, and skips Tailwind's base reset, so the rest of the site is untouched. An
+ * app writes `@import "tailwindcss";` and `@import "ngu-form/tailwind.css";` in styles.css instead.
  */
 @layer theme, base, components, utilities;
 @import 'tailwindcss/theme.css' layer(theme);
-@import 'tailwindcss/utilities.css' layer(utilities) source(none);
+/* Not in a layer: the site's own h2, h3 and p rules are not layered either, and must lose here. */
+@import 'tailwindcss/utilities.css' source(none);
+/* The preset's CSS, from source; an app imports "ngu-form/tailwind.css". */
+@import '../../ngu-form/tailwind.css';
 @source './app/docs/demos/tailwind';
+@source '../../ngu-form/tailwind/src';
+
 /* Dark like the rest of the site: the reader's choice, else the system's. */
 @custom-variant dark {
   &:where([data-theme='dark'] *) {
@@ -16,5 +21,25 @@
     &:where(:root:not([data-theme='light']) *) {
       @slot;
     }
+  }
+}
+
+/* The parts of Tailwind's base reset the preset relies on, for the demos only. */
+@layer base {
+  :where(.tw) :where(*, ::before, ::after) {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    border: 0 solid;
+  }
+  :where(.tw) :where(button, input, select, textarea) {
+    font: inherit;
+    color: inherit;
+    letter-spacing: inherit;
+    background-color: transparent;
+    border-radius: 0;
+  }
+  :where(.tw) :where(ol, ul) {
+    list-style: none;
   }
 }

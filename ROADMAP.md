@@ -335,6 +335,12 @@ the rest is reactive-forms code that esbuild hoists out of the lazy Material and
 
 - [x] **Unstyled mode** (S). `theme="none"` keeps structure and class hooks without default CSS.
 - [x] **Tailwind preset** (S). Documented class map and an example with Tailwind 4.
+- [x] **Tailwind classes everywhere** (M). Added on 2026-10-13: a slot for every visible part
+      (28), `[classes]` per form and view, `class` and `classes` per group, list and field
+      (also on run-time fields), `mergeClasses` for tailwind-merge, state attributes for
+      variants (`data-invalid`, `data-disabled`, `data-open`...), and a ready preset in
+      `ngu-form/tailwind` with its CSS file. Owners of paid kits such as Tailwind Plus copy
+      their class strings into their own map; ngu-form ships none of them.
 - [x] **Angular Material renderer** (L). `ngu-form/material` maps every built-in type to
       Material form fields.
 - [x] **PrimeNG renderer** (L). `ngu-form/primeng`, same contract.

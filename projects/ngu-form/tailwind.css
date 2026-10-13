@@ -1,0 +1,168 @@
+/*
+ * ngu-form's Tailwind 4 preset. Import it after Tailwind, and pass `nguTailwind` from
+ * `ngu-form/tailwind` as the class map with `theme: 'none'`:
+ *
+ *   @import "tailwindcss";
+ *   @import "ngu-form/tailwind.css";
+ *
+ * It points Tailwind at the preset's classes (Tailwind does not scan node_modules), adds the
+ * `ngu-accent` color, and draws the few parts that have no class map slot: chevrons, step
+ * markers, problem badges and the warning mark. Change the accent in your own CSS:
+ *
+ *   @theme { --color-ngu-accent: var(--color-emerald-600); }
+ */
+@source "./fesm2022/ngu-form-tailwind.mjs";
+
+@theme {
+  --color-ngu-accent: oklch(51.1% 0.262 276.966);
+}
+
+@layer components {
+  /* Wizard: the step marker, the step counter and each step's content. */
+  .ngu-unstyled .ngu-steps__marker {
+    display: inline-grid;
+    place-items: center;
+    inline-size: 1.75rem;
+    block-size: 1.75rem;
+    border: 1px solid var(--color-zinc-300);
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    @variant dark {
+      border-color: var(--color-zinc-600);
+    }
+  }
+  .ngu-unstyled [aria-current='step'] > .ngu-steps__marker {
+    border-color: transparent;
+    background: var(--color-ngu-accent);
+    color: white;
+  }
+  .ngu-unstyled [data-done] > .ngu-steps__marker {
+    border-color: var(--color-ngu-accent);
+    color: var(--color-ngu-accent);
+    @variant dark {
+      border-color: color-mix(in oklab, var(--color-ngu-accent) 60%, white);
+      color: color-mix(in oklab, var(--color-ngu-accent) 50%, white);
+    }
+  }
+  .ngu-unstyled .ngu-step:not([hidden]) {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+  .ngu-unstyled .ngu-step__count {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--color-zinc-500);
+    @variant dark {
+      color: var(--color-zinc-400);
+    }
+  }
+  .ngu-unstyled .ngu-review {
+    padding: 1rem;
+    border: 1px solid var(--color-zinc-200);
+    border-radius: 0.75rem;
+    @variant dark {
+      border-color: oklch(100% 0 0 / 0.1);
+    }
+  }
+  .ngu-unstyled .ngu-review__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-block-end: 0.75rem;
+  }
+  .ngu-unstyled .ngu-view {
+    display: grid;
+    gap: 0.75rem;
+  }
+
+  /* Problem count on tabs and panel headers. */
+  .ngu-unstyled .ngu-badge {
+    display: inline-flex;
+    justify-content: center;
+    min-inline-size: 1.25rem;
+    padding-inline: 0.375rem;
+    border-radius: 9999px;
+    background: var(--color-red-600);
+    color: white;
+    font-size: 0.75rem;
+    line-height: 1.25rem;
+  }
+
+  /* Chevrons of collapsible panels and list rows with a summary. */
+  .ngu-unstyled .ngu-panel__chevron,
+  .ngu-unstyled .ngu-array__chevron {
+    inline-size: 0.5rem;
+    block-size: 0.5rem;
+    flex: none;
+    border-right: 2px solid currentColor;
+    border-bottom: 2px solid currentColor;
+    rotate: -45deg;
+    transition: rotate 0.15s;
+  }
+  .ngu-unstyled .ngu-panel__chevron:dir(rtl),
+  .ngu-unstyled .ngu-array__chevron:dir(rtl) {
+    rotate: 135deg;
+  }
+  .ngu-panel--open.ngu-unstyled > h3 .ngu-panel__chevron,
+  .ngu-unstyled .ngu-array__chevron--open {
+    rotate: 45deg;
+  }
+  .ngu-unstyled .ngu-panel__title {
+    flex: 1;
+  }
+
+  /* Lists: the row tools and the one-line summary of a row. */
+  .ngu-unstyled .ngu-array__actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .ngu-unstyled .ngu-array__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+  }
+  .ngu-unstyled .ngu-array__toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    cursor: pointer;
+    text-align: start;
+  }
+  .ngu-unstyled .ngu-array__empty {
+    font-size: 0.875rem;
+    color: var(--color-zinc-500);
+    @variant dark {
+      color: var(--color-zinc-400);
+    }
+  }
+
+  /* The "!" before a warning. */
+  .ngu-unstyled .ngu-warning__mark {
+    display: inline-grid;
+    place-items: center;
+    inline-size: 1rem;
+    block-size: 1rem;
+    margin-inline-end: 0.375rem;
+    border-radius: 9999px;
+    background: var(--color-amber-500);
+    color: white;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    vertical-align: -0.125rem;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ngu-unstyled .ngu-panel__chevron,
+    .ngu-unstyled .ngu-array__chevron {
+      transition: none;
+    }
+  }
+}

@@ -101,6 +101,8 @@ function compile(field: DynamicField): DynamicEntry {
     separators: field.separators,
     fromLabel: field.fromLabel,
     toLabel: field.toLabel,
+    class: field.class,
+    classes: field.classes,
   };
   const validators: Validator<any, any, any>[] = field.validate
     ? Array.isArray(field.validate)

@@ -233,7 +233,7 @@ export const appConfig: ApplicationConfig = {
   tailwind: {
     title: 'Unstyled and Tailwind',
     description:
-      "Drop ngu-form's CSS and style the markup yourself, for example with Tailwind classes added through a class map.",
+      "Drop ngu-form's CSS and style the markup with utility classes: a ready Tailwind preset, your own class map, and classes per form, group and field.",
     sections: [
       {
         id: 'unstyled',
@@ -247,15 +247,121 @@ export const appConfig: ApplicationConfig = {
         },
       },
       {
-        id: 'class-map',
-        title: 'A class map',
+        id: 'preset',
+        title: 'The Tailwind preset',
         text: [
-          "`classes` in `provideNguFormConfig` adds your classes to the elements ngu-form renders, next to their own. With `theme: 'none'`, Tailwind utilities style the form completely.",
+          "`nguTailwind` from `ngu-form/tailwind` is a complete class map for Tailwind 4: every slot is styled, in light and dark. Use it with `theme: 'none'`.",
+        ],
+        demo: {
+          src: 'tailwind/preset.ts',
+          load: () => import('../demos/tailwind/preset').then((m) => m.TailwindPresetDemo),
+        },
+      },
+      {
+        id: 'tailwind-setup',
+        title: 'Setup',
+        text: [
+          "Import the preset's CSS after Tailwind. It points Tailwind at the preset's classes, since Tailwind does not scan `node_modules`. It also adds the `ngu-accent` color, and draws the few parts that have no slot: chevrons, step markers, problem badges and the warning mark.",
+        ],
+        code: [
+          { code: 'npm install tailwindcss @tailwindcss/postcss', lang: 'bash' },
+          {
+            lang: 'json',
+            filename: '.postcssrc.json',
+            code: '{ "plugins": { "@tailwindcss/postcss": {} } }',
+          },
+          {
+            lang: 'css',
+            filename: 'styles.css',
+            code: '@import "tailwindcss";\n@import "ngu-form/tailwind.css";\n\n/* Optional: your brand color for focus rings, checks and the submit button. */\n@theme {\n  --color-ngu-accent: var(--color-emerald-600);\n}',
+          },
+          {
+            lang: 'angular-ts',
+            filename: 'app.config.ts',
+            code: "import { provideNguFormConfig } from 'ngu-form';\nimport { nguTailwind } from 'ngu-form/tailwind';\n\nexport const appConfig = {\n  providers: [provideNguFormConfig({ theme: 'none', classes: nguTailwind })],\n};",
+          },
+        ],
+        after: [
+          'The preset expects Tailwind\'s base reset (Preflight), which `@import "tailwindcss"` includes. Dark colors follow your `dark:` variant.',
+        ],
+      },
+      {
+        id: 'layouts',
+        title: 'Wizards, lists and tabs',
+        text: [
+          'The same preset styles the step list, list rows, tabs and collapsible panels, and the review step at the end of a wizard.',
+        ],
+        demo: {
+          src: 'tailwind/wizard.ts',
+          load: () => import('../demos/tailwind/wizard').then((m) => m.TailwindWizardDemo),
+        },
+      },
+      {
+        id: 'levels',
+        title: 'Classes per form, group and field',
+        text: [
+          'Classes add up from the outside in. `[classes]` on `<ngu-form>` adds to the app-wide map, slot by slot. On a group or list, `classes` reaches everything inside it; on a field, only that field.',
+          '`class` puts classes on the element itself: the `<ngu-field>`, `<ngu-group>` or `<ngu-array>`, or the heading, paragraph or divider of static content.',
+        ],
+        demo: {
+          src: 'tailwind/levels.ts',
+          load: () => import('../demos/tailwind/levels').then((m) => m.TailwindLevelsDemo),
+        },
+        after: [
+          'Run-time fields from an API take the same `class` and `classes`, as plain JSON. `<ngu-view>` has a `[classes]` input too.',
+        ],
+      },
+      {
+        id: 'merge',
+        title: 'Conflicting utilities',
+        text: [
+          "When two levels set the same property, such as `px-3` from the preset and `px-4` on a field, both classes stay and the order of Tailwind's CSS decides, not the order you wrote them in. Pass `twMerge` from tailwind-merge as `mergeClasses`, and the inner level wins. For a single case, Tailwind's important modifier works too: `px-4!`.",
+        ],
+        code: [
+          {
+            lang: 'angular-ts',
+            code: "import { twMerge } from 'tailwind-merge';\n\nprovideNguFormConfig({ theme: 'none', classes: nguTailwind, mergeClasses: twMerge });",
+          },
+        ],
+      },
+      {
+        id: 'states',
+        title: 'States',
+        text: ['States are attributes, so Tailwind variants style them and the class map needs no slot per state.'],
+        table: {
+          caption: 'Attributes that mark states',
+          columns: ['Attribute', 'On', 'Example'],
+          rows: [
+            ['`aria-invalid="true"`', 'Controls, while their error shows', '`aria-invalid:border-red-500`'],
+            ['`data-invalid`', 'Fields, groups and lists, while an error shows', '`data-invalid:bg-red-50`'],
+            [
+              '`data-required`, `data-disabled`, `data-readonly`, `data-pending`, `data-warning`',
+              'Fields',
+              '`data-disabled:opacity-60`',
+            ],
+            ['`data-adorned`', 'A control inside a box with a prefix, suffix or icon', '`data-adorned:border-0`'],
+            ['`aria-selected="true"`', 'The selected tab', '`aria-selected:text-indigo-600`'],
+            ['`data-open`', 'Open panels', '`data-open:shadow-sm`'],
+            ['`aria-current="step"`, `data-done`', 'Steps in the step list', '`aria-[current=step]:font-semibold`'],
+          ],
+        },
+        after: [
+          'Inside a field, put `group` in the `field` slot and use `group-data-invalid:` on the label, for example.',
+        ],
+      },
+      {
+        id: 'class-map',
+        title: 'Your own class map',
+        text: [
+          'Write the map yourself for a different look; a slot you leave out stays unstyled. With a paid UI kit you own, such as Tailwind Plus, copy its class strings into your own map, in your app: ngu-form ships none of them.',
         ],
         demo: {
           src: 'tailwind/tailwind.ts',
           load: () => import('../demos/tailwind/tailwind').then((m) => m.TailwindDemo),
         },
+        after: [
+          "Keep the default theme and add a few utilities instead? Tailwind's utilities live in a cascade layer, and ngu-form's component styles are not layered, so ngu-form wins where both set the same property. Restyle with [tokens](/theming#tokens) in that case, or turn the theme off.",
+        ],
       },
       {
         id: 'slots',
@@ -266,40 +372,43 @@ export const appConfig: ApplicationConfig = {
           rows: [
             ['`form`', 'The `<form>` element'],
             ['`field`', 'Each `<ngu-field>`'],
-            ['`label`', 'Labels and legends'],
+            ['`label`', 'Labels and legends, and labels in view mode'],
             [
               '`control`',
               'Text inputs, selects and textareas, including those inside phone, tags and date range fields',
             ],
             ['`check`', 'Checkboxes, radios and switches'],
-            ['`hint`', 'Hints under a field'],
+            ['`hint`', 'Hints under a field, the character counter and the text shown while an async check runs'],
+            ['`warning`', 'Warnings from `warn`'],
             ['`error`', 'Error messages of fields, groups, lists and the form'],
+            ['`adorned`', 'The box around a control with a prefix, suffix, icon or show-password button'],
+            ['`affix`', 'Prefix and suffix text and icons'],
+            ['`option`', 'Each option of a radio or checkbox group or a segmented control'],
+            ['`chip`', 'Each tag of a tags field'],
             ['`group`', 'Each `<ngu-group>`'],
-            ['`title`', 'Titles of groups, lists and wizard steps'],
+            ['`title`', 'Titles of groups, lists, panels and wizard steps, and static headings'],
+            ['`description`', 'Descriptions of groups and lists, and static text'],
             ['`list`', 'Each `<ngu-array>`'],
             ['`row`', 'Each row of a list'],
-            ['`button`', 'Secondary buttons: add, remove, move, back, show password'],
+            ['`tabs`', 'The tab list'],
+            ['`tab`', 'Each tab'],
+            ['`panel`', 'Each collapsible panel'],
+            ['`steps`', "The wizard's step list"],
+            ['`step`', 'Each step in that list'],
+            ['`button`', 'Secondary buttons: add, remove, move, back, edit, discard, show password'],
             ['`submit`', 'The submit and Next buttons'],
+            ['`actions`', 'The row of submit, Back and Next buttons'],
+            ['`errorSummary`', 'The error summary of `<ngu-form errorSummary>`'],
+            ['`notice`', 'The notice after a draft was restored'],
+            ['`value`', 'Values in view mode: `<ngu-view>` and the review step'],
           ],
         },
       },
       {
-        id: 'tailwind-setup',
-        title: 'Tailwind 4 setup',
+        id: 'parts',
+        title: 'Parts without a slot',
         text: [
-          'Tailwind scans your source for class names, so classes in the class map and in specs are found like any other.',
-        ],
-        code: [
-          { code: 'npm install tailwindcss @tailwindcss/postcss', lang: 'bash' },
-          {
-            lang: 'json',
-            filename: '.postcssrc.json',
-            code: '{ "plugins": { "@tailwindcss/postcss": {} } }',
-          },
-          { lang: 'css', filename: 'styles.css', code: '@import "tailwindcss";' },
-        ],
-        after: [
-          "Keep the default theme and add a few utilities instead? Tailwind's utilities live in a cascade layer, and ngu-form's component styles are not layered, so ngu-form wins where both set the same property. Restyle with [tokens](/theming#tokens) in that case, or turn the theme off.",
+          'Every element keeps its `ngu-*` class. Reach one from a slot with an arbitrary variant, such as `[&_.ngu-badge]:bg-amber-600` on `tab`, or style it in your CSS. Rating, one-time code, range, color and captcha fields keep their own markup; style them through their `ngu-*` classes.',
         ],
       },
     ],

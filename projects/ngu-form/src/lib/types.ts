@@ -1,6 +1,7 @@
 import type { Injector, Signal, WritableSignal } from '@angular/core';
 import type { FieldTree } from '@angular/forms/signals';
 import type { NguCaptchaAdapter } from './captcha';
+import type { NguClassMap } from './look';
 
 /**
  * A function evaluated against the whole form model. Inside an array item it also
@@ -243,6 +244,10 @@ export interface BaseFieldSpec<V, TModel, TScope = TModel> extends ValidationSpe
   order?: number;
   /** The text shown for the value in view mode (`<ngu-view>` and the review step). */
   display?: (value: V, model: TModel) => string;
+  /** Classes added to this field's `<ngu-field>`, next to the class map's `field`. */
+  class?: string;
+  /** Classes added to the class map's slots inside this field only, such as `{ control: 'font-mono' }`. */
+  classes?: NguClassMap;
 }
 
 /**
@@ -500,6 +505,10 @@ export interface GroupSpec<T, TModel, TScope = TModel> extends Pick<ValidationSp
   layout?: SectionLayout;
   /** Makes this group a collapsible panel: `true` starts closed, `false` starts open. */
   collapsed?: boolean;
+  /** Classes added to this group's `<ngu-group>`, next to the class map's `group`. */
+  class?: string;
+  /** Classes added to the class map's slots for everything inside this group. */
+  classes?: NguClassMap;
   fields: FormSpec<T, TModel, TScope>;
 }
 
@@ -552,6 +561,10 @@ export interface ArraySpec<TItem, TModel, TScope = TModel>
    * box is `--ngu-list-height` tall (default `32rem`).
    */
   virtual?: boolean;
+  /** Classes added to this list's `<ngu-array>`, next to the class map's `list`. */
+  class?: string;
+  /** Classes added to the class map's slots for everything inside this list. */
+  classes?: NguClassMap;
 }
 
 /**
@@ -629,6 +642,10 @@ export interface DynamicField<V = any, TModel = any> {
     | readonly Validator<V, TModel, Readonly<Record<string, V>>>[];
   /** A server-side check. Runs after the sync rules pass, cancelled on new input. */
   validateAsync?: AsyncValidator<V, TModel, Readonly<Record<string, V>>>;
+  /** Classes added to this field's `<ngu-field>`. */
+  class?: string;
+  /** Classes added to the class map's slots inside this field only. */
+  classes?: NguClassMap;
 }
 
 /** Spec for a `Record<string, V>` property whose fields come from a signal or a list. */
@@ -650,6 +667,10 @@ export interface DynamicSpec<V, TModel, TScope = TModel> {
   order?: number;
   /** Makes the field list a collapsible panel: `true` starts closed, `false` starts open. */
   collapsed?: boolean;
+  /** Classes added to this field list's `<ngu-dynamic>`. */
+  class?: string;
+  /** Classes added to the class map's slots for every field in the list. */
+  classes?: NguClassMap;
 }
 
 /** What a model property of type `V` may be described as. */
@@ -680,6 +701,8 @@ interface StaticBase<TModel, TScope> {
   hidden?: LogicFn<TModel, boolean, TScope>;
   /** Position inside the group; see `order` on fields. */
   order?: number;
+  /** Classes added to the heading, paragraph or divider. */
+  class?: string;
 }
 
 /**
@@ -891,6 +914,8 @@ export interface GroupDef {
   readonly order?: number;
   readonly layout?: 'tabs';
   readonly collapsed?: boolean;
+  readonly class?: string;
+  readonly classes?: NguClassMap;
   readonly fields: FormDefinition;
 }
 
@@ -916,6 +941,8 @@ export interface ArrayDef {
   readonly summary?: (item: any, index: number) => string;
   readonly layout?: 'table';
   readonly virtual?: boolean;
+  readonly class?: string;
+  readonly classes?: NguClassMap;
 }
 
 /** One run-time field, compiled. */
@@ -940,6 +967,8 @@ export interface DynamicDef {
   readonly keepRemoved: boolean;
   readonly order?: number;
   readonly collapsed?: boolean;
+  readonly class?: string;
+  readonly classes?: NguClassMap;
   /** Compiled fields by key, in list order. */
   readonly entries: Signal<ReadonlyMap<string, DynamicEntry>>;
 }
@@ -953,6 +982,7 @@ export interface StaticDef {
   readonly span?: number;
   readonly hidden?: LogicFn<any, boolean, any>;
   readonly order?: number;
+  readonly class?: string;
 }
 
 export type AnyFieldDef = LeafDef | GroupDef | ArrayDef | DynamicDef | StaticDef;

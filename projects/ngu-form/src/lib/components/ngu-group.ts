@@ -21,7 +21,7 @@ import { NguField } from './ngu-field';
 import { NguFormContext } from './ngu-form-context';
 import { NguSection } from './ngu-section';
 import { NguPanel, NguTabs } from './ngu-sections';
-import { injectNguLook } from '../look';
+import { extendLook, injectOuterLook, NGU_LOOK, slotClass, type NguClassMap } from '../look';
 
 let nextGroupId = 0;
 
@@ -48,13 +48,15 @@ interface Entry {
  */
 @Component({
   selector: 'ngu-group',
+  providers: [{ provide: NGU_LOOK, useFactory: () => inject(NguGroup).look }],
   imports: [NguField, NguTabs, NguPanel, forwardRef(() => NguArray), forwardRef(() => NguDynamic)],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '[class.ngu-unstyled]': "look().theme === 'none'",
-    '[class]': 'look().classes.group',
+    '[class]': 'hostClass()',
     class: 'ngu-group',
     '[class.ngu-group--invalid]': 'showErrors()',
+    '[attr.data-invalid]': "showErrors() ? '' : null",
     '[attr.role]': "title() ? 'group' : null",
     '[attr.aria-labelledby]': 'title() ? titleId : null',
     '[style.--ngu-cols]': 'columns()',
@@ -64,7 +66,7 @@ interface Entry {
       <h3 class="ngu-group__title" [class]="look().classes.title" [id]="titleId">{{ i18n.text(title()) }}</h3>
     }
     @if (description()) {
-      <p class="ngu-group__description">{{ i18n.text(description()) }}</p>
+      <p class="ngu-group__description" [class]="look().classes.description">{{ i18n.text(description()) }}</p>
     }
     @if (layout() === 'tabs') {
       @defer (on immediate) {
@@ -102,6 +104,8 @@ interface Entry {
                     [description]="entry.def.description"
                     [layout]="entry.def.layout ?? 'grid'"
                     [path]="entry.path"
+                    [classes]="entry.def.classes"
+                    [styleClass]="entry.def.class"
                   />
                 }
                 @case ('array') {
@@ -114,27 +118,27 @@ interface Entry {
                   @let s = entry.def;
                   @switch (s.kind) {
                     @case ('divider') {
-                      <hr class="ngu-static ngu-divider" [style.grid-column]="entry.column" />
+                      <hr class="ngu-static ngu-divider" [class]="s.class ?? ''" [style.grid-column]="entry.column" />
                     }
                     @case ('text') {
-                      <p class="ngu-static ngu-static__text" [style.grid-column]="entry.column">{{ i18n.text(s.text) }}</p>
+                      <p class="ngu-static ngu-static__text" [class]="staticClass('description', s.class)" [style.grid-column]="entry.column">{{ i18n.text(s.text) }}</p>
                     }
                     @default {
                       @switch (s.level) {
                         @case (2) {
-                          <h2 class="ngu-static ngu-static__heading" [style.grid-column]="entry.column">{{ i18n.text(s.text) }}</h2>
+                          <h2 class="ngu-static ngu-static__heading" [class]="staticClass(\'title\', s.class)" [style.grid-column]="entry.column">{{ i18n.text(s.text) }}</h2>
                         }
                         @case (4) {
-                          <h4 class="ngu-static ngu-static__heading" [style.grid-column]="entry.column">{{ i18n.text(s.text) }}</h4>
+                          <h4 class="ngu-static ngu-static__heading" [class]="staticClass(\'title\', s.class)" [style.grid-column]="entry.column">{{ i18n.text(s.text) }}</h4>
                         }
                         @case (5) {
-                          <h5 class="ngu-static ngu-static__heading" [style.grid-column]="entry.column">{{ i18n.text(s.text) }}</h5>
+                          <h5 class="ngu-static ngu-static__heading" [class]="staticClass(\'title\', s.class)" [style.grid-column]="entry.column">{{ i18n.text(s.text) }}</h5>
                         }
                         @case (6) {
-                          <h6 class="ngu-static ngu-static__heading" [style.grid-column]="entry.column">{{ i18n.text(s.text) }}</h6>
+                          <h6 class="ngu-static ngu-static__heading" [class]="staticClass(\'title\', s.class)" [style.grid-column]="entry.column">{{ i18n.text(s.text) }}</h6>
                         }
                         @default {
-                          <h3 class="ngu-static ngu-static__heading" [style.grid-column]="entry.column">{{ i18n.text(s.text) }}</h3>
+                          <h3 class="ngu-static ngu-static__heading" [class]="staticClass(\'title\', s.class)" [style.grid-column]="entry.column">{{ i18n.text(s.text) }}</h3>
                         }
                       }
                     }
@@ -202,7 +206,6 @@ interface Entry {
   `,
 })
 export class NguGroup {
-  protected readonly look = injectNguLook();
   readonly fields = input.required<FormDefinition>();
   readonly tree = input.required<Field<any>>();
   readonly cols = input<Cols>(1);
@@ -212,6 +215,20 @@ export class NguGroup {
   readonly layout = input<'grid' | 'tabs'>('grid');
   /** Dot path of this group inside the form; empty at the root. */
   readonly path = input<string>('');
+  /** Classes for the class map's slots inside this group, from its spec. */
+  readonly classes = input<NguClassMap>();
+  /** Classes for this group's host, from the `class` of its spec. */
+  readonly styleClass = input<string>();
+
+  private readonly outerLook = injectOuterLook();
+  /** The look around this group with its `classes`; everything inside it reads this one. */
+  readonly look = computed(() => extendLook(this.outerLook(), this.classes()));
+  protected readonly hostClass = computed(() => slotClass(this.look(), 'group', this.styleClass()));
+
+  /** Classes of static content: its slot, with the `class` of its spec. */
+  protected staticClass(slot: 'title' | 'description', own: string | undefined): string {
+    return slotClass(this.look(), slot, own);
+  }
 
   protected readonly titleId = `ngu-group-${nextGroupId++}`;
   private readonly context = inject(NguFormContext, { optional: true });

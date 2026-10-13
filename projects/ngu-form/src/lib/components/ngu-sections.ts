@@ -30,6 +30,8 @@ const CONTENT = `
         [description]="$any(entry.inner).description"
         [layout]="$any(entry.inner).layout ?? 'grid'"
         [path]="entry.path"
+        [classes]="$any(entry.inner).classes"
+        [styleClass]="$any(entry.inner).class"
       />
     }
     @case ('array') {
@@ -110,12 +112,13 @@ abstract class SectionBase {
   host: { class: 'ngu-tabs', '[class.ngu-unstyled]': "look().theme === 'none'" },
   template: `
     @let current = active();
-    <div class="ngu-tabs__list" role="tablist" [attr.aria-labelledby]="labelledBy()" (keydown)="onKeydown($event)">
+    <div class="ngu-tabs__list" [class]="look().classes.tabs" role="tablist" [attr.aria-labelledby]="labelledBy()" (keydown)="onKeydown($event)">
       @for (entry of tabs(); track entry.key) {
         <button
           type="button"
           role="tab"
           class="ngu-tab"
+          [class]="look().classes.tab"
           [id]="idPrefix() + '-tab-' + entry.key"
           [attr.data-key]="entry.key"
           [attr.aria-selected]="entry.key === current"
@@ -178,7 +181,8 @@ abstract class SectionBase {
       outline: 2px solid var(--ngu-focus-color, #1a73e8);
       outline-offset: -2px;
     }
-    :host(:where(:not(.ngu-unstyled))) .ngu-print-title {
+    /* Only for print, also in unstyled forms. */
+    .ngu-print-title {
       display: none;
     }
     @media (forced-colors: active) {
@@ -252,7 +256,13 @@ export class NguTabs extends SectionBase {
   selector: 'ngu-panel',
   imports: [NguSection, forwardRef(() => NguGroup), forwardRef(() => NguArray), forwardRef(() => NguDynamic)],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: { class: 'ngu-panel', '[class.ngu-panel--open]': 'open()', '[class.ngu-unstyled]': "look().theme === 'none'" },
+  host: {
+    class: 'ngu-panel',
+    '[class]': 'look().classes.panel',
+    '[class.ngu-panel--open]': 'open()',
+    '[attr.data-open]': "open() ? '' : null",
+    '[class.ngu-unstyled]': "look().theme === 'none'",
+  },
   template: `
     @let entry = section();
     <h3 class="ngu-panel__heading" [class]="look().classes.title">

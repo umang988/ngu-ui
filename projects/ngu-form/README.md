@@ -1142,7 +1142,21 @@ the markup, its `ngu-*` classes and the behavior. Set any of them app-wide with
 
 ### Tailwind and other utility CSS
 
-`classes` adds your classes to the elements ngu-form renders:
+`ngu-form/tailwind` has a complete Tailwind 4 look. Import its CSS after Tailwind, then use the
+class map with `theme: "none"`:
+
+```css
+@import "tailwindcss";
+@import "ngu-form/tailwind.css";
+```
+
+```ts
+import { nguTailwind } from "ngu-form/tailwind";
+
+provideNguFormConfig({ theme: "none", classes: nguTailwind })
+```
+
+Or write your own map. `classes` adds your classes to the elements ngu-form renders:
 
 ```ts
 provideNguFormConfig({
@@ -1157,8 +1171,23 @@ provideNguFormConfig({
 })
 ```
 
-Keys: `form`, `field`, `label`, `control`, `check`, `hint`, `error`, `group`, `title`, `list`,
-`row`, `button`, `submit`. Custom renderers read the same settings with `injectNguLook()`.
+Keys: `form`, `field`, `label`, `control`, `check`, `hint`, `warning`, `error`, `adorned`,
+`affix`, `option`, `chip`, `group`, `title`, `description`, `list`, `row`, `tabs`, `tab`,
+`panel`, `steps`, `step`, `button`, `submit`, `actions`, `errorSummary`, `notice`, `value`.
+Custom renderers read the same settings with `injectNguLook()`.
+
+Classes add up from the outside in: `[classes]` on `<ngu-form>`, then `classes` on a group or
+list (for everything inside it), then `classes` on a field (that field only). `class` goes on the
+element itself:
+
+```ts
+code: { label: "Coupon", class: "rounded-xl bg-amber-50 p-4", classes: { control: "font-mono" } },
+```
+
+Pass `mergeClasses: twMerge` (from tailwind-merge) in the config so an inner `px-4` replaces an
+outer `px-3`. States are attributes for variants: `data-invalid`, `data-required`,
+`data-disabled`, `data-readonly`, `data-pending` and `data-warning` on fields, `aria-invalid` on
+controls, `data-open` on panels, `aria-current="step"` and `data-done` on wizard steps.
 
 ## Testing
 

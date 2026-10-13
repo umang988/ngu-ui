@@ -6,7 +6,7 @@ import { isLeafDef, type AnyFieldDef, type ArrayDef, type FormDef, type FormDefi
 import { UNVIEWED_TYPES, viewValue, type ViewValue } from '../view';
 import { NguFormContext } from './ngu-form-context';
 import { NGU_FORM_CONFIG } from '../config';
-import { injectNguLook, NGU_LOOK, resolveLook, type NguLook, type NguTheme } from '../look';
+import { extendLook, injectNguLook, NGU_LOOK, resolveLook, type NguClassMap, type NguLook, type NguTheme } from '../look';
 
 type Item =
   | { readonly kind: 'leaf'; readonly key: string; readonly def: LeafDef; readonly field: Field<any> }
@@ -275,8 +275,8 @@ export class NguViewRows {
           @switch (item.kind) {
             @case ('leaf') {
               <div class="ngu-view__item">
-                <dt class="ngu-view__label">{{ i18n().text(item.def.label) ?? item.key }}</dt>
-                <dd class="ngu-view__value">
+                <dt class="ngu-view__label" [class]="look().classes.label">{{ i18n().text(item.def.label) ?? item.key }}</dt>
+                <dd class="ngu-view__value" [class]="look().classes.value">
                   @let v = valueOf(item.def, item.field);
                   ${VALUE_TEMPLATE}
                 </dd>
@@ -284,16 +284,16 @@ export class NguViewRows {
             }
             @case ('section') {
               <div class="ngu-view__item ngu-view__item--section">
-                <dt class="ngu-view__heading">{{ i18n().text(item.title) ?? item.key }}</dt>
-                <dd class="ngu-view__value">
+                <dt class="ngu-view__heading" [class]="look().classes.title">{{ i18n().text(item.title) ?? item.key }}</dt>
+                <dd class="ngu-view__value" [class]="look().classes.value">
                   <ngu-view-list [fields]="item.fields" [tree]="item.field" [model]="model()" [i18n]="i18n()" />
                 </dd>
               </div>
             }
             @case ('array') {
               <div class="ngu-view__item ngu-view__item--section">
-                <dt class="ngu-view__heading">{{ i18n().text(item.def.title) ?? item.key }}</dt>
-                <dd class="ngu-view__value">
+                <dt class="ngu-view__heading" [class]="look().classes.title">{{ i18n().text(item.def.title) ?? item.key }}</dt>
+                <dd class="ngu-view__value" [class]="look().classes.value">
                   <ngu-view-rows [def]="item.def" [tree]="item.field" [model]="model()" [i18n]="i18n()" />
                 </dd>
               </div>
@@ -358,12 +358,14 @@ export class NguView<TModel extends object = any> {
   readonly section = input<string>();
   /** `'none'` drops ngu-form's CSS. Defaults to the surrounding form's theme, else the app-wide one. */
   readonly theme = input<NguTheme>();
+  /** Classes for this view, added to the class map slot by slot. */
+  readonly classes = input<NguClassMap>();
 
   private readonly outerLook = inject(NGU_LOOK, { optional: true, skipSelf: true });
   private readonly config = inject(NGU_FORM_CONFIG, { optional: true });
   /** The look of the surrounding form, or the app-wide one, with this view's `theme`. */
   readonly look = computed<NguLook>(() => {
-    const outer = this.outerLook?.() ?? resolveLook(this.config);
+    const outer = extendLook(this.outerLook?.() ?? resolveLook(this.config), this.classes());
     const theme = this.theme();
     return theme ? { ...outer, theme } : outer;
   });
