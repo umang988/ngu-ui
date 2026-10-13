@@ -36,10 +36,13 @@ test.describe('keyboard', () => {
     await page.keyboard.press('Home');
     await expect(tabs.first()).toHaveAttribute('aria-selected', 'true');
 
-    // Into the second tab's first field; selecting its text must not switch tabs.
+    // Into the second tab's first field; selecting its text must not switch tabs. Tab waits
+    // until the second panel shows, or focus would land in the first one as it hides.
     await page.keyboard.press('ArrowRight');
+    await expect(tabs.nth(1)).toHaveAttribute('aria-selected', 'true');
+    const panel = page.locator(`[id="${await tabs.nth(1).getAttribute('aria-controls')}"]`);
+    await expect(panel).toBeVisible();
     await page.keyboard.press('Tab');
-    const panel = page.locator('ngu-tabs').first().getByRole('tabpanel');
     await expect(panel.locator('input, textarea').first()).toBeFocused();
     await page.keyboard.type('someone@example.com');
     await page.keyboard.press('Shift+Home');
