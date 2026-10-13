@@ -1,0 +1,31 @@
+{
+  "name": "ngu-table",
+  "version": "0.1.0",
+  "peerDependencies": {
+    "@angular/common": "^22.2.0",
+    "@angular/core": "^22.2.0"
+  },
+  "dependencies": {
+    "tslib": "^2.3.0"
+  },
+  "sideEffects": false,
+  "description": "An Angular data table for admin list screens: one fetchFn and a column list give you server paging, search, filters, sorting, typed cells, row actions and CSV export.",
+  "keywords": [
+    "angular",
+    "table",
+    "data-table",
+    "datagrid",
+    "server-side",
+    "pagination",
+    "signals"
+  ],
+  "license": "MIT",
+  "author": "Umang",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/umang988/ngu-ui.git",
+    "directory": "projects/ngu-table"
+  },
+  "homepage": "https://ngu-table.netlify.app",
+  "bugs": "https://github.com/umang988/ngu-ui/issues"
+}

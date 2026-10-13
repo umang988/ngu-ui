@@ -1,12 +1,12 @@
 import { defineConfig, devices } from '@playwright/test';
 
 // Runs against the production builds of both docs sites, served like Netlify serves them:
-//   npm run build:dropdown && npx ng build demo && npx ng build ngu-dropdown-demo && npx ng build ssr-check
+//   npm run build:dropdown && npx ng build demo && npx ng build ngu-dropdown-demo && npx ng build ngu-table-demo && npx ng build ssr-check
 //   npm run e2e                   # every project
 //   npm run e2e -- --project=chromium keyboard.spec.ts
 const CI = !!process.env['CI'];
 
-const FUNCTIONAL = /(keyboard|drafts|dropdown|recipes)\.spec\.ts/
+const FUNCTIONAL = /(keyboard|drafts|dropdown|recipes|table)\.spec\.ts/
 
 export default defineConfig({
   testDir: '.',
@@ -35,6 +35,12 @@ export default defineConfig({
       command: 'node e2e/serve.mjs dist/ngu-dropdown-demo/browser 4322',
       cwd: '..',
       url: 'http://localhost:4322',
+      reuseExistingServer: !CI,
+    },
+    {
+      command: 'node e2e/serve.mjs dist/ngu-table-demo/browser 4324',
+      cwd: '..',
+      url: 'http://localhost:4324',
       reuseExistingServer: !CI,
     },
     {

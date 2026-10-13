@@ -1,0 +1,24 @@
+# Netlify site for the ngu-table docs (angular.json project `ngu-table-demo`).
+# In the Netlify UI leave "Base directory" empty and set "Package directory" to projects/ngu-table-demo.
+# Netlify then installs and builds from the repo root, so the paths below are relative to it.
+
+[build]
+  command = "npx ng build ngu-table-demo"
+  publish = "dist/ngu-table-demo/browser"
+  # Exit 0 skips the build: only when nothing this site is built from changed since the last
+  # deploy. A build without a cached commit (first deploy, "clear cache") always runs.
+  ignore = 'test "$CACHED_COMMIT_REF" != "$COMMIT_REF" && git diff --quiet "$CACHED_COMMIT_REF" "$COMMIT_REF" -- projects/ngu-table-demo projects/ngu-table projects/ngu-dropdown projects/docs-kit angular.json package.json package-lock.json tsconfig.json'
+
+[build.environment]
+  NODE_VERSION = "24"
+  NG_CLI_ANALYTICS = "false"
+  # Netlify adds its Angular plugin automatically. Without this it takes the first project in
+  # angular.json, the ngu-form library, and fails the build.
+  ANGULAR_PROJECT = "ngu-table-demo"
+
+# Client-side routing: deep links such as /columns get index.html.
+# Files that exist (bundles, source/, favicon) are still served as themselves.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

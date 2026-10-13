@@ -1,0 +1,859 @@
+/*
+ * Not encapsulated, like Angular Material: every class is prefixed, and apps can override
+ * them without ::ng-deep. The shared ngu theme variables are read once here; the filter panel
+ * and the dialog inherit them, since they stay inside the host in the DOM even in the top layer.
+ * Defaults pick a light or dark value from the page's `color-scheme`.
+ */
+.ngu-table {
+  --ngu-tbl-border: var(--ngu-border-color, light-dark(#d3d8e0, #3a4562));
+  --ngu-tbl-line: color-mix(in srgb, var(--ngu-tbl-border) 65%, transparent);
+  --ngu-tbl-radius: var(--ngu-radius, 0.5rem);
+  --ngu-tbl-surface: var(--ngu-surface, light-dark(#fff, #151c30));
+  --ngu-tbl-head: var(
+    --ngu-table-head-bg,
+    color-mix(in srgb, currentColor 4%, var(--ngu-tbl-surface))
+  );
+  --ngu-tbl-hover: var(--ngu-table-row-hover, color-mix(in srgb, currentColor 5%, transparent));
+  --ngu-tbl-stripe: var(--ngu-table-stripe, color-mix(in srgb, currentColor 3%, transparent));
+  --ngu-tbl-muted: var(--ngu-hint-color, light-dark(#4f5869, #a3abbe));
+  --ngu-tbl-primary: var(--ngu-primary, light-dark(#2547d0, #8fa6ff));
+  --ngu-tbl-on-primary: var(--ngu-on-primary, light-dark(#fff, #0e1424));
+  --ngu-tbl-focus: 2px solid var(--ngu-focus-color, var(--ngu-tbl-primary));
+  --ngu-tbl-skeleton: var(--ngu-skeleton-color, rgba(127, 127, 127, 0.16));
+  --ngu-tbl-shadow: var(--ngu-table-overlay-shadow, 0 12px 32px rgba(16, 24, 40, 0.18));
+  --ngu-tbl-success: var(--ngu-success-color, light-dark(#18692c, #6fcf8a));
+  --ngu-tbl-danger: var(--ngu-error-color, light-dark(#b42318, #ff9b8f));
+  --ngu-tbl-on-danger: var(--ngu-on-error, light-dark(#fff, #1b0f0f));
+  --ngu-tbl-warning: var(--ngu-warning-color, light-dark(#8a5300, #f0b45a));
+  --ngu-tbl-info: var(--ngu-info-color, light-dark(#1d5fd1, #8ab4ff));
+  --ngu-tbl-accent: var(--ngu-tbl-primary);
+  --ngu-tbl-neutral: var(--ngu-tbl-muted);
+  display: block;
+}
+
+.ngu-table svg {
+  display: block;
+  flex: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.ngu-tbl-icon {
+  display: inline-flex;
+  flex: none;
+}
+
+.ngu-tbl-sr-only {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+.ngu-tbl--surface {
+  border: 1px solid var(--ngu-tbl-border);
+  border-radius: var(--ngu-tbl-radius);
+  background: var(--ngu-tbl-surface);
+  /* Rounds the table's corners. The filter panel and the dialog live in the top layer. */
+  overflow: hidden;
+  overflow: clip;
+}
+
+/* ── Buttons ─────────────────────────────────────────────────────────────── */
+.ngu-tbl-btn,
+.ngu-tbl-icon-btn,
+.ngu-tbl-page {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  box-sizing: border-box;
+  min-block-size: 2rem;
+  border: 1px solid var(--ngu-tbl-border);
+  border-radius: var(--ngu-tbl-radius);
+  background: var(--ngu-tbl-surface);
+  color: inherit;
+  font: inherit;
+  font-size: 0.875rem;
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.ngu-tbl-btn {
+  padding: 0 0.75rem;
+  font-weight: 500;
+}
+
+.ngu-tbl-btn:hover:not(:disabled),
+.ngu-tbl-page:hover:not(:disabled, .ngu-tbl-page--current) {
+  background: color-mix(in srgb, currentColor 6%, var(--ngu-tbl-surface));
+}
+
+.ngu-tbl-btn--primary,
+.ngu-tbl-btn--primary:hover:not(:disabled) {
+  border-color: var(--ngu-tbl-primary);
+  background: var(--ngu-tbl-primary);
+  color: var(--ngu-tbl-on-primary);
+}
+
+.ngu-tbl-btn--danger,
+.ngu-tbl-btn--danger:hover:not(:disabled) {
+  border-color: var(--ngu-tbl-danger);
+  background: var(--ngu-tbl-danger);
+  color: var(--ngu-tbl-on-danger);
+}
+
+.ngu-tbl-btn--ghost {
+  border-color: transparent;
+  background: transparent;
+}
+
+.ngu-tbl-icon-btn {
+  inline-size: 2rem;
+  padding: 0;
+  border-color: transparent;
+  background: transparent;
+  color: var(--ngu-tbl-muted);
+}
+
+.ngu-tbl-icon-btn:hover {
+  background: var(--ngu-tbl-hover);
+  color: inherit;
+}
+
+/* Quiet at rest: a red button in every row would out-shout the table. */
+.ngu-tbl-icon-btn--danger:hover {
+  background: color-mix(in srgb, var(--ngu-tbl-danger) 14%, transparent);
+  color: var(--ngu-tbl-danger);
+}
+
+.ngu-tbl-btn:disabled,
+.ngu-tbl-page:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.ngu-tbl-btn:focus-visible,
+.ngu-tbl-icon-btn:focus-visible,
+.ngu-tbl-page:focus-visible,
+.ngu-tbl-sort:focus-visible,
+.ngu-tbl-link:focus-visible,
+.ngu-tbl-link-btn:focus-visible,
+.ngu-tbl-page-size:focus-visible,
+.ngu-tbl-search-input:focus-visible {
+  outline: var(--ngu-tbl-focus);
+  outline-offset: 1px;
+}
+
+/* ── Toolbar ─────────────────────────────────────────────────────────────── */
+.ngu-tbl-toolbar {
+  container: ngu-tbl-toolbar / inline-size;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border-block-end: 1px solid var(--ngu-tbl-line);
+}
+
+.ngu-tbl-search {
+  position: relative;
+  flex: 1 1 14rem;
+  min-inline-size: 11rem;
+  max-inline-size: 26rem;
+}
+
+.ngu-tbl-search-input {
+  box-sizing: border-box;
+  inline-size: 100%;
+  min-block-size: 2rem;
+  padding: 0.375rem 2.25rem 0.375rem 0.75rem;
+  padding-inline: 0.75rem 2.25rem;
+  border: 1px solid var(--ngu-tbl-border);
+  border-radius: var(--ngu-tbl-radius);
+  background: var(--ngu-input-bg, transparent);
+  color: inherit;
+  font: inherit;
+  font-size: 0.875rem;
+}
+
+.ngu-tbl-search-input::-webkit-search-cancel-button {
+  appearance: none;
+}
+
+.ngu-tbl-search-input::placeholder {
+  color: var(--ngu-tbl-muted);
+  opacity: 1;
+}
+
+.ngu-tbl-search-icon,
+.ngu-tbl-search-clear {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-end: 0.25rem;
+  display: grid;
+  place-items: center;
+  inline-size: 1.75rem;
+  margin-block: auto;
+  color: var(--ngu-tbl-muted);
+}
+
+.ngu-tbl-search-icon {
+  pointer-events: none;
+}
+
+.ngu-tbl-search-clear {
+  block-size: 1.75rem;
+  padding: 0;
+  border: 0;
+  border-radius: var(--ngu-tbl-radius);
+  background: none;
+  cursor: pointer;
+}
+
+.ngu-tbl-search-clear:hover {
+  color: inherit;
+}
+
+.ngu-tbl-search-clear:focus-visible {
+  outline: var(--ngu-tbl-focus);
+}
+
+.ngu-tbl-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-inline-start: auto;
+}
+
+/* Icon-only on a narrow table: four labelled buttons wrap onto three rows on a phone. */
+@container ngu-tbl-toolbar (max-width: 36rem) {
+  .ngu-tbl-actions .ngu-tbl-btn-text {
+    position: absolute;
+    inline-size: 1px;
+    block-size: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .ngu-tbl-actions .ngu-tbl-btn {
+    inline-size: 2rem;
+    padding: 0;
+  }
+
+  .ngu-tbl-search {
+    max-inline-size: none;
+  }
+}
+
+/* ── Filter panel ────────────────────────────────────────────────────────── */
+/* Placed by the component against its trigger, in the top layer. */
+.ngu-tbl-filter {
+  position: fixed;
+  inset: auto;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  inline-size: 320px;
+  max-inline-size: calc(100vw - 1rem);
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--ngu-tbl-border);
+  border-radius: calc(var(--ngu-tbl-radius) + 0.25rem);
+  background: var(--ngu-tbl-surface);
+  color: inherit;
+  box-shadow: var(--ngu-tbl-shadow);
+  overflow: visible;
+  animation: ngu-tbl-drop 120ms ease-out;
+}
+
+@keyframes ngu-tbl-drop {
+  from {
+    opacity: 0;
+    translate: 0 -4px;
+  }
+}
+
+.ngu-tbl-filter-head,
+.ngu-tbl-filter-foot {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1rem;
+}
+
+.ngu-tbl-filter-head {
+  justify-content: space-between;
+  border-block-end: 1px solid var(--ngu-tbl-line);
+}
+
+.ngu-tbl-filter-title {
+  font-weight: 600;
+}
+
+.ngu-tbl-filter-body {
+  flex: 1;
+  min-block-size: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1rem;
+  overflow-y: auto;
+}
+
+.ngu-tbl-filter-foot {
+  justify-content: flex-end;
+  border-block-start: 1px solid var(--ngu-tbl-line);
+}
+
+/* ── Table ───────────────────────────────────────────────────────────────── */
+.ngu-tbl-wrap {
+  position: relative;
+  inline-size: 100%;
+  overflow-x: auto;
+}
+
+/* With `maxHeight` the rows scroll here, which is what makes the heading stick. */
+.ngu-tbl-wrap--scroll {
+  overflow-y: auto;
+}
+
+/* The browser must not move the scroll position as spacers resize under virtual rows. */
+.ngu-tbl-wrap--virtual {
+  overflow-anchor: none;
+}
+
+/* Dimmed, not hidden: the table keeps its height, so nothing below it moves. */
+.ngu-tbl-wrap--refreshing {
+  opacity: 0.55;
+  pointer-events: none;
+  transition: opacity 150ms ease;
+}
+
+.ngu-tbl-table {
+  inline-size: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  /* Tabular figures everywhere: a number in a text column still lines up with the one above. */
+  font-variant-numeric: tabular-nums;
+}
+
+.ngu-tbl-table th,
+.ngu-tbl-table td {
+  padding: 0.625rem 1rem;
+  text-align: start;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.ngu-tbl-table--compact th,
+.ngu-tbl-table--compact td {
+  padding: 0.375rem 0.75rem;
+}
+
+/* Virtual rows are one line each, of one height. */
+.ngu-tbl-table--virtual th,
+.ngu-tbl-table--virtual td {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ngu-tbl-table--virtual .ngu-tbl-wrap-text {
+  min-inline-size: 0;
+  white-space: nowrap;
+}
+
+.ngu-tbl-table .ngu-tbl-spacer td {
+  padding: 0;
+  border: 0;
+}
+
+/* The sizer row: it widens the columns but takes no height and shows nothing. */
+.ngu-tbl-table .ngu-tbl-sizer td {
+  padding-block: 0;
+  border: 0;
+}
+
+.ngu-tbl-sizer-cell {
+  block-size: 0;
+  overflow: hidden;
+  visibility: hidden;
+}
+
+.ngu-tbl-sizer-avatar,
+.ngu-tbl-sizer-icon,
+.ngu-tbl-sizer-image {
+  display: inline-block;
+}
+
+/* Room for the avatar (1.75rem) or icon (14px or 17px) and the gap before the text. */
+.ngu-tbl-sizer-avatar {
+  padding-inline-start: 2.25rem;
+}
+
+.ngu-tbl-sizer-icon {
+  padding-inline-start: 1.375rem;
+}
+
+.ngu-tbl-table thead th {
+  position: sticky;
+  inset-block-start: 0;
+  z-index: 1;
+  border-block-end: 1px solid var(--ngu-tbl-border);
+  background: var(--ngu-tbl-head);
+  color: var(--ngu-tbl-muted);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.ngu-tbl-table tbody td {
+  border-block-end: 1px solid var(--ngu-tbl-line);
+}
+
+.ngu-tbl-table tbody tr:last-child td {
+  border-block-end: 0;
+}
+
+/* By the row's place in the list, not in the DOM, which virtual rows and spacers shift. */
+.ngu-tbl-table--striped .ngu-tbl-row--alt {
+  background: var(--ngu-tbl-stripe);
+}
+
+.ngu-tbl-row:hover {
+  background: var(--ngu-tbl-hover);
+}
+
+.ngu-tbl-row--clickable {
+  cursor: pointer;
+}
+
+.ngu-tbl-row--clickable:focus-visible {
+  outline: var(--ngu-tbl-focus);
+  outline-offset: -2px;
+}
+
+/* Right-aligned, so digits stack place over place down the column. */
+.ngu-tbl-table .ngu-tbl-num {
+  text-align: end;
+}
+
+.ngu-tbl-table .ngu-tbl-wrap-text {
+  min-inline-size: 14rem;
+  white-space: normal;
+}
+
+.ngu-tbl-table .ngu-tbl-col-actions {
+  inline-size: 1%;
+  text-align: end;
+}
+
+/* A real button, not a click handler on the <th>, so the keyboard reaches it. */
+.ngu-tbl-sort {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0;
+  border: 0;
+  border-radius: 0.25rem;
+  background: none;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  cursor: pointer;
+}
+
+.ngu-tbl-num .ngu-tbl-sort {
+  flex-direction: row-reverse;
+}
+
+/* Faint until its column is the one sorted by: a row of hard arrows reads as all active. */
+.ngu-tbl-sort-icon {
+  opacity: 0.45;
+}
+
+.ngu-tbl-sort:hover .ngu-tbl-sort-icon {
+  opacity: 0.8;
+}
+
+.ngu-tbl-sort-icon--active,
+.ngu-tbl-sort:hover .ngu-tbl-sort-icon--active {
+  color: var(--ngu-tbl-primary);
+  opacity: 1;
+}
+
+.ngu-tbl-row-actions {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.125rem;
+}
+
+/* ── Typed cells ─────────────────────────────────────────────────────────── */
+.ngu-tbl-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.1875rem 0.625rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--ngu-tbl-tone) 15%, transparent);
+  /* A quarter of the text color: darker on a light page, lighter on a dark one, for contrast
+     on the tint whatever tone colors the app sets. */
+  color: color-mix(in srgb, var(--ngu-tbl-tone) 75%, currentColor);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  line-height: 1.4;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.ngu-tbl-badge--success {
+  --ngu-tbl-tone: var(--ngu-tbl-success);
+}
+.ngu-tbl-badge--danger {
+  --ngu-tbl-tone: var(--ngu-tbl-danger);
+}
+.ngu-tbl-badge--warning {
+  --ngu-tbl-tone: var(--ngu-tbl-warning);
+}
+.ngu-tbl-badge--info {
+  --ngu-tbl-tone: var(--ngu-tbl-info);
+}
+.ngu-tbl-badge--accent {
+  --ngu-tbl-tone: var(--ngu-tbl-accent);
+}
+.ngu-tbl-badge--neutral {
+  --ngu-tbl-tone: var(--ngu-tbl-neutral);
+}
+
+.ngu-tbl-yes {
+  color: var(--ngu-tbl-success);
+}
+
+.ngu-tbl-no {
+  color: var(--ngu-tbl-muted);
+}
+
+.ngu-tbl-avatar-cell,
+.ngu-tbl-link,
+.ngu-tbl-progress {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-inline-size: 0;
+}
+
+.ngu-tbl-avatar-cell {
+  max-inline-size: 16rem;
+}
+
+.ngu-tbl-avatar {
+  display: grid;
+  flex: none;
+  place-items: center;
+  inline-size: 1.75rem;
+  block-size: 1.75rem;
+  border-radius: 50%;
+  background: var(--ngu-tbl-primary);
+  color: var(--ngu-tbl-on-primary);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  object-fit: cover;
+  user-select: none;
+}
+
+.ngu-tbl-truncate {
+  min-inline-size: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ngu-tbl-image {
+  display: block;
+  border: 1px solid var(--ngu-tbl-line);
+  border-radius: 0.25rem;
+  object-fit: cover;
+}
+
+.ngu-tbl-link {
+  border-radius: 0.125rem;
+  color: var(--ngu-tbl-primary);
+  text-decoration: none;
+}
+
+.ngu-tbl-link .ngu-tbl-icon {
+  color: var(--ngu-tbl-muted);
+}
+
+.ngu-tbl-link:hover,
+.ngu-tbl-link-btn:hover {
+  text-decoration: underline;
+}
+
+.ngu-tbl-link-btn {
+  padding: 0;
+  border: 0;
+  border-radius: 0.125rem;
+  background: none;
+  color: var(--ngu-tbl-primary);
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+
+.ngu-tbl-progress {
+  min-inline-size: 8rem;
+}
+
+.ngu-tbl-progress-track {
+  flex: 1;
+  min-inline-size: 4rem;
+  block-size: 0.375rem;
+  border-radius: 999px;
+  background: var(--ngu-tbl-skeleton);
+  overflow: hidden;
+}
+
+.ngu-tbl-progress-fill {
+  display: block;
+  block-size: 100%;
+  border-radius: 999px;
+  background: var(--ngu-tbl-primary);
+  transition: width 300ms ease-out;
+}
+
+.ngu-tbl-progress-value {
+  color: var(--ngu-tbl-muted);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+/* ── Loading and empty ───────────────────────────────────────────────────── */
+/* Neither is data, so neither takes the row hover or the stripe. */
+.ngu-tbl-table .ngu-tbl-placeholder td,
+.ngu-tbl-table .ngu-tbl-empty td {
+  border-block-end: 0;
+  background: none;
+}
+
+/* A virtual row still loading keeps the rule between rows, so the list doesn't change shape. */
+.ngu-tbl-table--virtual .ngu-tbl-placeholder td {
+  border-block-end: 1px solid var(--ngu-tbl-line);
+}
+
+.ngu-tbl-table .ngu-tbl-empty td {
+  padding: 0;
+  white-space: normal;
+}
+
+/* Sized to the line, so a skeleton row is as tall as a real one. */
+.ngu-tbl-skeleton {
+  display: block;
+  inline-size: 100%;
+  block-size: 0.85em;
+  border-radius: 0.25rem;
+  background: linear-gradient(
+    90deg,
+    var(--ngu-tbl-skeleton) 25%,
+    color-mix(in srgb, var(--ngu-tbl-skeleton) 40%, transparent) 37%,
+    var(--ngu-tbl-skeleton) 63%
+  );
+  background-size: 400% 100%;
+  animation: ngu-tbl-shimmer 1.4s ease infinite;
+}
+
+.ngu-tbl-skeleton--short {
+  inline-size: 40%;
+  margin-inline-start: auto;
+}
+
+@keyframes ngu-tbl-shimmer {
+  from {
+    background-position: 100% 50%;
+  }
+  to {
+    background-position: 0 50%;
+  }
+}
+
+.ngu-tbl-notice {
+  display: grid;
+  justify-items: center;
+  gap: 0.375rem;
+  padding: 2.5rem 1rem;
+  text-align: center;
+}
+
+.ngu-tbl-notice-icon {
+  display: grid;
+  place-items: center;
+  inline-size: 2.75rem;
+  block-size: 2.75rem;
+  margin-block-end: 0.25rem;
+  border-radius: 50%;
+  background: var(--ngu-tbl-hover);
+  color: var(--ngu-tbl-muted);
+}
+
+.ngu-tbl-notice-title {
+  font-weight: 600;
+}
+
+.ngu-tbl-notice-text {
+  margin: 0 0 0.5rem;
+  color: var(--ngu-tbl-muted);
+}
+
+/* ── Footer ──────────────────────────────────────────────────────────────── */
+.ngu-tbl-footer {
+  container: ngu-tbl-footer / inline-size;
+  border-block-start: 1px solid var(--ngu-tbl-line);
+  color: var(--ngu-tbl-muted);
+  font-size: 0.875rem;
+}
+
+/* Rows per page at the start, the range centred against the footer, the pager at the end. */
+.ngu-tbl-footer-grid {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.625rem 1rem;
+}
+
+.ngu-tbl-page-size {
+  grid-column: 1;
+  justify-self: start;
+  min-block-size: 2rem;
+  padding: 0 0.5rem;
+  border: 1px solid var(--ngu-tbl-border);
+  border-radius: var(--ngu-tbl-radius);
+  background: var(--ngu-tbl-surface);
+  color: inherit;
+  font: inherit;
+}
+
+.ngu-tbl-range {
+  grid-column: 2;
+  justify-self: center;
+  white-space: nowrap;
+}
+
+.ngu-tbl-range--error {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: var(--ngu-tbl-danger);
+}
+
+.ngu-tbl-pager {
+  grid-column: 3;
+  justify-self: end;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.ngu-tbl-page {
+  min-inline-size: 2rem;
+  padding: 0 0.5rem;
+  color: var(--ngu-tbl-muted);
+}
+
+.ngu-tbl-page--current {
+  border-color: var(--ngu-tbl-primary);
+  background: var(--ngu-tbl-primary);
+  color: var(--ngu-tbl-on-primary);
+  font-weight: 600;
+}
+
+/* Three tracks don't fit a phone: stacked and centred instead. */
+@container ngu-tbl-footer (max-width: 40rem) {
+  .ngu-tbl-footer-grid {
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: center;
+  }
+
+  .ngu-tbl-footer-grid > * {
+    grid-column: auto;
+    justify-self: center;
+  }
+}
+
+/* ── Delete dialog ───────────────────────────────────────────────────────── */
+.ngu-tbl-dialog {
+  box-sizing: border-box;
+  inline-size: min(28rem, calc(100vw - 2rem));
+  padding: 0;
+  border: 1px solid var(--ngu-tbl-border);
+  border-radius: calc(var(--ngu-tbl-radius) + 0.25rem);
+  background: var(--ngu-tbl-surface);
+  color: inherit;
+  box-shadow: var(--ngu-tbl-shadow);
+}
+
+.ngu-tbl-dialog::backdrop {
+  background: rgba(15, 20, 35, 0.45);
+}
+
+.ngu-tbl-dialog-panel {
+  padding: 1.25rem 1.5rem;
+}
+
+.ngu-tbl-dialog-title {
+  margin: 0 0 0.5rem;
+  font-size: 1.0625rem;
+  font-weight: 600;
+}
+
+.ngu-tbl-dialog-text {
+  margin: 0;
+  color: var(--ngu-tbl-muted);
+}
+
+.ngu-tbl-dialog-foot {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-block-start: 1.25rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ngu-tbl-skeleton,
+  .ngu-tbl-filter {
+    animation: none;
+  }
+
+  .ngu-tbl-progress-fill,
+  .ngu-tbl-wrap--refreshing {
+    transition: none;
+  }
+}
+
+@media (forced-colors: active) {
+  .ngu-tbl-page--current,
+  .ngu-tbl-badge {
+    border: 1px solid CanvasText;
+  }
+
+  .ngu-tbl-page--current {
+    outline: 2px solid Highlight;
+  }
+}

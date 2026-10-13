@@ -1,5 +1,7 @@
 # ngu-form roadmap
 
+> ngu-table has its own roadmap: [projects/ngu-table/ROADMAP.md](projects/ngu-table/ROADMAP.md).
+
 ngu-form describes Angular forms in TypeScript. A plain-object spec mirrors the model and
 renders as accessible, validated markup on top of Angular Signal Forms. This document is the
 plan from today's v0.1 to a stable 1.0 and beyond. It lists every feature a modern form

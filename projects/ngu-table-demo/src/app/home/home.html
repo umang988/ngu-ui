@@ -1,0 +1,122 @@
+<section class="hero page" aria-labelledby="hero-title">
+  <h1 id="hero-title">One fetchFn.<br />A whole list screen.</h1>
+  <p class="lead">
+    ngu-table is an Angular data table for admin screens. Describe the columns and write one method
+    that loads a page; search, filters, sorting, paging, row actions and CSV export are done, on
+    every list in your app.
+  </p>
+  <div class="hero__actions">
+    <a class="button" routerLink="/installation">Get started</a>
+    <a class="button button--quiet" routerLink="/introduction">Read the guide</a>
+    <div class="install">
+      <code><span class="install__prompt" aria-hidden="true">$</span> npm install ngu-table</code>
+      <button
+        type="button"
+        class="install__copy"
+        (click)="copyInstall()"
+        aria-label="Copy the install command"
+      >
+        {{ installCopied() ? 'Copied' : 'Copy' }}
+      </button>
+      <span class="visually-hidden" aria-live="polite">{{
+        installCopied() ? 'Copied to the clipboard' : ''
+      }}</span>
+    </div>
+  </div>
+</section>
+
+<section class="live page" aria-labelledby="live-title">
+  <h2 id="live-title" class="visually-hidden">Live demo</h2>
+  <div class="sheet">
+    <div class="sheet__col sheet__col--code">
+      <p class="sheet__caption">The code you write</p>
+      <app-code [code]="code" filename="orders.ts" [bare]="true" />
+      <app-code [code]="template" language="angular-html" filename="template" [bare]="true" />
+    </div>
+    <div class="sheet__col sheet__col--log">
+      <p class="sheet__caption">What your server is asked</p>
+      @if (requests().length) {
+        <ol class="log" aria-label="Requests, newest first">
+          @for (r of requests(); track r.id; let first = $first) {
+            <li class="log__row" [class.log__row--new]="first">{{ r.text }}</li>
+          }
+        </ol>
+      } @else {
+        <p class="log__empty">Waiting for the first page…</p>
+      }
+      <p class="sheet__hint">
+        Search, sort a column or turn a page: one request each, and a newer one cancels an older
+        one.
+      </p>
+    </div>
+    <div class="sheet__table">
+      <p class="sheet__caption">The screen people use</p>
+      <ngu-table
+        [fetchFn]="load"
+        [columns]="columns"
+        ariaLabel="Orders"
+        showEdit
+        showDelete
+        showExport
+        exportFileName="orders"
+        (queryChange)="asked($event)"
+      />
+    </div>
+  </div>
+</section>
+
+<section class="why page" aria-labelledby="why-title">
+  <div class="section-head">
+    <h2 id="why-title">Why ngu-table</h2>
+  </div>
+  <dl class="why__list">
+    <div>
+      <dt>One method, a whole screen</dt>
+      <dd>
+        <code>fetchFn</code> gets page, size, search, sort and filters in the shape a Spring Data
+        <code>Page</code> answers. The table does the rest, the same way on every screen.
+      </dd>
+    </div>
+    <div>
+      <dt>Columns that know their type</dt>
+      <dd>
+        Dates, amounts (rupees in lakhs if you like), status badges with colors that mean something,
+        avatars, links and progress bars, from one line of config each.
+      </dd>
+    </div>
+    <div>
+      <dt>No stale answers</dt>
+      <dd>
+        A new search, sort or filter cancels the request in flight. Rows stay put, dimmed, while the
+        next page loads; skeletons only before the first.
+      </dd>
+    </div>
+    <div>
+      <dt>Filters that apply when you say</dt>
+      <dd>
+        A filter panel applied with one button, tabs that apply at once, and one Clear that resets
+        search, sort and filters in a single request.
+      </dd>
+    </div>
+    <div>
+      <dt>Row actions with rules</dt>
+      <dd>
+        View, Edit and Delete with per-row rules, a native confirmation dialog, clickable rows and
+        room for your own buttons.
+      </dd>
+    </div>
+    <div>
+      <dt>Accessible</dt>
+      <dd>
+        Sort buttons with <code>aria-sort</code>, announced page changes, named icon buttons,
+        keyboard rows, forced colors and reduced motion. The site is checked with axe.
+      </dd>
+    </div>
+  </dl>
+</section>
+
+<section class="next page" aria-labelledby="next-title">
+  <h2 id="next-title">Replace your next hand-written list</h2>
+  <p class="lead">Install the package, describe the columns, write one method that loads a page.</p>
+  <a class="button" routerLink="/installation">Read the installation guide</a>
+</section>

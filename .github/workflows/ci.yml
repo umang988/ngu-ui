@@ -35,7 +35,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        project: [ngu-form, ngu-dropdown, demo, ngu-dropdown-demo]
+        project: [ngu-form, ngu-dropdown, ngu-table, demo, ngu-dropdown-demo, ngu-table-demo]
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
@@ -56,7 +56,7 @@ jobs:
           cache: npm
       - run: npm ci
       - name: Build the libraries
-        run: npm run build:dropdown && npm run build:form
+        run: npm run build:dropdown && npm run build:form && npm run build:table
       - name: Schematic specs
         run: npm run test:schematics
       - name: Public API matches api/*.api.md, and every export has TSDoc
@@ -69,6 +69,7 @@ jobs:
           node projects/docs-kit/agents/generate.mjs projects/demo/agent-docs.json --site dist/demo/browser
           npx ng build ngu-dropdown-demo
           node projects/docs-kit/agents/generate.mjs projects/ngu-dropdown-demo/agent-docs.json --site dist/ngu-dropdown-demo/browser
+          npx ng build ngu-table-demo
           npx ng build ssr-check
       - uses: actions/upload-artifact@v7
         with:
@@ -76,6 +77,7 @@ jobs:
           path: |
             dist/demo/browser
             dist/ngu-dropdown-demo/browser
+            dist/ngu-table-demo/browser
             dist/ssr-check/browser
           retention-days: 7
 

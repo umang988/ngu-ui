@@ -6,7 +6,8 @@ name: Release
 #   2. Give it a dated section in projects/<package>/CHANGELOG.md: "## 1.0.0 (2026-11-02): Title".
 #   3. Merge, wait for CI to pass, then run this workflow from the Actions tab.
 # npm accepts the publish through trusted publishing (OIDC): no token is stored in GitHub. Each
-# package lists this repository and workflow file as a trusted publisher on npmjs.com.
+# package lists this repository and workflow file as a trusted publisher on npmjs.com, which
+# npm allows only once the package exists: a new package's first version is published by hand.
 
 on:
   workflow_dispatch:
@@ -14,7 +15,7 @@ on:
       package:
         description: Package to publish
         type: choice
-        options: [ngu-form, ngu-dropdown]
+        options: [ngu-form, ngu-dropdown, ngu-table]
         required: true
       dry-run:
         description: Check and build everything, but do not publish, tag or release
@@ -57,10 +58,10 @@ jobs:
         id: meta
         run: node scripts/release-check.mjs ${{ inputs.package }} release-notes.md >> "$GITHUB_OUTPUT"
 
-      # Both packages for either release: api:check reads both, and building ngu-form checks that
+      # Every package for any release: api:check reads them all, and building ngu-form checks that
       # it still compiles against this ngu-dropdown.
       - name: Build
-        run: npm run build:dropdown && npm run build:form
+        run: npm run build:dropdown && npm run build:form && npm run build:table
       - name: Test
         run: |
           npx ng test ${{ inputs.package }} --watch=false

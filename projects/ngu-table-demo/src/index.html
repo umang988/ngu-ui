@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>ngu-table: an Angular data table for list screens</title>
+    <base href="/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="ngu-table is an Angular data table for admin list screens: one fetchFn and a column list give you server paging, search, filters, sorting, typed cells, row actions and CSV export."
+    />
+    <meta name="theme-color" content="#f6f7f9" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0e1424" media="(prefers-color-scheme: dark)" />
+    <link rel="icon" type="image/x-icon" href="favicon.ico" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Public+Sans:wght@400..800&display=swap"
+    />
+    <script>
+      // Apply a saved theme before the first paint, so the page never flashes the other one.
+      try {
+        const theme = localStorage.getItem('ngu-theme');
+        if (theme === 'light' || theme === 'dark') {
+          document.documentElement.dataset.theme = theme;
+        }
+      } catch {}
+    </script>
+  </head>
+  <body>
+    <app-root></app-root>
+  </body>
+</html>

@@ -18,6 +18,7 @@
       "ngu-form/dropdown": ["./projects/ngu-form/dropdown/src/public-api.ts"],
       "ngu-form/tailwind": ["./projects/ngu-form/tailwind/src/public-api.ts"],
       "ngu-dropdown": ["./projects/ngu-dropdown/src/public-api.ts"],
+      "ngu-table": ["./projects/ngu-table/src/public-api.ts"],
       "docs-kit/*": ["./projects/docs-kit/src/*"]
     },
     "skipLibCheck": true,
@@ -47,6 +48,12 @@
       "path": "./projects/ngu-dropdown/tsconfig.spec.json"
     },
     {
+      "path": "./projects/ngu-table/tsconfig.lib.json"
+    },
+    {
+      "path": "./projects/ngu-table/tsconfig.spec.json"
+    },
+    {
       "path": "./projects/demo/tsconfig.app.json"
     },
     {
@@ -57,6 +64,12 @@
     },
     {
       "path": "./projects/ngu-dropdown-demo/tsconfig.spec.json"
+    },
+    {
+      "path": "./projects/ngu-table-demo/tsconfig.app.json"
+    },
+    {
+      "path": "./projects/ngu-table-demo/tsconfig.spec.json"
     }
   ]
 }

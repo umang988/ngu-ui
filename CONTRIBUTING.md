@@ -1,7 +1,7 @@
 # Contributing
 
-Thanks for helping with ngu-form and ngu-dropdown. This repository holds both libraries, their
-docs sites, and the tools around them. Please read the [code of conduct](CODE_OF_CONDUCT.md)
+Thanks for helping with ngu-form, ngu-dropdown and ngu-table. This repository holds the three
+libraries, their docs sites, and the tools around them. Please read the [code of conduct](CODE_OF_CONDUCT.md)
 first, and report security problems privately as [SECURITY.md](SECURITY.md) explains.
 
 ## Before you start
@@ -23,6 +23,7 @@ cd ngu-ui
 npm ci
 npm start                 # ngu-form docs site on http://localhost:4200
 npm run dropdown          # ngu-dropdown docs site on http://localhost:4301
+npm run table             # ngu-table docs site on http://localhost:4302
 ```
 
 The docs sites import the libraries from source, so a change in `projects/ngu-form/src` shows
@@ -34,8 +35,10 @@ up right away.
 | --- | --- |
 | `projects/ngu-form` | The ngu-form library: `src/` is the main entry point, and `upload/`, `material/`, `primeng/`, `dropdown/`, `tailwind/`, `testing/`, `playwright/` and `debug/` are the others. `schematics/` holds `ng add` and the generators. |
 | `projects/ngu-dropdown` | The ngu-dropdown library. |
+| `projects/ngu-table` | The ngu-table library. Its plans are in its own [ROADMAP.md](projects/ngu-table/ROADMAP.md). |
 | `projects/demo` | ngu-form's docs site. Pages are data in `src/app/docs/content`, demos in `src/app/docs/demos`, complete examples in `src/app/examples`. |
 | `projects/ngu-dropdown-demo` | ngu-dropdown's docs site. |
+| `projects/ngu-table-demo` | ngu-table's docs site. |
 | `projects/docs-kit` | The shared docs shell, the agent-docs generator and the API reference generator. Not published. |
 | `projects/size-check`, `projects/ssr-check` | Small apps for the bundle size check and the server-rendering check. Not deployed. |
 | `e2e` | Playwright tests over the built docs sites. See [e2e/README.md](e2e/README.md). |
@@ -60,6 +63,7 @@ Run the spec files you touched rather than whole suites; CI runs everything.
 ```sh
 npx ng test ngu-form --watch=false --include=projects/ngu-form/src/lib/validation.spec.ts
 npx ng test ngu-dropdown --watch=false --include=projects/ngu-dropdown/src/lib/dropdown.spec.ts
+npx ng test ngu-table --watch=false --include=projects/ngu-table/src/lib/fetch.spec.ts
 npm run lint
 ```
 
@@ -67,14 +71,14 @@ When you change the public API, build the libraries and update the API report, t
 the changed files in `api/` and `projects/demo/src/app/docs/content/reference/`:
 
 ```sh
-npm run build:dropdown && npm run build:form
+npm run build:dropdown && npm run build:form && npm run build:table
 npm run api:update        # or api:check, which CI runs
 ```
 
 For the browser tests, build the sites first; [e2e/README.md](e2e/README.md) has the details.
 
 ```sh
-npx ng build demo && npx ng build ngu-dropdown-demo && npx ng build ssr-check
+npx ng build demo && npx ng build ngu-dropdown-demo && npx ng build ngu-table-demo && npx ng build ssr-check
 npx playwright install chromium firefox webkit   # once
 npm run e2e -- --project=chromium
 ```

@@ -7,7 +7,7 @@ import { execFileSync } from 'node:child_process';
 import { readFileSync, writeFileSync } from 'node:fs';
 
 const [name, notesFile = 'release-notes.md'] = process.argv.slice(2);
-const PACKAGES = ['ngu-form', 'ngu-dropdown'];
+const PACKAGES = ['ngu-form', 'ngu-dropdown', 'ngu-table'];
 if (!PACKAGES.includes(name)) {
   fail(`Usage: node scripts/release-check.mjs <${PACKAGES.join('|')}> [notes-file]`);
 }

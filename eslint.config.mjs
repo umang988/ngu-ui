@@ -39,7 +39,7 @@ export default defineConfig(
     },
   },
   {
-    files: ['projects/ngu-form/src/**/*.ts', 'projects/ngu-form/*/src/**/*.ts', 'projects/ngu-dropdown/src/**/*.ts'],
+    files: ['projects/ngu-form/src/**/*.ts', 'projects/ngu-form/*/src/**/*.ts', 'projects/ngu-dropdown/src/**/*.ts', 'projects/ngu-table/src/**/*.ts'],
     ignores: ['**/*.spec.ts', '**/testing/**'],
     rules: {
       '@angular-eslint/component-selector': ['error', { type: 'element', prefix: 'ngu', style: 'kebab-case' }],

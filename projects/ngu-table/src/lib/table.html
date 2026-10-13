@@ -1,0 +1,587 @@
+<div class="ngu-tbl" [class.ngu-tbl--surface]="surface()">
+  <!-- A rail that cuts the rows along one axis, above the toolbar: the tab says which set is
+       being looked at, and the toolbar searches, filters and pages within it. -->
+  <ng-content select="[nguTableTabs]" />
+
+  @if (showToolbar()) {
+    <div class="ngu-tbl-toolbar">
+      @if (showSearch()) {
+        <div class="ngu-tbl-search">
+          <input
+            type="search"
+            class="ngu-tbl-search-input"
+            [placeholder]="searchLabel()"
+            [attr.aria-label]="searchLabel()"
+            [value]="searchText()"
+            (input)="onSearchInput($event)"
+          />
+
+          @if (searchText()) {
+            <button
+              type="button"
+              class="ngu-tbl-search-clear"
+              [attr.aria-label]="messages().clearSearch"
+              (click)="clearSearch()"
+            >
+              <ngu-tbl-icon name="x" [size]="14" />
+            </button>
+          } @else {
+            <ngu-tbl-icon class="ngu-tbl-search-icon" name="search" [size]="15" />
+          }
+        </div>
+      }
+
+      <!-- A screen's own toolbar controls. -->
+      <ng-content select="[nguTableToolbar]" />
+
+      <div class="ngu-tbl-actions">
+        @if (clearVisible()) {
+          <button type="button" class="ngu-tbl-btn ngu-tbl-btn--ghost" (click)="clearAll()">
+            <ngu-tbl-icon name="x" [size]="15" />
+            <span class="ngu-tbl-btn-text">{{ messages().clear }}</span>
+          </button>
+        }
+
+        @if (showFilter()) {
+          <button
+            #filterTrigger
+            type="button"
+            class="ngu-tbl-btn"
+            [class.ngu-tbl-btn--primary]="filtering()"
+            [attr.aria-expanded]="filterOpen()"
+            [attr.aria-controls]="id + '-filters'"
+            (click)="toggleFilter()"
+          >
+            <ngu-tbl-icon name="filter" [size]="15" />
+            <span class="ngu-tbl-btn-text">{{ messages().filter }}</span>
+          </button>
+
+          <!-- Right after its trigger, so Tab goes from the button into the panel; shown in
+               the top layer, so no card or scroller around the table can clip it. -->
+          @if (filterPos(); as pos) {
+            <div
+              #filterPanel
+              popover="manual"
+              role="group"
+              class="ngu-tbl-filter"
+              [id]="id + '-filters'"
+              [attr.aria-labelledby]="id + '-filters-title'"
+              [style.left.px]="pos.left"
+              [style.top.px]="pos.top"
+              [style.bottom.px]="pos.bottom"
+              [style.max-height.px]="pos.maxHeight"
+            >
+              <div class="ngu-tbl-filter-head">
+                <span class="ngu-tbl-filter-title" [id]="id + '-filters-title'">
+                  {{ messages().filtersTitle }}
+                </span>
+                <button
+                  type="button"
+                  class="ngu-tbl-icon-btn"
+                  [attr.aria-label]="messages().closeFilters"
+                  (click)="closeFilter()"
+                >
+                  <ngu-tbl-icon name="x" [size]="14" />
+                </button>
+              </div>
+
+              <div class="ngu-tbl-filter-body">
+                <ng-content select="[nguTableFilters]" />
+              </div>
+
+              <div class="ngu-tbl-filter-foot">
+                <button type="button" class="ngu-tbl-btn" (click)="clearFilters()">
+                  {{ messages().clearFilters }}
+                </button>
+                <button
+                  type="button"
+                  class="ngu-tbl-btn ngu-tbl-btn--primary"
+                  (click)="applyFilters()"
+                >
+                  {{ messages().applyFilters }}
+                </button>
+              </div>
+            </div>
+          }
+        }
+
+        @if (showImport()) {
+          <button type="button" class="ngu-tbl-btn" (click)="pickFile()">
+            <ngu-tbl-icon name="upload" [size]="15" />
+            <span class="ngu-tbl-btn-text">{{ messages().import }}</span>
+          </button>
+          <input
+            #fileInput
+            type="file"
+            class="ngu-tbl-sr-only"
+            tabindex="-1"
+            aria-hidden="true"
+            [accept]="importAccept()"
+            (change)="onFileChosen($event)"
+          />
+        }
+
+        @if (showExport()) {
+          <button type="button" class="ngu-tbl-btn" [disabled]="!canExport()" (click)="exportCsv()">
+            <ngu-tbl-icon name="download" [size]="15" />
+            <span class="ngu-tbl-btn-text">{{ messages().export }}</span>
+          </button>
+        }
+
+        @if (showAdd()) {
+          <button
+            type="button"
+            class="ngu-tbl-btn ngu-tbl-btn--primary"
+            [disabled]="addDisabled()"
+            (click)="addClick.emit()"
+          >
+            <ngu-tbl-icon name="plus" [size]="15" />
+            <span class="ngu-tbl-btn-text">{{ addText() }}</span>
+          </button>
+        }
+      </div>
+    </div>
+  }
+
+  <!-- Rows in hand stay put and dim while the next page lands. -->
+  <div
+    #scrollBox
+    class="ngu-tbl-wrap"
+    [class.ngu-tbl-wrap--scroll]="scrollHeight()"
+    [class.ngu-tbl-wrap--virtual]="virtual()"
+    [class.ngu-tbl-wrap--refreshing]="refreshing()"
+    [style.max-height]="scrollHeight()"
+  >
+    <!-- A virtual table tells screen readers how many rows there are, and where each drawn
+         row sits among them (the heading row is row 1). -->
+    <table
+      #table
+      class="ngu-tbl-table"
+      [class.ngu-tbl-table--compact]="compact()"
+      [class.ngu-tbl-table--striped]="striped()"
+      [class.ngu-tbl-table--virtual]="virtual()"
+      [attr.aria-label]="ariaLabel()"
+      [attr.aria-rowcount]="virtual() ? total() + 1 : null"
+    >
+      <thead>
+        <tr [attr.aria-rowindex]="virtual() ? 1 : null">
+          @for (head of headerCells(); track head.column) {
+            <th
+              scope="col"
+              [style.width]="head.column.width"
+              [class.ngu-tbl-num]="head.numeric"
+              [attr.aria-sort]="head.aria"
+            >
+              @if (head.sortable) {
+                <button type="button" class="ngu-tbl-sort" (click)="toggleSort(head.column)">
+                  <span>{{ head.column.header }}</span>
+                  <ngu-tbl-icon
+                    class="ngu-tbl-sort-icon"
+                    [class.ngu-tbl-sort-icon--active]="head.direction"
+                    [name]="head.icon"
+                    [size]="13"
+                  />
+                </button>
+              } @else {
+                {{ head.column.header }}
+              }
+            </th>
+          }
+
+          @if (showActions()) {
+            <th scope="col" class="ngu-tbl-col-actions">{{ messages().actions }}</th>
+          }
+        </tr>
+      </thead>
+
+      <tbody [attr.aria-busy]="busy()">
+        <!-- A virtual table's column widths: the widest value seen in each column, in a row of
+             no height that nobody sees, so columns don't jump as other rows scroll in. -->
+        @if (sizer(); as cells) {
+          <tr class="ngu-tbl-sizer" aria-hidden="true">
+            @for (cell of cells; track $index) {
+              <td [class.ngu-tbl-num]="cell.numeric">
+                <div class="ngu-tbl-sizer-cell">
+                  @switch (cell.kind) {
+                    @case ('badge') {
+                      <span [class]="cell.badge">{{ cell.text }}</span>
+                    }
+                    @case ('avatar') {
+                      <span class="ngu-tbl-sizer-avatar">{{ cell.text }}</span>
+                    }
+                    @case ('mailto') {
+                      <span class="ngu-tbl-sizer-icon">{{ cell.text }}</span>
+                    }
+                    @case ('tel') {
+                      <span class="ngu-tbl-sizer-icon">{{ cell.text }}</span>
+                    }
+                    @case ('progress') {
+                      <span class="ngu-tbl-progress"></span>
+                    }
+                    @case ('boolean') {
+                      <span class="ngu-tbl-sizer-icon"></span>
+                    }
+                    @case ('image') {
+                      <span class="ngu-tbl-sizer-image" [style.inline-size]="cell.size"></span>
+                    }
+                    @default {
+                      {{ cell.text }}
+                    }
+                  }
+                </div>
+              </td>
+            }
+            @if (showActions()) {
+              <td class="ngu-tbl-col-actions">
+                <div
+                  class="ngu-tbl-sizer-cell"
+                  [style.min-inline-size.rem]="actionSlots() * 2.125"
+                ></div>
+              </td>
+            }
+          </tr>
+        }
+
+        <!-- Virtual rows: empty space stands in for the rows above and below the drawn ones,
+             so the scrollbar is sized to the whole list. -->
+        @if (window().before > 0) {
+          <tr class="ngu-tbl-spacer" aria-hidden="true">
+            <td [attr.colspan]="columnCount()" [style.height.px]="window().before"></td>
+          </tr>
+        }
+
+        @for (item of viewRows(); track item.key) {
+          @if (item.placeholder) {
+            <tr
+              class="ngu-tbl-placeholder"
+              [style.height.px]="rowHeightPx()"
+              [attr.aria-rowindex]="item.index + 2"
+            >
+              @for (column of visibleColumns(); track column) {
+                <td><span class="ngu-tbl-skeleton"></span></td>
+              }
+              @if (showActions()) {
+                <td><span class="ngu-tbl-skeleton ngu-tbl-skeleton--short"></span></td>
+              }
+            </tr>
+          } @else {
+            <tr
+              class="ngu-tbl-row"
+              [class.ngu-tbl-row--alt]="item.index % 2 === 1"
+              [class.ngu-tbl-row--clickable]="rowClickable()"
+              [style.height.px]="rowStyleHeight()"
+              [attr.aria-rowindex]="virtual() ? item.index + 2 : null"
+              [attr.tabindex]="rowClickable() ? 0 : null"
+              (click)="onRowClick($event, item.row)"
+              (keydown.enter)="onRowKey($event, item.row)"
+            >
+              @for (cell of item.cells; track cell.column) {
+                <td [class.ngu-tbl-num]="cell.numeric" [class.ngu-tbl-wrap-text]="cell.wrap">
+                  <!-- Everything read from cells built once per row: no pipes, no calls. -->
+                  @switch (cell.kind) {
+                    @case ('badge') {
+                      <span [class]="cell.badge">{{ cell.text }}</span>
+                    }
+
+                    @case ('boolean') {
+                      @if (cell.truthy) {
+                        <ngu-tbl-icon class="ngu-tbl-yes" name="check" [size]="17" />
+                      } @else {
+                        <ngu-tbl-icon class="ngu-tbl-no" name="x" [size]="17" />
+                      }
+                      <span class="ngu-tbl-sr-only">{{ cell.text }}</span>
+                    }
+
+                    @case ('avatar') {
+                      <span class="ngu-tbl-avatar-cell">
+                        @if (cell.src) {
+                          <img class="ngu-tbl-avatar" [src]="cell.src" alt="" />
+                        } @else {
+                          <span class="ngu-tbl-avatar" aria-hidden="true">{{ cell.initials }}</span>
+                        }
+                        <span class="ngu-tbl-truncate">{{ cell.text }}</span>
+                      </span>
+                    }
+
+                    @case ('image') {
+                      @if (cell.src) {
+                        <img
+                          class="ngu-tbl-image"
+                          [src]="cell.src"
+                          [style.width]="cell.size"
+                          [style.height]="cell.size"
+                          alt=""
+                        />
+                      } @else {
+                        {{ cell.text }}
+                      }
+                    }
+
+                    @case ('mailto') {
+                      <a class="ngu-tbl-link" [href]="cell.href">
+                        <ngu-tbl-icon name="mail" [size]="14" />
+                        <span class="ngu-tbl-truncate">{{ cell.text }}</span>
+                      </a>
+                    }
+
+                    @case ('tel') {
+                      <a class="ngu-tbl-link" [href]="cell.href">
+                        <ngu-tbl-icon name="phone" [size]="14" />
+                        <span>{{ cell.text }}</span>
+                      </a>
+                    }
+
+                    @case ('link') {
+                      <button
+                        type="button"
+                        class="ngu-tbl-link-btn"
+                        (click)="onLink(item.row, cell.column)"
+                      >
+                        {{ cell.text }}
+                      </button>
+                    }
+
+                    @case ('progress') {
+                      <span class="ngu-tbl-progress">
+                        <span class="ngu-tbl-progress-track">
+                          <span class="ngu-tbl-progress-fill" [style.width.%]="cell.percent"></span>
+                        </span>
+                        <span class="ngu-tbl-progress-value">{{ cell.text }}</span>
+                      </span>
+                    }
+
+                    @case ('template') {
+                      <ng-container
+                        [ngTemplateOutlet]="cell.template!"
+                        [ngTemplateOutletContext]="cell.context!"
+                      />
+                    }
+
+                    @default {
+                      {{ cell.text }}
+                    }
+                  }
+                </td>
+              }
+
+              @if (showActions()) {
+                <td class="ngu-tbl-col-actions">
+                  <div class="ngu-tbl-row-actions">
+                    @if (showView()) {
+                      <button
+                        type="button"
+                        class="ngu-tbl-icon-btn"
+                        [title]="messages().view"
+                        [attr.aria-label]="messages().view"
+                        (click)="viewRow.emit(item.row)"
+                      >
+                        <ngu-tbl-icon name="eye" />
+                      </button>
+                    }
+
+                    @if (item.canEdit) {
+                      <button
+                        type="button"
+                        class="ngu-tbl-icon-btn"
+                        [title]="messages().edit"
+                        [attr.aria-label]="messages().edit"
+                        (click)="editRow.emit(item.row)"
+                      >
+                        <ngu-tbl-icon name="pencil" />
+                      </button>
+                    }
+
+                    @if (item.canDelete) {
+                      <button
+                        type="button"
+                        class="ngu-tbl-icon-btn ngu-tbl-icon-btn--danger"
+                        [title]="messages().delete"
+                        [attr.aria-label]="messages().delete"
+                        (click)="askDelete(item.row, $event)"
+                      >
+                        <ngu-tbl-icon name="trash" />
+                      </button>
+                    }
+
+                    @if (rowActions(); as actions) {
+                      <ng-container
+                        [ngTemplateOutlet]="actions.template"
+                        [ngTemplateOutletContext]="item.actions"
+                      />
+                    }
+                  </div>
+                </td>
+              }
+            </tr>
+          }
+        }
+
+        @if (window().after > 0) {
+          <tr class="ngu-tbl-spacer" aria-hidden="true">
+            <td [attr.colspan]="columnCount()" [style.height.px]="window().after"></td>
+          </tr>
+        }
+
+        @if (showSkeleton()) {
+          @for (line of skeletonRange(); track line) {
+            <tr class="ngu-tbl-placeholder">
+              @for (column of visibleColumns(); track column) {
+                <td><span class="ngu-tbl-skeleton"></span></td>
+              }
+              @if (showActions()) {
+                <td><span class="ngu-tbl-skeleton ngu-tbl-skeleton--short"></span></td>
+              }
+            </tr>
+          }
+        }
+
+        @if (showEmpty()) {
+          <tr class="ngu-tbl-empty">
+            <td [attr.colspan]="columnCount()">
+              @if (failed()) {
+                <div class="ngu-tbl-notice" role="alert">
+                  <div class="ngu-tbl-notice-icon"><ngu-tbl-icon name="alert" [size]="22" /></div>
+                  <div class="ngu-tbl-notice-title">{{ messages().errorTitle }}</div>
+                  <p class="ngu-tbl-notice-text">{{ messages().errorMessage }}</p>
+                  <button type="button" class="ngu-tbl-btn" (click)="reload()">
+                    {{ messages().retry }}
+                  </button>
+                </div>
+              } @else if (emptyTemplate(); as empty) {
+                <div class="ngu-tbl-notice">
+                  <ng-container [ngTemplateOutlet]="empty.template" />
+                </div>
+              } @else {
+                <div class="ngu-tbl-notice">
+                  <div class="ngu-tbl-notice-icon"><ngu-tbl-icon name="inbox" [size]="22" /></div>
+                  <div class="ngu-tbl-notice-title">{{ emptyHeading() }}</div>
+                  <p class="ngu-tbl-notice-text">{{ emptyBody() }}</p>
+                </div>
+              }
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  @if (pager(); as p) {
+    @if (p.show) {
+      <div class="ngu-tbl-footer">
+        <div class="ngu-tbl-footer-grid">
+          @if (showPageSize() && p.paged) {
+            <select
+              class="ngu-tbl-page-size"
+              [attr.aria-label]="messages().rowsPerPage"
+              (change)="onPageSize($event)"
+            >
+              @for (size of pageSizeChoices(); track size) {
+                <option [value]="size" [selected]="size === pageSize()">
+                  {{ messages().pageSize(size) }}
+                </option>
+              }
+            </select>
+          }
+
+          @if (virtual() && failed() && total()) {
+            <!-- A virtual list keeps the rows it has; only the missing ones are asked again. -->
+            <span class="ngu-tbl-range ngu-tbl-range--error" role="alert">
+              {{ messages().errorTitle }}
+              <button type="button" class="ngu-tbl-btn" (click)="retryVirtual()">
+                {{ messages().retry }}
+              </button>
+            </span>
+          } @else {
+            <span class="ngu-tbl-range" role="status">{{ p.range }}</span>
+          }
+
+          <!-- A group, not a <nav>: several tables on one page would repeat the landmark. -->
+          @if (p.paged) {
+            <div class="ngu-tbl-pager" role="group" [attr.aria-label]="messages().pagination">
+              <button
+                type="button"
+                class="ngu-tbl-page"
+                [attr.aria-label]="messages().firstPage"
+                [disabled]="p.atStart"
+                (click)="goToPage(0)"
+              >
+                <ngu-tbl-icon name="first" [size]="14" />
+              </button>
+              <button
+                type="button"
+                class="ngu-tbl-page"
+                [attr.aria-label]="messages().previousPage"
+                [disabled]="p.atStart"
+                (click)="goToPage(p.prev)"
+              >
+                <ngu-tbl-icon name="previous" [size]="14" />
+              </button>
+
+              @for (page of p.pages; track page.index) {
+                <button
+                  type="button"
+                  class="ngu-tbl-page"
+                  [class.ngu-tbl-page--current]="page.active"
+                  [attr.aria-current]="page.aria"
+                  [attr.aria-label]="page.name"
+                  (click)="goToPage(page.index)"
+                >
+                  {{ page.label }}
+                </button>
+              }
+
+              <button
+                type="button"
+                class="ngu-tbl-page"
+                [attr.aria-label]="messages().nextPage"
+                [disabled]="p.atEnd"
+                (click)="goToPage(p.next)"
+              >
+                <ngu-tbl-icon name="next" [size]="14" />
+              </button>
+              <button
+                type="button"
+                class="ngu-tbl-page"
+                [attr.aria-label]="messages().lastPage"
+                [disabled]="p.atEnd"
+                (click)="goToPage(p.lastPage)"
+              >
+                <ngu-tbl-icon name="last" [size]="14" />
+              </button>
+            </div>
+          }
+        </div>
+      </div>
+    }
+  }
+</div>
+
+<!-- A native modal dialog: the top layer, a focus trap and Escape come with it. Kept rendered
+     so closing it can put focus back on the Delete button that opened it. A click on the
+     backdrop closes it; Escape is the keyboard's way, built into the element. -->
+<!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events, @angular-eslint/template/interactive-supports-focus -->
+<dialog
+  #dialog
+  class="ngu-tbl-dialog"
+  [attr.aria-labelledby]="id + '-delete-title'"
+  [attr.aria-describedby]="id + '-delete-text'"
+  (close)="onDialogClosed()"
+  (click)="onDialogClick($event)"
+>
+  <div class="ngu-tbl-dialog-panel">
+    <h2 class="ngu-tbl-dialog-title" [id]="id + '-delete-title'">{{ messages().deleteTitle }}</h2>
+    <p class="ngu-tbl-dialog-text" [id]="id + '-delete-text'">{{ deleteText() }}</p>
+    <div class="ngu-tbl-dialog-foot">
+      <button type="button" class="ngu-tbl-btn" autofocus (click)="closeDialog()">
+        {{ messages().cancel }}
+      </button>
+      <button
+        type="button"
+        class="ngu-tbl-btn ngu-tbl-btn--danger"
+        (click)="confirmPendingDelete()"
+      >
+        {{ messages().delete }}
+      </button>
+    </div>
+  </div>
+</dialog>

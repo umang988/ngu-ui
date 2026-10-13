@@ -1,11 +1,12 @@
-import { axeViolations, DROPDOWN_SITE, expect, FORM_SITE, settle, test, useTheme, type Theme } from './support';
+import { axeViolations, DROPDOWN_SITE, expect, FORM_SITE, settle, TABLE_SITE, test, useTheme, type Theme } from './support';
 
-// Every page of both docs sites, in both themes: it renders, logs no errors, and axe finds
+// Every page of every docs site, in both themes: it renders, logs no errors, and axe finds
 // nothing. Pages come from each site's own sidebar, so new pages are covered without edits here.
 
 const SITES = [
   { name: 'ngu-form', base: FORM_SITE },
   { name: 'ngu-dropdown', base: DROPDOWN_SITE },
+  { name: 'ngu-table', base: TABLE_SITE },
 ];
 const THEMES: readonly Theme[] = ['light', 'dark'];
 

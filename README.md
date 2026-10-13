@@ -1,28 +1,35 @@
 # ngu-ui workspace
 
-Angular 22 workspace for two libraries, [`ngu-form`](projects/ngu-form/README.md) and
-[`ngu-dropdown`](projects/ngu-dropdown/README.md), and their docs sites.
+Angular 22 workspace for three libraries, [`ngu-form`](projects/ngu-form/README.md),
+[`ngu-dropdown`](projects/ngu-dropdown/README.md) and [`ngu-table`](projects/ngu-table/README.md),
+and their docs sites.
 
 | Path | What |
 | --- | --- |
 | `projects/ngu-form` | The ngu-form library (ng-packagr) and its schematics. |
 | `projects/ngu-dropdown` | The ngu-dropdown library. |
+| `projects/ngu-table` | The ngu-table library. |
 | `projects/demo` | ngu-form's docs site, https://ngu-form.netlify.app. Imports the libraries from source. |
 | `projects/ngu-dropdown-demo` | ngu-dropdown's docs site, https://ngu-dropdown.netlify.app. |
+| `projects/ngu-table-demo` | ngu-table's docs site (`netlify.toml` ready, site not created yet). |
 | `projects/docs-kit` | Shared docs shell, agent-docs generator and API reference generator. |
 | `projects/size-check`, `projects/ssr-check` | Bundle size and server-rendering checks. Not deployed. |
 | `e2e` | Playwright suites over the built sites ([README](e2e/README.md)). |
 | `api` | Generated public API reports, compared in CI. |
 
-Plans and progress: [ROADMAP.md](ROADMAP.md). How to work on it: [CONTRIBUTING.md](CONTRIBUTING.md).
+Plans and progress: [ROADMAP.md](ROADMAP.md) for ngu-form and
+[projects/ngu-table/ROADMAP.md](projects/ngu-table/ROADMAP.md) for ngu-table. How to work on it:
+[CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Commands
 
 ```sh
 npm start                      # ngu-form docs site on http://localhost:4200
 npm run dropdown               # ngu-dropdown docs site on http://localhost:4301
+npm run table                  # ngu-table docs site on http://localhost:4302
 npm run build:dropdown         # dist/ngu-dropdown (build it first: ngu-form/dropdown uses it)
 npm run build:form             # dist/ngu-form, its schematics and agent docs
+npm run build:table            # dist/ngu-table
 npx ng test ngu-form --watch=false --include=projects/ngu-form/src/lib/define.spec.ts
 npm run lint
 npm run api:check              # after the builds: API report and TSDoc coverage

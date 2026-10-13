@@ -58,6 +58,32 @@
         }
       }
     },
+    "ngu-table": {
+      "projectType": "library",
+      "root": "projects/ngu-table",
+      "sourceRoot": "projects/ngu-table/src",
+      "prefix": "ngu",
+      "architect": {
+        "build": {
+          "builder": "@angular/build:ng-packagr",
+          "configurations": {
+            "production": {
+              "tsConfig": "projects/ngu-table/tsconfig.lib.prod.json"
+            },
+            "development": {
+              "tsConfig": "projects/ngu-table/tsconfig.lib.json"
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "test": {
+          "builder": "@angular/build:unit-test",
+          "options": {
+            "tsConfig": "projects/ngu-table/tsconfig.spec.json"
+          }
+        }
+      }
+    },
     "demo": {
       "projectType": "application",
       "schematics": {
@@ -244,6 +270,95 @@
           "builder": "@angular/build:unit-test",
           "options": {
             "tsConfig": "projects/ngu-dropdown-demo/tsconfig.spec.json"
+          }
+        }
+      }
+    },
+    "ngu-table-demo": {
+      "projectType": "application",
+      "schematics": {
+        "@schematics/angular:component": {
+          "style": "scss"
+        }
+      },
+      "root": "projects/ngu-table-demo",
+      "sourceRoot": "projects/ngu-table-demo/src",
+      "prefix": "app",
+      "architect": {
+        "build": {
+          "builder": "@angular/build:application",
+          "options": {
+            "browser": "projects/ngu-table-demo/src/main.ts",
+            "tsConfig": "projects/ngu-table-demo/tsconfig.app.json",
+            "inlineStyleLanguage": "scss",
+            "assets": [
+              {
+                "glob": "**/*",
+                "input": "projects/ngu-table-demo/public"
+              },
+              {
+                "glob": "**/*.ts",
+                "input": "projects/ngu-table-demo/src/app/demos",
+                "output": "source/docs",
+                "ignore": [
+                  "**/*.spec.ts"
+                ]
+              },
+              {
+                "glob": "CHANGELOG.md",
+                "input": "projects/ngu-table",
+                "output": "source"
+              }
+            ],
+            "styles": [
+              "projects/docs-kit/styles/base.scss",
+              "projects/docs-kit/styles/docs.scss",
+              "projects/ngu-table-demo/src/styles.scss"
+            ]
+          },
+          "configurations": {
+            "production": {
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "520kB",
+                  "maximumError": "1MB"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "14kB",
+                  "maximumError": "16kB"
+                }
+              ],
+              "outputHashing": "all"
+            },
+            "development": {
+              "optimization": false,
+              "extractLicenses": false,
+              "sourceMap": true
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "serve": {
+          "builder": "@angular/build:dev-server",
+          "configurations": {
+            "production": {
+              "buildTarget": "ngu-table-demo:build:production"
+            },
+            "development": {
+              "buildTarget": "ngu-table-demo:build:development"
+            }
+          },
+          "defaultConfiguration": "development",
+          "options": {
+            "port": 4302
+          }
+        },
+        "test": {
+          "builder": "@angular/build:unit-test",
+          "options": {
+            "tsConfig": "projects/ngu-table-demo/tsconfig.spec.json"
           }
         }
       }

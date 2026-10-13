@@ -3,6 +3,7 @@ import { test as base, expect, type Page } from '@playwright/test';
 
 export const FORM_SITE = 'http://localhost:4321';
 export const DROPDOWN_SITE = 'http://localhost:4322';
+export const TABLE_SITE = 'http://localhost:4324';
 
 export type Theme = 'light' | 'dark';
 

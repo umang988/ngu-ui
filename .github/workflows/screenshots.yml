@@ -32,6 +32,7 @@ jobs:
           npm run build:dropdown
           npx ng build demo
           npx ng build ngu-dropdown-demo
+          npx ng build ngu-table-demo
           npx ng build ssr-check
       - name: Take screenshots
         run: npx playwright test -c e2e --project=visual --update-snapshots=all

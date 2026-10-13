@@ -1,12 +1,12 @@
 # End-to-end tests
 
-Playwright tests over the production builds of both docs sites, served the way Netlify serves
+Playwright tests over the production builds of the docs sites, served the way Netlify serves
 them (`serve.mjs`: files as themselves, every other path gets `index.html`).
 
 | Project | Spec | What |
 | --- | --- | --- |
-| `site` | `site.spec.ts` | Every page of both sites, light and dark: renders, no console errors, no axe violations. Pages come from each site's sidebar. Chromium. |
-| `chromium`, `firefox`, `webkit` | `keyboard.spec.ts`, `drafts.spec.ts`, `dropdown.spec.ts`, `recipes.spec.ts` | Keyboard-only flows, IndexedDB drafts across a reload, ngu-dropdown by keyboard, the autosave and admin recipes. |
+| `site` | `site.spec.ts` | Every page of every site, light and dark: renders, no console errors, no axe violations. Pages come from each site's sidebar. Chromium. |
+| `chromium`, `firefox`, `webkit` | `keyboard.spec.ts`, `drafts.spec.ts`, `dropdown.spec.ts`, `recipes.spec.ts`, `table.spec.ts` | Keyboard-only flows, IndexedDB drafts across a reload, ngu-dropdown by keyboard, the autosave and admin recipes, ngu-table's filter panel, delete dialog, keyboard rows and narrow layout. |
 | `ssr` | `ssr.spec.ts` | `projects/ssr-check` prerenders the examples; each page arrives with its form in the HTML and hydrates without mismatches. |
 | `perf` | `perf.spec.ts` | A 500-field form (`/bench`): render time, no long tasks while typing, a full check under budget. Chromium. |
 | `visual` | `visual.spec.ts` | One screenshot per field type of `/gallery`, light, dark and right to left. |
@@ -15,13 +15,13 @@ them (`serve.mjs`: files as themselves, every other path gets `index.html`).
 
 ```sh
 npm run build:dropdown                      # ngu-dropdown first: ngu-form/dropdown builds against it
-npx ng build demo && npx ng build ngu-dropdown-demo && npx ng build ssr-check
+npx ng build demo && npx ng build ngu-dropdown-demo && npx ng build ngu-table-demo && npx ng build ssr-check
 npx playwright install chromium firefox webkit   # once
 npm run e2e -- --project=chromium           # one project at a time on a small machine
 npm run e2e -- --project=site
 ```
 
-The config starts a server per site (ports 4321, 4322 and 4323) and reuses them if they already run.
+The config starts a server per site (ports 4321, 4322, 4324 and 4323) and reuses them if they already run.
 
 ## Screenshots
 
