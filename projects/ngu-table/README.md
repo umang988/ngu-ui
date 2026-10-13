@@ -88,9 +88,12 @@ Rows you already have are searched, sorted and paged in the browser:
 ```
 
 App-wide defaults (page size, date formats, currency, status words, every built-in string)
-go in one provider:
+go in one provider. Import it from `ngu-table/config`, so the table itself stays out of the
+bundle every page loads first:
 
 ```ts
+import { provideNguTableConfig } from 'ngu-table/config';
+
 provideNguTableConfig({
   pageSize: 25,
   currencyCode: 'INR',

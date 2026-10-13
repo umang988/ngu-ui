@@ -236,7 +236,7 @@ async remove(order: Order) {
             filename: 'app.config.ts',
             code: `import { registerLocaleData } from '@angular/common';
 import localeEnIn from '@angular/common/locales/en-IN';
-import { provideNguTableConfig } from 'ngu-table';
+import { provideNguTableConfig } from 'ngu-table/config';
 
 registerLocaleData(localeEnIn);
 
@@ -298,7 +298,7 @@ export const appConfig: ApplicationConfig = {
         id: 'empty',
         title: 'The empty notice',
         text: [
-          '`<ng-template nguTableEmpty>` replaces the notice shown when there are no rows; the error notice stays. For text alone, `emptyTitle` and `emptyMessage` are enough.',
+          '`<ng-template nguTableEmpty>` replaces the notice shown when there are no rows; the error notice stays. For text alone, `emptyTitle` and `emptyMessage` are enough, and an element marked `nguTableEmptyIcon` replaces just the icon, from any icon library: `<my-icon nguTableEmptyIcon name="truck" />`.',
         ],
         demo: {
           src: 'empty.ts',
@@ -357,7 +357,7 @@ export class SessionSearchMemory implements NguTableSearchMemory {
   }
 }
 
-// app.config.ts
+// app.config.ts, importing from 'ngu-table/config'
 provideNguTableConfig({ searchMemory: SessionSearchMemory });`,
           },
         ],

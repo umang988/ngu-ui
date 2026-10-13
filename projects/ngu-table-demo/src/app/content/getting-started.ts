@@ -153,11 +153,12 @@ export class Orders {
         title: 'App-wide defaults',
         text: [
           'Page size, date formats, the currency, status words and every built-in string can be set once for the whole app. Nested providers merge, so a route can change one setting and keep the rest.',
+          'Import it from `ngu-table/config`, which holds only the defaults. Imported from `ngu-table` in `app.config.ts`, it would bring the whole table into the bundle every page loads first, login included, instead of the lazy chunks of the screens that show a table.',
         ],
         code: [
           {
             filename: 'app.config.ts',
-            code: `import { provideNguTableConfig } from 'ngu-table';
+            code: `import { provideNguTableConfig } from 'ngu-table/config';
 
 export const appConfig: ApplicationConfig = {
   providers: [

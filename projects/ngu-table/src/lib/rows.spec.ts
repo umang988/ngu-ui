@@ -1,7 +1,11 @@
 import { ChangeDetectionStrategy, Component, Injectable, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { driver, ORDERS, type Order } from '../testing/helpers';
-import { provideNguTableConfig, type NguTableMessages, type NguTableSearchMemory } from './config';
+import {
+  provideNguTableConfig,
+  type NguTableMessages,
+  type NguTableSearchMemory,
+} from 'ngu-table/config';
 import { NguTable } from './table';
 import { NguTableCell, NguTableEmpty, NguTableRowActions } from './templates';
 import type { NguTableColumn, NguTableLinkEvent } from './types';
@@ -219,6 +223,7 @@ describe('NguTable text', () => {
         @if (custom()) {
           <ng-template nguTableEmpty><span class="mine">No orders yet</span></ng-template>
         }
+        <span nguTableEmptyIcon class="own-icon">★</span>
       </ngu-table>
     `,
   })
@@ -264,6 +269,15 @@ describe('NguTable text', () => {
     await fixture.whenStable();
 
     expect(driver(fixture).range()).toBe('1-10 / 12');
+  });
+
+  it('shows a projected nguTableEmptyIcon in place of the inbox icon', async () => {
+    const fixture = TestBed.createComponent(TextHost);
+    await fixture.whenStable();
+    const icon = driver(fixture).notice()!.querySelector('.ngu-tbl-notice-icon')!;
+
+    expect(icon.querySelector('.own-icon')!.textContent).toBe('★');
+    expect(icon.querySelector('ngu-tbl-icon')).toBeNull();
   });
 
   it('shows the nguTableEmpty template instead of the empty notice', async () => {

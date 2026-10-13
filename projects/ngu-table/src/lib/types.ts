@@ -26,11 +26,9 @@ export type NguTableColumnType =
   | 'link'
   | 'progress';
 
-/**
- * What a badge means, not its color: the stylesheet decides what each tone looks like,
- * through the `--ngu-tbl-<tone>` variables.
- */
-export type NguBadgeTone = 'success' | 'danger' | 'warning' | 'info' | 'accent' | 'neutral';
+import type { NguBadgeTone } from 'ngu-table/config';
+
+export type { NguBadgeTone };
 
 /** One column of `[columns]`. Only `field` and `header` are required. */
 export interface NguTableColumn<T = any> {

@@ -453,7 +453,12 @@
                 </div>
               } @else {
                 <div class="ngu-tbl-notice">
-                  <div class="ngu-tbl-notice-icon"><ngu-tbl-icon name="inbox" [size]="22" /></div>
+                  <!-- An icon of your own (any icon library) replaces the inbox. -->
+                  <div class="ngu-tbl-notice-icon">
+                    <ng-content select="[nguTableEmptyIcon]">
+                      <ngu-tbl-icon name="inbox" [size]="22" />
+                    </ng-content>
+                  </div>
                   <div class="ngu-tbl-notice-title">{{ emptyHeading() }}</div>
                   <p class="ngu-tbl-notice-text">{{ emptyBody() }}</p>
                 </div>

@@ -1,5 +1,9 @@
-import { toneKey } from './config';
-import type { NguBadgeTone } from './types';
+import type { NguBadgeTone } from 'ngu-table/config';
+
+/** The key a status word is looked up by: no case, spaces, dots, dashes or underscores. */
+function toneKey(value: string): string {
+  return value.toLowerCase().replace(/[\s._-]+/g, '');
+}
 
 /** Keys are stripped of case and separators, so `ON_HOLD` and `on hold` are one entry. */
 const KNOWN_TONES: Readonly<Record<string, NguBadgeTone>> = {

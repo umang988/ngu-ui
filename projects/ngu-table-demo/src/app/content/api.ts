@@ -355,6 +355,7 @@ export const PAGES: Record<string, DocPage> = {
               '`<ng-template nguTableRowActions>`',
               'Extra buttons in each row. Context: `$implicit` row.',
             ],
+            ['`[nguTableEmptyIcon]`', "Replaces the empty notice's icon."],
             ['`<ng-template nguTableEmpty>`', 'Replaces the empty notice.'],
           ],
         },
@@ -371,7 +372,7 @@ export const PAGES: Record<string, DocPage> = {
         id: 'config',
         title: 'provideNguTableConfig',
         text: [
-          "Defaults for every table under an injector. Options left out keep the parent injector's value or the built-in default; `messages` and `badgeTones` merge key by key.",
+          "Defaults for every table under an injector. Options left out keep the parent injector's value or the built-in default; `messages` and `badgeTones` merge key by key. Import it from `ngu-table/config` in an app config, so the table stays out of the initial bundle.",
         ],
         api: [
           {

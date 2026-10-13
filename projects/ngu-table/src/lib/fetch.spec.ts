@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, signal, viewChild } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { answer, driver, FakeServer, wait, type Order } from '../testing/helpers';
-import { provideNguTableConfig } from './config';
+import { provideNguTableConfig } from 'ngu-table/config';
 import { NguTable } from './table';
 import type { NguTableColumn, NguTableFetchContext, NguTableQuery } from './types';
 

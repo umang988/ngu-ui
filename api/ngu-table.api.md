@@ -8,53 +8,53 @@
 export type NguBadgeTone = "success" | "danger" | "warning" | "info" | "accent" | "neutral";
 
 export declare class NguTable<T = any> implements OnInit {
-    readonly columns: import("@angular/core").InputSignal<readonly NguTableColumn<T>[]>;
-    readonly rows: import("@angular/core").InputSignal<readonly T[]>;
-    readonly fetchFn: import("@angular/core").InputSignal<NguTableFetch<T> | null>;
-    readonly mode: import("@angular/core").InputSignal<"server" | "client">;
+    readonly columns: InputSignal<readonly NguTableColumn<T>[]>;
+    readonly rows: InputSignal<readonly T[]>;
+    readonly fetchFn: InputSignal<NguTableFetch<T> | null>;
+    readonly mode: InputSignal<'server' | 'client'>;
     readonly loading: import("@angular/core").InputSignalWithTransform<boolean, unknown>;
-    readonly filters: import("@angular/core").InputSignal<Record<string, unknown>>;
-    readonly rowKey: import("@angular/core").InputSignal<string | undefined>;
-    readonly skeletonRows: import("@angular/core").InputSignal<number>;
-    readonly emptyText: import("@angular/core").InputSignal<string | undefined>;
-    readonly stateKey: import("@angular/core").InputSignal<string | undefined>;
-    readonly ariaLabel: import("@angular/core").InputSignal<string | undefined>;
+    readonly filters: InputSignal<Record<string, unknown>>;
+    readonly rowKey: InputSignal<string | undefined>;
+    readonly skeletonRows: InputSignal<number>;
+    readonly emptyText: InputSignal<string | undefined>;
+    readonly stateKey: InputSignal<string | undefined>;
+    readonly ariaLabel: InputSignal<string | undefined>;
     readonly surface: import("@angular/core").InputSignalWithTransform<boolean, unknown>;
     readonly compact: import("@angular/core").InputSignalWithTransform<boolean, unknown>;
     readonly striped: import("@angular/core").InputSignalWithTransform<boolean, unknown>;
-    readonly maxHeight: import("@angular/core").InputSignal<string | null>;
-    readonly emptyTitle: import("@angular/core").InputSignal<string | undefined>;
-    readonly emptyMessage: import("@angular/core").InputSignal<string | undefined>;
+    readonly maxHeight: InputSignal<string | null>;
+    readonly emptyTitle: InputSignal<string | undefined>;
+    readonly emptyMessage: InputSignal<string | undefined>;
     readonly showSearch: import("@angular/core").InputSignalWithTransform<boolean, unknown>;
-    readonly searchPlaceholder: import("@angular/core").InputSignal<string | undefined>;
-    readonly searchDebounce: import("@angular/core").InputSignal<number | undefined>;
-    readonly searchMinLength: import("@angular/core").InputSignal<number | undefined>;
+    readonly searchPlaceholder: InputSignal<string | undefined>;
+    readonly searchDebounce: InputSignal<number | undefined>;
+    readonly searchMinLength: InputSignal<number | undefined>;
     readonly showClear: import("@angular/core").InputSignalWithTransform<boolean, unknown>;
     readonly showFilter: import("@angular/core").InputSignalWithTransform<boolean, unknown>;
     readonly filterActive: import("@angular/core").InputSignalWithTransform<boolean | undefined, unknown>;
     readonly showImport: import("@angular/core").InputSignalWithTransform<boolean, unknown>;
-    readonly importAccept: import("@angular/core").InputSignal<string>;
+    readonly importAccept: InputSignal<string>;
     readonly importOpensDialog: import("@angular/core").InputSignalWithTransform<boolean, unknown>;
     readonly showExport: import("@angular/core").InputSignalWithTransform<boolean, unknown>;
-    readonly exportFileName: import("@angular/core").InputSignal<string>;
+    readonly exportFileName: InputSignal<string>;
     readonly showAdd: import("@angular/core").InputSignalWithTransform<boolean, unknown>;
-    readonly addLabel: import("@angular/core").InputSignal<string | undefined>;
+    readonly addLabel: InputSignal<string | undefined>;
     readonly addDisabled: import("@angular/core").InputSignalWithTransform<boolean, unknown>;
     readonly showView: import("@angular/core").InputSignalWithTransform<boolean, unknown>;
     readonly showEdit: import("@angular/core").InputSignalWithTransform<boolean, unknown>;
     readonly showDelete: import("@angular/core").InputSignalWithTransform<boolean, unknown>;
-    readonly canEdit: import("@angular/core").InputSignal<(row: T) => boolean>;
-    readonly canDelete: import("@angular/core").InputSignal<(row: T) => boolean>;
+    readonly canEdit: InputSignal<(row: T) => boolean>;
+    readonly canDelete: InputSignal<(row: T) => boolean>;
     readonly confirmDelete: import("@angular/core").InputSignalWithTransform<boolean, unknown>;
-    readonly deleteMessage: import("@angular/core").InputSignal<string | undefined>;
+    readonly deleteMessage: InputSignal<string | undefined>;
     readonly rowClickable: import("@angular/core").InputSignalWithTransform<boolean, unknown>;
-    readonly pagination: import("@angular/core").InputSignal<"none" | "pages" | "virtual">;
-    readonly rowHeight: import("@angular/core").InputSignal<number | undefined>;
+    readonly pagination: InputSignal<'pages' | 'none' | 'virtual'>;
+    readonly rowHeight: InputSignal<number | undefined>;
     readonly page: import("@angular/core").ModelSignal<number>;
     readonly pageSize: import("@angular/core").ModelSignal<number>;
     readonly showPageSize: import("@angular/core").InputSignalWithTransform<boolean, unknown>;
-    readonly pageSizeOptions: import("@angular/core").InputSignal<readonly number[] | undefined>;
-    readonly totalRows: import("@angular/core").InputSignal<number>;
+    readonly pageSizeOptions: InputSignal<readonly number[] | undefined>;
+    readonly totalRows: InputSignal<number>;
     readonly sort: import("@angular/core").ModelSignal<NguTableSort | null>;
     readonly searchText: import("@angular/core").ModelSignal<string>;
     readonly searchChange: import("@angular/core").OutputEmitterRef<string>;
@@ -116,21 +116,7 @@ export interface NguTableColumn<T = any> {
 
 export type NguTableColumnType = "text" | "number" | "currency" | "percent" | "date" | "datetime" | "badge" | "boolean" | "avatar" | "image" | "email" | "phone" | "link" | "progress";
 
-export interface NguTableConfig {
-    messages?: Partial<NguTableMessages> | Signal<Partial<NguTableMessages>>;
-    rowKey?: string;
-    pageSize?: number;
-    pageSizeOptions?: readonly number[];
-    searchDebounce?: number;
-    searchMinLength?: number;
-    emptyText?: string;
-    dateFormat?: string;
-    datetimeFormat?: string;
-    currencyCode?: string;
-    currencyLocale?: (currencyCode: string) => string;
-    badgeTones?: Record<string, NguBadgeTone>;
-    searchMemory?: NguTableSearchMemory | ProviderToken<NguTableSearchMemory>;
-}
+export 
 
 export declare class NguTableEmpty {
     readonly template: TemplateRef<void>;
@@ -145,6 +131,83 @@ export interface NguTableFetchContext {
 export interface NguTableLinkEvent<T = any> {
     row: T;
     column: NguTableColumn<T>;
+}
+
+export 
+
+export interface NguTablePage<T> {
+    content: readonly T[];
+    totalElements: number;
+    totalPages?: number;
+    number?: number;
+    size?: number;
+}
+
+export interface NguTableQuery {
+    page: number;
+    size: number;
+    search: string;
+    sort: string | null;
+    order: NguTableSortDirection | null;
+    filters: Record<string, unknown>;
+}
+
+export declare class NguTableRowActions<T = any> {
+    readonly template: TemplateRef<NguTableRowContext<T>>;
+    static ngTemplateContextGuard<T>(_dir: NguTableRowActions<T>, _ctx: unknown): _ctx is NguTableRowContext<T>;
+}
+
+export interface NguTableRowContext<T = any> {
+    $implicit: T;
+}
+
+export 
+
+export interface NguTableSort {
+    field: string;
+    direction: NguTableSortDirection;
+}
+
+export type NguTableSortDirection = "asc" | "desc";
+
+export type NguTableSource = "fetch" | "client" | "server";
+
+export interface NguTableSubscribable<T> {
+    subscribe(observer: {
+        next: (value: T) => void;
+        error: (error: unknown) => void;
+        complete: () => void;
+    }): {
+        unsubscribe(): void;
+    };
+}
+
+export declare function provideNguTableConfig(config: NguTableConfig): Provider;
+```
+
+## ngu-table/config
+
+```ts
+export declare const DEFAULT_MESSAGES: NguTableMessages;
+
+export declare const NGU_TABLE_CONFIG: InjectionToken<ResolvedNguTableConfig>;
+
+export type NguBadgeTone = "success" | "danger" | "warning" | "info" | "accent" | "neutral";
+
+export interface NguTableConfig {
+    messages?: Partial<NguTableMessages> | Signal<Partial<NguTableMessages>>;
+    rowKey?: string;
+    pageSize?: number;
+    pageSizeOptions?: readonly number[];
+    searchDebounce?: number;
+    searchMinLength?: number;
+    emptyText?: string;
+    dateFormat?: string;
+    datetimeFormat?: string;
+    currencyCode?: string;
+    currencyLocale?: (currencyCode: string) => string;
+    badgeTones?: Record<string, NguBadgeTone>;
+    searchMemory?: NguTableSearchMemory | ProviderToken<NguTableSearchMemory>;
 }
 
 export interface NguTableMessages {
@@ -186,55 +249,26 @@ export interface NguTableMessages {
     page: (page: number) => string;
 }
 
-export interface NguTablePage<T> {
-    content: readonly T[];
-    totalElements: number;
-    totalPages?: number;
-    number?: number;
-    size?: number;
-}
-
-export interface NguTableQuery {
-    page: number;
-    size: number;
-    search: string;
-    sort: string | null;
-    order: NguTableSortDirection | null;
-    filters: Record<string, unknown>;
-}
-
-export declare class NguTableRowActions<T = any> {
-    readonly template: TemplateRef<NguTableRowContext<T>>;
-    static ngTemplateContextGuard<T>(_dir: NguTableRowActions<T>, _ctx: unknown): _ctx is NguTableRowContext<T>;
-}
-
-export interface NguTableRowContext<T = any> {
-    $implicit: T;
-}
-
 export interface NguTableSearchMemory {
     recall(key: string): string;
     remember(key: string, text: string): void;
 }
 
-export interface NguTableSort {
-    field: string;
-    direction: NguTableSortDirection;
-}
-
-export type NguTableSortDirection = "asc" | "desc";
-
-export type NguTableSource = "fetch" | "client" | "server";
-
-export interface NguTableSubscribable<T> {
-    subscribe(observer: {
-        next: (value: T) => void;
-        error: (error: unknown) => void;
-        complete: () => void;
-    }): {
-        unsubscribe(): void;
-    };
-}
-
 export declare function provideNguTableConfig(config: NguTableConfig): Provider;
+
+export interface ResolvedNguTableConfig {
+    messages: () => NguTableMessages;
+    rowKey: string;
+    pageSize: number;
+    pageSizeOptions: readonly number[];
+    searchDebounce: number;
+    searchMinLength: number;
+    emptyText: string;
+    dateFormat: string;
+    datetimeFormat: string;
+    currencyCode: string | null;
+    currencyLocale: ((currencyCode: string) => string) | null;
+    badgeTones: Readonly<Record<string, NguBadgeTone>>;
+    searchMemory: NguTableSearchMemory | ProviderToken<NguTableSearchMemory> | null;
+}
 ```

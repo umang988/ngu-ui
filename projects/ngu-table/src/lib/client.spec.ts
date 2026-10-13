@@ -152,6 +152,7 @@ describe('NguTable in client mode', () => {
     const t = await mount((host) => host.rows.set([]));
 
     expect(t.notice()!.textContent).toContain('Nothing to show');
+    expect(t.notice()!.querySelector('.ngu-tbl-notice-icon ngu-tbl-icon')).not.toBeNull();
     expect(t.range()).toBe('No records');
     expect(t.button('Export')!.disabled).toBe(true);
   });

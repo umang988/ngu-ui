@@ -23,12 +23,13 @@ import {
   signal,
   untracked,
   viewChild,
+  type InputSignal,
   type OnInit,
   type ProviderToken,
 } from '@angular/core';
 import { consume } from './async';
 import { buildCells, cellText, isNumeric, type CellFormat, type RenderCell } from './cells';
-import { NGU_TABLE_CONFIG, type NguTableSearchMemory } from './config';
+import { NGU_TABLE_CONFIG, type NguTableSearchMemory } from 'ngu-table/config';
 import { NguTableIcon, type NguTableIconName } from './icon';
 import { resolvePath } from './path';
 import { NguTableCell, NguTableEmpty, NguTableRowActions } from './templates';
@@ -236,7 +237,8 @@ export class NguTable<T = any> implements OnInit {
   readonly fetchFn = input<NguTableFetch<T> | null>(null);
 
   /** With `[rows]`: `'client'` searches, sorts and pages them here; `'server'` leaves it to you. */
-  readonly mode = input<'server' | 'client'>('server');
+  // Typed explicitly so the declaration file prints the union in a stable order.
+  readonly mode: InputSignal<'server' | 'client'> = input<'server' | 'client'>('server');
 
   /** Shows the loading state. Read only in server mode; fetch mode knows when it is loading. */
   readonly loading = input(false, { transform: booleanAttribute });
@@ -335,7 +337,9 @@ export class NguTable<T = any> implements OnInit {
    * inside a scroller (`maxHeight`, default `32rem`), and in fetch mode asks the server only for
    * the pages under the scroll position.
    */
-  readonly pagination = input<'none' | 'pages' | 'virtual'>('pages');
+  readonly pagination: InputSignal<'pages' | 'none' | 'virtual'> = input<
+    'pages' | 'none' | 'virtual'
+  >('pages');
   /**
    * Height of each virtual row in px. Default: measured from the first rows drawn. Set it when
    * some rows are taller than the first ones, such as a cell template with two lines.

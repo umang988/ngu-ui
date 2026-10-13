@@ -5,7 +5,12 @@ import {
   type Provider,
   type Signal,
 } from '@angular/core';
-import type { NguBadgeTone } from './types';
+
+/**
+ * What a badge means, not its color: the stylesheet decides what each tone looks like,
+ * through the `--ngu-tbl-<tone>` variables.
+ */
+export type NguBadgeTone = 'success' | 'danger' | 'warning' | 'info' | 'accent' | 'neutral';
 
 /** Every built-in string. Functions take the numbers they describe, for plurals. */
 export interface NguTableMessages {
@@ -140,25 +145,42 @@ export interface NguTableConfig {
   searchMemory?: NguTableSearchMemory | ProviderToken<NguTableSearchMemory>;
 }
 
-/** The config with every default filled in and the messages merged across injectors. */
+/**
+ * The config with every default filled in and the messages merged across injectors, as
+ * `NGU_TABLE_CONFIG` holds it.
+ */
 export interface ResolvedNguTableConfig {
+  /** The merged messages; a function, so a signal of messages stays live. */
   messages: () => NguTableMessages;
+  /** Default `rowKey`. */
   rowKey: string;
+  /** Default page size. */
   pageSize: number;
+  /** Default rows-per-page choices. */
   pageSizeOptions: readonly number[];
+  /** Default search debounce, in ms. */
   searchDebounce: number;
+  /** Default minimum search length. */
   searchMinLength: number;
+  /** Default text for empty values. */
   emptyText: string;
+  /** Pattern of `date` columns. */
   dateFormat: string;
+  /** Pattern of `datetime` columns. */
   datetimeFormat: string;
+  /** Currency of `currency` columns without one; `null` for `DEFAULT_CURRENCY_CODE`. */
   currencyCode: string | null;
+  /** Locale per currency; `null` for `LOCALE_ID`. */
   currencyLocale: ((currencyCode: string) => string) | null;
+  /** App status words by normalized key. */
   badgeTones: Readonly<Record<string, NguBadgeTone>>;
+  /** The search memory, or `null`. */
   searchMemory: NguTableSearchMemory | ProviderToken<NguTableSearchMemory> | null;
 }
 
 const number = (n: number) => n.toLocaleString();
 
+/** The built-in English strings. */
 export const DEFAULT_MESSAGES: NguTableMessages = {
   searchPlaceholder: 'Search…',
   clearSearch: 'Clear search',
@@ -214,6 +236,7 @@ const ROOT: ResolvedNguTableConfig = {
   searchMemory: null,
 };
 
+/** The resolved config every `<ngu-table>` reads. Set it with `provideNguTableConfig`. */
 export const NGU_TABLE_CONFIG = new InjectionToken<ResolvedNguTableConfig>('NGU_TABLE_CONFIG', {
   providedIn: 'root',
   factory: () => ROOT,
@@ -245,7 +268,7 @@ export function provideNguTableConfig(config: NguTableConfig): Provider {
 }
 
 /** The key a status word is looked up by: no case, spaces, dots, dashes or underscores. */
-export function toneKey(value: string): string {
+function toneKey(value: string): string {
   return value.toLowerCase().replace(/[\s._-]+/g, '');
 }
 

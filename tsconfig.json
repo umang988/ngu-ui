@@ -19,6 +19,7 @@
       "ngu-form/tailwind": ["./projects/ngu-form/tailwind/src/public-api.ts"],
       "ngu-dropdown": ["./projects/ngu-dropdown/src/public-api.ts"],
       "ngu-table": ["./projects/ngu-table/src/public-api.ts"],
+      "ngu-table/config": ["./projects/ngu-table/config/src/public-api.ts"],
       "docs-kit/*": ["./projects/docs-kit/src/*"]
     },
     "skipLibCheck": true,

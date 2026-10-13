@@ -17,7 +17,7 @@
   `formatter`, `hidden`, `width`, `wrap`, `sortField` and `exportField`. Cells are formatted
   once per row object.
 - Templates: `nguTableCell` for a column, `nguTableRowActions` for extra row buttons,
-  `nguTableEmpty` for the empty notice.
+  `nguTableEmpty` for the empty notice, and a `[nguTableEmptyIcon]` slot for its icon alone.
 - Toolbar: a debounced search box with `searchMinLength`, a Clear button that resets search,
   sort and filters in one request, a filter panel of your `[nguTableFilters]` content applied
   with one button, `[nguTableTabs]` and `commitFilters()` for controls that apply at once,
@@ -33,7 +33,8 @@
   row height is measured (or set with `rowHeight`), columns are sized for the longest values
   in a sample of the list, and
   `aria-rowcount` / `aria-rowindex` give screen readers the whole count.
-- `provideNguTableConfig`: messages (a signal switches language live), page size and choices,
+- `provideNguTableConfig`, also in its own entry point `ngu-table/config` so an app config can
+  import it without the table: messages (a signal switches language live), page size and choices,
   row key, search debounce and minimum length, empty text, date formats, currency code,
   `currencyLocale` for per-currency grouping, `badgeTones`, and a `searchMemory` hook that keeps
   each table's search between screens.
