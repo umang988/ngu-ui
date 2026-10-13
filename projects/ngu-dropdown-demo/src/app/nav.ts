@@ -21,6 +21,7 @@ export const NAV: readonly NavGroup[] = [
       { title: 'Server data', path: 'server-data', load: guide('server-data') },
       { title: 'Static options', path: 'static-options', load: guide('static-options') },
       { title: 'Selection', path: 'selection', load: guide('selection') },
+      { title: 'Events', path: 'events', load: guide('events') },
       { title: 'Forms', path: 'forms', load: guide('forms') },
       { title: 'Templates', path: 'templates', load: guide('templates') },
       { title: 'Text and translations', path: 'messages', load: guide('messages') },

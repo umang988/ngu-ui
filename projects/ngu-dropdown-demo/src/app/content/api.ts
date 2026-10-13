@@ -99,11 +99,22 @@ export const PAGES: Record<string, DocPage> = {
           caption: 'Outputs and methods',
           columns: ['Name', 'Type', 'Description'],
           rows: [
-            ['`(selectionChange)`', '`T | T[] | null`', 'The chosen rows.'],
+            ['`(selectionChange)`', '`T | T[] | null`', 'The chosen rows. See [Events](/events).'],
             ['`(searchChange)`', '`string`', 'The term after the debounce.'],
             ['`(queryChange)`', '`NguDropdownQuery`', 'Each request as it is made.'],
             ['`(loadError)`', '`unknown`', 'A failed `fetchFn` or `lookupFn`.'],
             ['`(opened)` / `(closed)`', '`void`', 'The panel opened or closed.'],
+            [
+              '`(focused)` / `(blurred)`',
+              '`FocusEvent`',
+              'Focus came into the control, or left it and its panel.',
+            ],
+            [
+              '`(added)` / `(removed)`',
+              '`T`',
+              'One row the user added to or took out of the selection.',
+            ],
+            ['`(cleared)`', '`void`', 'The clear button was used.'],
             ['`reload()`', '`void`', 'Drops loaded pages and asks again.'],
             ['`focus()`', '`void`', 'Focuses the control.'],
           ],

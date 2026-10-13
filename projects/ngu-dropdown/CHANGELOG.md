@@ -1,5 +1,31 @@
 # Changelog
 
+## 0.1.3 (unreleased): Focus, blur and row events
+
+### Added
+
+- `(focused)` and `(blurred)`: focus came into the control, or left it and its open panel.
+  Moves between its own parts (the field, the search box, the clear button) do not count.
+  Each emits the `FocusEvent`.
+- `(added)` and `(removed)`: the one row the user added to or took out of the selection. In
+  single mode, choosing a row removes the one before it.
+- `(cleared)`: the clear button was used, after a `(removed)` for each row.
+- A docs page, [Events](https://ngu-dropdown.netlify.app/events), with a live log of every
+  output and the DOM events the tag already passes on, such as `(keydown)` and `(click)`.
+
+### Fixed
+
+- With `multiple`, `(selectionChange)` left out rows chosen before the user arrived (a value
+  from a form or a restored draft) when only `[options]` or a loaded page knew them. It now
+  emits the whole selection.
+- Pressing the panel's footer or a notice moved focus to the page, so the arrow keys stopped
+  working until the search box was clicked again. Focus now stays where it was.
+- In Chrome and Firefox, Tab from the search box landed on the list (both browsers make a
+  scrolling element focusable), and closing the panel then dropped focus on the page. Tab now
+  goes on to the next field.
+- In Safari and Firefox on macOS, which do not focus a button on click, a list opened with the
+  mouse and without a search box ignored the arrow keys. A click now focuses the field.
+
 ## 0.1.2 (2026-10-13): Docs for AI coding agents and two fixes
 
 ### Added

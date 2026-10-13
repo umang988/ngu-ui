@@ -16,6 +16,7 @@
     [attr.aria-required]="required() || null"
     [attr.aria-readonly]="readonly() || null"
     [attr.aria-describedby]="describedBy() || null"
+    (mousedown)="onTriggerMousedown($event)"
     (click)="toggle()"
     (blur)="onTriggerBlur()"
     (keydown)="onTriggerKeydown($event)"
@@ -46,6 +47,7 @@
       type="button"
       class="ngu-dd-clear"
       [attr.aria-label]="messages().clear"
+      (mousedown)="$event.preventDefault()"
       (click)="clear()"
     >
       <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
@@ -74,6 +76,7 @@
     [style.width.px]="panelBox().width"
     [style.max-height.px]="panelBox().maxHeight"
     (keydown)="onListKeydown($event)"
+    (mousedown)="onPanelMousedown($event)"
   >
     @if (searchVisible()) {
       <div class="ngu-dd-search">
@@ -101,11 +104,14 @@
       </div>
     }
 
-    <!-- The scroller: count × optionHeight tall from the first response. -->
+    <!-- The scroller: count × optionHeight tall from the first response. Chrome and Firefox
+         put a scroller in the Tab order; out of it, Tab leaves the dropdown for the next field
+         instead of landing here just before the panel closes and drops focus. -->
     <div
       #list
       class="ngu-dd-list"
       role="listbox"
+      tabindex="-1"
       [attr.id]="listId"
       [attr.aria-label]="listLabel()"
       [attr.aria-multiselectable]="multiple() || null"
@@ -160,7 +166,6 @@
                   [attr.aria-disabled]="option.disabled || null"
                   [attr.aria-setsize]="count()"
                   [attr.aria-posinset]="option.index + 1"
-                  (mousedown)="keepFocus($event)"
                   (click)="pick(option.row!)"
                 >
                   @if (option.context) {

@@ -243,7 +243,7 @@ async save() {
         id: 'events',
         title: 'Rows as well as keys',
         text: [
-          '`value` holds only keys. `(selectionChange)` emits the chosen row, or rows with `multiple`, for screens that need the rest of the record.',
+          '`value` holds only keys. `(selectionChange)` emits the chosen row, or rows with `multiple`, for screens that need the rest of the record. [Events](/events) lists the other outputs.',
         ],
         code: [
           {
@@ -251,6 +251,115 @@ async save() {
             code: `<ngu-dropdown [fetchFn]="loadCustomers" [(value)]="customerId"
               (selectionChange)="customer.set($event)" />`,
           },
+        ],
+      },
+    ],
+  },
+
+  events: {
+    title: 'Events',
+    description:
+      'What each output reports and when, focus and blur for the whole control, and the DOM events the tag passes on.',
+    sections: [
+      {
+        id: 'live',
+        title: 'Every event, live',
+        text: [
+          'This dropdown logs every output it has, newest first. Tab into it, open it, search, pick a few rows, then clear them with the × button.',
+        ],
+        demo: {
+          src: 'events.ts',
+          load: () => import('../demos/events').then((m) => m.DropdownEventsDemo),
+          value: false,
+          files: FAKE,
+        },
+      },
+      {
+        id: 'outputs',
+        title: 'Outputs',
+        table: {
+          caption: 'Outputs',
+          columns: ['Output', 'Payload', 'Fires when'],
+          rows: [
+            [
+              '`(valueChange)`',
+              'the key, or keys',
+              'The value changed: a pick, a clear, or a value a form wrote in. `[(value)]` binds it.',
+            ],
+            [
+              '`(selectionChange)`',
+              '`T | T[] | null`',
+              'The user changed the selection. Emits the whole selection as rows.',
+            ],
+            [
+              '`(added)` / `(removed)`',
+              '`T`',
+              'One row joined or left the selection. In single mode, choosing a row removes the one before it.',
+            ],
+            [
+              '`(cleared)`',
+              '`void`',
+              'The clear button was used, after a `(removed)` for each row.',
+            ],
+            [
+              '`(searchChange)`',
+              '`string`',
+              'The search term, once it has been still for `searchDebounce`. `""` when the panel closes with a term in the box.',
+            ],
+            [
+              '`(queryChange)`',
+              '`NguDropdownQuery`',
+              'Each `fetchFn` request as it is made, for a scroll, a search or a filter change.',
+            ],
+            ['`(loadError)`', '`unknown`', 'A `fetchFn` or `lookupFn` call failed.'],
+            ['`(opened)` / `(closed)`', '`void`', 'The panel opened, or closed for any reason.'],
+            [
+              '`(focused)` / `(blurred)`',
+              '`FocusEvent`',
+              'Focus came into the control, or left it and its panel.',
+            ],
+          ],
+        },
+      },
+      {
+        id: 'user-only',
+        title: 'Only what people do',
+        text: [
+          '`(selectionChange)`, `(added)`, `(removed)` and `(cleared)` report choices people make. A value written by a form, a restored draft or your own code emits none of them, so a handler that saves or calls an API does not run when the screen loads. Only `(valueChange)` follows those writes.',
+          'One choice emits in this order: `(valueChange)`, `(selectionChange)`, then `(removed)` and `(added)`, then `(cleared)` if it was the clear button. A row the dropdown cannot name, such as a saved key whose page never loaded and that no `lookupFn` named, is left out of the row events, as it is from `(selectionChange)`.',
+        ],
+        code: [
+          {
+            filename: 'team-picker.html',
+            lang: 'angular-html',
+            code: `<ngu-dropdown [fetchFn]="loadPeople" [(value)]="memberIds" multiple
+              optionValue="id" optionLabel="name"
+              (added)="team.addMember($event.id)"
+              (removed)="team.removeMember($event.id)" />`,
+          },
+        ],
+      },
+      {
+        id: 'focus',
+        title: 'Focus and blur',
+        text: [
+          "The field, its search box and the clear button are separate elements, so the DOM's `focus` and `blur` fire on every move between them, and they do not bubble up to the tag. `(focused)` and `(blurred)` treat the control and its open panel as one: tabbing in, opening, searching and picking emit `(focused)` once, and `(blurred)` comes when focus goes somewhere else. Each emits the `FocusEvent`, whose `relatedTarget` is where focus came from or went.",
+          'Forms do not need them: the dropdown already marks its control touched when people leave it.',
+        ],
+        code: [
+          {
+            lang: 'angular-html',
+            code: `<ngu-dropdown [fetchFn]="loadCities" [(value)]="cityId"
+              (blurred)="checkDelivery()" />`,
+          },
+        ],
+      },
+      {
+        id: 'dom',
+        title: 'DOM events',
+        text: [
+          'The panel is shown in the top layer but stays inside the tag in the DOM, so every DOM event that bubbles reaches `<ngu-dropdown>`: `(click)`, `(keydown)`, `(keyup)`, `(input)` (each keystroke in the search box, before the debounce), `(focusin)`, `(focusout)`, `(pointerdown)` and the rest. `(mouseenter)` and `(mouseleave)` treat the panel as part of the tag too. Escape is the exception: the dropdown stops it, so it closes only the list and not a dialog around it.',
+          "There is no `(change)` output: use `(valueChange)` or `(selectionChange)`. A `(change)` on the tag hears the search box's native `change` event, which fires when the box loses focus after typing.",
         ],
       },
     ],

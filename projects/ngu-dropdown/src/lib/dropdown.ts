@@ -173,6 +173,8 @@ function consume<R>(
     '[class.ngu-dropdown--invalid]': 'errorVisible()',
     '[class.ngu-dropdown--disabled]': 'isDisabled()',
     '[class.ngu-dropdown--readonly]': 'readonly()',
+    '(focusin)': 'onFocusIn($event)',
+    '(focusout)': 'onFocusOut($event)',
   },
 })
 export class NguDropdown<T = any> implements ControlValueAccessor, DoCheck {
@@ -355,6 +357,28 @@ export class NguDropdown<T = any> implements ControlValueAccessor, DoCheck {
   readonly opened = output<void>();
   /** The panel closed, whatever closed it. */
   readonly closed = output<void>();
+  /**
+   * Focus came into the control from outside it. Moves between its own parts (the field, the
+   * search box, the clear button) do not count. Emits the `focusin` event.
+   */
+  readonly focused = output<FocusEvent>();
+  /**
+   * Focus left the control and its panel. Moves between its own parts do not count. Emits the
+   * `focusout` event, whose `relatedTarget` is where focus went.
+   */
+  readonly blurred = output<FocusEvent>();
+  /**
+   * A row the user added to the selection, after `selectionChange`. In single mode, choosing a
+   * row adds it and removes the one before.
+   */
+  readonly added = output<T>();
+  /**
+   * A row the user took out of the selection, after `selectionChange`. The clear button
+   * removes each chosen row, then emits `cleared`.
+   */
+  readonly removed = output<T>();
+  /** The user cleared the selection with the clear button, after `removed`. */
+  readonly cleared = output<void>();
 
   private readonly optionTemplate = contentChild<NguDropdownOption<T>>(NguDropdownOption);
   private readonly selectionTemplate = contentChild<NguDropdownSelection<T>>(NguDropdownSelection);
@@ -524,11 +548,9 @@ export class NguDropdown<T = any> implements ControlValueAccessor, DoCheck {
   /** What the closed control shows: names where the row is known, else the bare key. */
   protected readonly chips = computed(() => {
     this.seenVersion();
-    const index = this.clientIndex();
-    const pages = this.pages();
 
     return [...this.selectedKeys()].map((key) => {
-      const row = this.seen.get(key) ?? index.get(key) ?? this.findInPages(pages, key);
+      const row = this.rowOf(key);
       return { key, row, label: row !== undefined ? this.labelOf(row) : String(key) };
     });
   });
@@ -821,6 +843,14 @@ export class NguDropdown<T = any> implements ControlValueAccessor, DoCheck {
   protected toggle(): void {
     if (this.open()) this.leave();
     else this.openPanel(false);
+    // Safari and Firefox on macOS do not focus a button on click, and while the panel is open
+    // the press is kept from moving focus, so the keys work after a click in every browser.
+    this.focus();
+  }
+
+  /** While the panel is open, a press on the field would take focus out of the search box. */
+  protected onTriggerMousedown(event: MouseEvent): void {
+    if (this.open()) event.preventDefault();
   }
 
   private openPanel(fromKeyboard: boolean): void {
@@ -868,6 +898,32 @@ export class NguDropdown<T = any> implements ControlValueAccessor, DoCheck {
   /** The field tabbed past without opening it, which no close path sees. */
   protected onTriggerBlur(): void {
     if (!this.open()) this.onTouched();
+  }
+
+  /** The panel is in the tag, so the search box counts as inside too. */
+  protected onFocusIn(event: FocusEvent): void {
+    if (!this.holds(event.relatedTarget)) this.focused.emit(event);
+  }
+
+  protected onFocusOut(event: FocusEvent): void {
+    if (!this.holds(event.relatedTarget)) this.blurred.emit(event);
+  }
+
+  private holds(target: EventTarget | null): boolean {
+    return target instanceof Node && this.host.contains(target);
+  }
+
+  /**
+   * Keeps focus in the search box (or on the trigger) when an option, the footer or a notice
+   * is pressed. Otherwise focus would go to the page, leaving the keys dead and firing
+   * `blurred` mid-use. The search box takes its own presses, and the list its scrollbar's.
+   */
+  protected onPanelMousedown(event: MouseEvent): void {
+    const target = event.target;
+    if (target === this.searchEl()?.nativeElement || target === this.listEl()?.nativeElement) {
+      return;
+    }
+    event.preventDefault();
   }
 
   /** Escape closes this list only, not a dialog or panel around it. */
@@ -1039,17 +1095,23 @@ export class NguDropdown<T = any> implements ControlValueAccessor, DoCheck {
 
   protected clear(): void {
     this.commit(this.multiple() ? [] : null);
+    this.cleared.emit();
     this.focus();
   }
 
   /** The one path a user's choice takes, and so the only one that tells the form. */
   private commit(next: any): void {
+    const before = [...this.selectedKeys()];
     this.value.set(next);
     this.onChange(next);
     this.onTouched();
 
     const keys: unknown[] = Array.isArray(next) ? next : next === null ? [] : [next];
-    const rows = keys.map((key) => this.seen.get(key)).filter((row): row is T => row !== undefined);
+    const named = (list: unknown[]) =>
+      list.map((key) => this.rowOf(key)).filter((row): row is T => row !== undefined);
+    const rows = named(keys);
+    const removed = named(before.filter((key) => !keys.includes(key)));
+    const added = named(keys.filter((key) => !before.includes(key)));
 
     // Read the rows out first, then forget everything no longer chosen.
     for (const key of [...this.seen.keys()]) {
@@ -1057,11 +1119,8 @@ export class NguDropdown<T = any> implements ControlValueAccessor, DoCheck {
     }
 
     this.selectionChange.emit(this.multiple() ? rows : (rows[0] ?? null));
-  }
-
-  /** Keeps focus in the search box (or on the trigger) when an option is clicked. */
-  protected keepFocus(event: MouseEvent): void {
-    event.preventDefault();
+    for (const row of removed) this.removed.emit(row);
+    for (const row of added) this.added.emit(row);
   }
 
   // ── Scrolling ──────────────────────────────────────────────────────────────
@@ -1322,6 +1381,11 @@ export class NguDropdown<T = any> implements ControlValueAccessor, DoCheck {
 
     const selected = this.selectedKeys();
     return this.clientRows().findIndex((row) => selected.has(this.keyOf(row)));
+  }
+
+  /** The row behind a key: one chosen before, a client option, or one on a loaded page. */
+  private rowOf(key: unknown): T | undefined {
+    return this.seen.get(key) ?? this.clientIndex().get(key) ?? this.findInPages(this.pages(), key);
   }
 
   private findInPages(pages: ReadonlyMap<number, readonly T[]>, key: unknown): T | undefined {

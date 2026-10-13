@@ -51,6 +51,11 @@ export declare class NguDropdown<T = any> implements ControlValueAccessor, DoChe
     readonly loadError: import("@angular/core").OutputEmitterRef<unknown>;
     readonly opened: import("@angular/core").OutputEmitterRef<void>;
     readonly closed: import("@angular/core").OutputEmitterRef<void>;
+    readonly focused: import("@angular/core").OutputEmitterRef<FocusEvent>;
+    readonly blurred: import("@angular/core").OutputEmitterRef<FocusEvent>;
+    readonly added: import("@angular/core").OutputEmitterRef<T>;
+    readonly removed: import("@angular/core").OutputEmitterRef<T>;
+    readonly cleared: import("@angular/core").OutputEmitterRef<void>;
     constructor();
     writeValue(value: any): void;
     registerOnChange(fn: (value: any) => void): void;

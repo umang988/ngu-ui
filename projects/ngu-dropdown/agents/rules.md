@@ -32,7 +32,7 @@ export class CustomerPicker {
 2. `fetchFn(query, { signal })` returns an Observable or a Promise of `{ content, totalElements }` (`totalPages`, `number`, `size` are optional, as Spring Data sends them). `query.page` is zero-based; `query.search` is trimmed and `''` when empty. Pass `signal` to `fetch` so stale requests are cancelled.
 3. Define `fetchFn`, `lookupFn` and `optionLabel` functions as class fields (arrow functions), not inline in the template and not as methods that lose `this`.
 4. Rows default to `{ value, label }`. For other shapes set `optionValue` and `optionLabel` (dot paths like `employee.id`), or once for the app with `provideNguDropdownConfig({ optionValue: 'id', optionLabel: 'name' })`. `optionLabel` can be `(row) => string` to join fields.
-5. The value is the key (`optionValue`), not the row; with `multiple` it is an array of keys. `(selectionChange)` gives the rows.
+5. The value is the key (`optionValue`), not the row; with `multiple` it is an array of keys. `(selectionChange)` gives the rows, `(added)`/`(removed)` the one row that changed. There is no `(change)`, `(focus)` or `(blur)` output: use `(valueChange)` or `(selectionChange)`, `(focused)` and `(blurred)`.
 6. When a form starts with a saved key whose row is not on the first page, give `lookupFn(keys, { signal })` (or `selectedOption`) so the label can show.
 7. Label it: `<label for>` plus `inputId`, or `ariaLabel` when there is no visible label.
 8. `[filters]` re-queries when it changes; `reload()` drops loaded pages. Style through the `--ngu-*` CSS variables shared with ngu-form, not internal class names.
