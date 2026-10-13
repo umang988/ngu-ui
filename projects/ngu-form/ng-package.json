@@ -5,6 +5,7 @@
     "entryFile": "src/public-api.ts"
   },
   "assets": [
+    "CHANGELOG.md",
     "tailwind.css"
   ]
 }

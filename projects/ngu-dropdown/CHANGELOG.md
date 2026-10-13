@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.1.2 (unreleased): Docs for AI coding agents and two fixes
+## 0.1.2 (2026-10-13): Docs for AI coding agents and two fixes
 
 ### Added
 
