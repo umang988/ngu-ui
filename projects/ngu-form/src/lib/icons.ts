@@ -3,6 +3,7 @@ import { InjectionToken, type Provider, type Type } from '@angular/core';
 /** Icon components by name, for `prefixIcon` and `suffixIcon`. */
 export type NguIcons = Readonly<Record<string, Type<unknown>>>;
 
+/** Every registry passed to `provideNguIcons`, in order; later ones win. */
 export const NGU_ICONS = new InjectionToken<readonly NguIcons[]>('NGU_ICONS');
 
 /**

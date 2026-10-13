@@ -41,6 +41,7 @@ import { NguPrimeFrame } from './frame';
   `,
 })
 export class NguPrimeSlider {
+  /** The field's render context: texts, state and options, from ngu-form. */
   readonly context = input.required<NguFieldRenderContext>();
   protected readonly shown = computed(() => {
     const c = this.context();
@@ -88,6 +89,7 @@ export class NguPrimeSlider {
   `,
 })
 export class NguPrimeDate {
+  /** The field's render context: texts, state and options, from ngu-form. */
   readonly context = input.required<NguFieldRenderContext>();
   protected readonly range = computed(() => this.context().def.type === 'daterange');
   protected readonly min = computed(() => toLocal(this.context().def.min));
@@ -130,6 +132,7 @@ export class NguPrimeDate {
   `,
 })
 export class NguPrimeRating {
+  /** The field's render context: texts, state and options, from ngu-form. */
   readonly context = input.required<NguFieldRenderContext>();
   protected readonly stars = computed(() => {
     const max = this.context().def.max;

@@ -3,14 +3,23 @@ import type { NgControl } from '@angular/forms';
 
 /** Every built-in string. Functions take the number they describe, for plurals. */
 export interface NguDropdownMessages {
+  /** Shown in the closed control while nothing is chosen. Default `Select…`. */
   placeholder: string;
+  /** Placeholder and accessible name of the search box. Default `Search…`. */
   searchPlaceholder: string;
+  /** Heading of the notice shown when the list has no rows. Default `Nothing to pick`. */
   emptyTitle: string;
+  /** Text under `emptyTitle`. Default `No options match what you typed.` */
   emptyMessage: string;
+  /** Heading of the notice a failed `fetchFn` shows. Default `Could not load these options`. */
   errorTitle: string;
+  /** Text under `errorTitle`. Default `The request failed. It may just be the connection.` */
   errorMessage: string;
+  /** The error notice's button, which asks again. Default `Try again`. */
   retry: string;
+  /** Shown in the footer while a page loads. Default `Loading…`. */
   loading: string;
+  /** Accessible name of the clear button. Default `Clear selection`. */
   clear: string;
   /** The footer's total, such as "1,204 options". */
   count: (count: number) => string;
@@ -25,11 +34,19 @@ export interface NguDropdownMessages {
  * draft can still show names. `control` is the `NgControl` the dropdown is bound to.
  */
 export interface NguDropdownRowMemory {
+  /**
+   * Called with the row behind each chosen key as the dropdown learns it: from a pick, a
+   * loaded page, `lookupFn` or `selectedOption`.
+   */
   remember(control: NgControl, key: unknown, row: unknown): void;
   /** The row remembered for `key`, or `undefined`. */
   recall(control: NgControl, key: unknown): unknown;
 }
 
+/**
+ * Defaults for every `<ngu-dropdown>` under an injector, passed to `provideNguDropdownConfig`.
+ * Options left out keep the parent injector's value, or the built-in default.
+ */
 export interface NguDropdownConfig {
   /** Replaces some or all built-in strings. A signal switches language live. */
   messages?: Partial<NguDropdownMessages> | Signal<Partial<NguDropdownMessages>>;
@@ -41,12 +58,16 @@ export interface NguDropdownConfig {
   pageSize?: number;
   /** Row height in px. Default 36. */
   optionHeight?: number;
-  /** Panel height ceiling in px. Default 320. */
+  /** Panel height ceiling in px. Default 320. Below the field the panel keeps at least 160px. */
   panelMaxHeight?: number;
   /** Search debounce in ms. Default 300. */
   searchDebounce?: number;
   /** Client lists longer than this show a search box. Default 8. */
   searchThreshold?: number;
+  /**
+   * Remembers the rows behind chosen keys per form control, so a value restored into the
+   * control, such as a saved draft, still shows names. Used only with a form directive.
+   */
   rowMemory?: NguDropdownRowMemory;
 }
 

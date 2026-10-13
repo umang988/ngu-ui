@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { provideNguDropdownConfig } from 'ngu-dropdown';
 import { provideNguDropdown } from 'ngu-form/dropdown';
 import { provideNguMaterial } from 'ngu-form/material';
 import { provideNguPrimeNG } from 'ngu-form/primeng';
@@ -177,5 +178,34 @@ describe('dropdown type', () => {
     fixture.detectChanges();
     expect(field.querySelector('.ngu-error')).not.toBeNull();
     expect(dropdown.querySelector('[aria-invalid="true"]')).not.toBeNull();
+  });
+
+  it("follows the app's provideNguDropdownConfig for keys and labels", async () => {
+    @Component({
+      imports: [NguForm],
+      template: `<ngu-form [form]="form" />`,
+    })
+    class ConfiguredHost {
+      readonly form = defineForm(
+        { owner: 2 as number | null },
+        {
+          owner: {
+            label: 'Owner',
+            type: 'dropdown',
+            options: [
+              { id: 1, name: 'Ada' },
+              { id: 2, name: 'Grace' },
+            ],
+          },
+        },
+      );
+    }
+    TestBed.configureTestingModule({
+      providers: [provideNguDropdown(), provideNguDropdownConfig({ optionValue: 'id', optionLabel: 'name' })],
+    });
+    const fixture = TestBed.createComponent(ConfiguredHost);
+    await fixture.whenStable();
+    const trigger = (fixture.nativeElement as HTMLElement).querySelector('ngu-dropdown [role="combobox"]')!;
+    expect(trigger.textContent).toContain('Grace');
   });
 });

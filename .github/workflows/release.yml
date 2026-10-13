@@ -1,0 +1,100 @@
+name: Release
+
+# Publishes one package to npm with provenance, tags the commit and creates a GitHub release
+# from the package's CHANGELOG section. Before running it on main:
+#   1. Bump the version in projects/<package>/package.json.
+#   2. Give it a dated section in projects/<package>/CHANGELOG.md: "## 1.0.0 (2026-11-02): Title".
+#   3. Merge, wait for CI to pass, then run this workflow from the Actions tab.
+# npm accepts the publish through trusted publishing (OIDC): no token is stored in GitHub. Each
+# package lists this repository and workflow file as a trusted publisher on npmjs.com.
+
+on:
+  workflow_dispatch:
+    inputs:
+      package:
+        description: Package to publish
+        type: choice
+        options: [ngu-form, ngu-dropdown]
+        required: true
+      dry-run:
+        description: Check and build everything, but do not publish, tag or release
+        type: boolean
+        default: false
+
+permissions:
+  contents: write # the tag and the GitHub release
+  id-token: write # npm trusted publishing and provenance
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+env:
+  NG_CLI_ANALYTICS: 'false'
+
+jobs:
+  release:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Only from main
+        if: github.ref != 'refs/heads/main'
+        run: |
+          echo "::error::Run the release from main, not ${{ github.ref }}."
+          exit 1
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+          registry-url: https://registry.npmjs.org
+      - name: npm with trusted publishing
+        run: npm install --global npm@11.19.0
+      - run: npm ci
+
+      - name: Check the version, tag and changelog
+        id: meta
+        run: node scripts/release-check.mjs ${{ inputs.package }} release-notes.md >> "$GITHUB_OUTPUT"
+
+      - name: Build
+        run: |
+          npm run build:dropdown
+          if [ "${{ inputs.package }}" = ngu-form ]; then npm run build:form; fi
+      - name: Test
+        run: |
+          npx ng test ${{ inputs.package }} --watch=false
+          if [ "${{ inputs.package }}" = ngu-form ]; then npm run test:schematics; fi
+          npm run api:check
+      - name: Bundle size, added to the release notes
+        if: inputs.package == 'ngu-form'
+        run: |
+          node scripts/size.mjs --build --check --markdown > size.md
+          printf '\n### Bundle size\n\n' >> release-notes.md
+          cat size.md >> release-notes.md
+      - name: Pack
+        working-directory: dist/${{ inputs.package }}
+        run: npm pack --dry-run
+
+      - name: Publish to npm
+        if: ${{ !inputs.dry-run }}
+        working-directory: dist/${{ inputs.package }}
+        run: npm publish --provenance --access public --tag ${{ steps.meta.outputs.prerelease == 'true' && 'next' || 'latest' }}
+      - name: Tag and create the GitHub release
+        if: ${{ !inputs.dry-run }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git tag "${{ steps.meta.outputs.tag }}"
+          git push origin "${{ steps.meta.outputs.tag }}"
+          gh release create "${{ steps.meta.outputs.tag }}" \
+            --title "${{ inputs.package }} ${{ steps.meta.outputs.version }}" \
+            --notes-file release-notes.md \
+            ${{ steps.meta.outputs.prerelease == 'true' && '--prerelease' || '' }}
+      - name: Summary
+        run: |
+          {
+            echo "## ${{ steps.meta.outputs.tag }}${{ inputs.dry-run && ' (dry run)' || '' }}"
+            echo
+            cat release-notes.md
+          } >> "$GITHUB_STEP_SUMMARY"

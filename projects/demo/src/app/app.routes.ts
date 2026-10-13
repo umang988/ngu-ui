@@ -31,5 +31,17 @@ export const routes: Routes = [
       ...docPageRoutes(SITE),
     ],
   },
+  // Every field type with fixed values, for the visual regression screenshots. Not in the sidebar.
+  {
+    path: 'gallery',
+    loadComponent: () => import('./pages/gallery/gallery').then((m) => m.Gallery),
+    title: 'Field gallery | ngu-form',
+  },
+  // A 500-field form for the performance check (e2e/perf.spec.ts). Not in the sidebar.
+  {
+    path: 'bench',
+    loadComponent: () => import('./pages/bench/bench').then((m) => m.Bench),
+    title: 'Benchmark | ngu-form',
+  },
   { path: '**', redirectTo: '' },
 ];

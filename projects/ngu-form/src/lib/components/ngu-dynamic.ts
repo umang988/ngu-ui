@@ -37,11 +37,14 @@ import { extendLook, injectOuterLook, NGU_LOOK } from '../look';
   `,
 })
 export class NguDynamic {
+  /** The run-time field list's definition. Set by ngu-form; apps rarely need it. */
   readonly def = input.required<DynamicDef>();
   private readonly outerLook = injectOuterLook();
   /** The look around this field list with the `classes` of its spec. */
   readonly look = computed(() => extendLook(this.outerLook(), this.def().classes));
+  /** The field node of the object that holds the run-time fields. Set by ngu-form; apps rarely need it. */
   readonly tree = input.required<Field<any>>();
+  /** Dot path of this field list inside the form, for template overrides. */
   readonly path = input<string>('');
 
   /** Keys currently in the model; recomputes only when keys change, not on every keystroke. */

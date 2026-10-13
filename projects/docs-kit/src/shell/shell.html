@@ -63,6 +63,7 @@
   </div>
 </header>
 
+<!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events, @angular-eslint/template/interactive-supports-focus -- a click on the backdrop closes it; Escape does the same by keyboard -->
 <dialog #drawer class="drawer" aria-label="Documentation menu" (click)="onDrawerClick($event)">
   <div class="drawer__head">
     <span class="wordmark__name">{{ site.name }}</span>

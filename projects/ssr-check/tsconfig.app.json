@@ -1,0 +1,9 @@
+/* Server-renders the docs examples against the library source, like the docs site does. */
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "outDir": "../../out-tsc/ssr-check",
+    "types": []
+  },
+  "include": ["src/**/*.ts"]
+}

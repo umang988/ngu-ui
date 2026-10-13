@@ -63,13 +63,27 @@ describe('App', () => {
     }
   });
 
+  it('renders the recipes without a submit button', async () => {
+    // Settings save themselves (tabs, no button); the team admin opens on a record in view mode.
+    for (const [id, selector] of [
+      ['settings', '.preview ngu-form [role="tab"]'],
+      ['team', '.preview ngu-view'],
+    ]) {
+      const { el, fixture } = await open(`/examples/${id}`);
+      await until(fixture, () => !!el.querySelector(selector));
+      expect(el.querySelector(selector), id).not.toBeNull();
+      fixture.destroy();
+    }
+  });
+
   it('renders every documentation page with its title and live demos', async () => {
     // A demo shows a form, a form's values in view mode, or fields of a hand-written form.
     const shown = (el: HTMLElement) =>
       Array.from(el.querySelectorAll('.demo')).filter((d) => d.querySelector('ngu-form, ngu-view, ngu-field')).length;
     const count = (sections: readonly DocSection[]): number =>
       sections.reduce((n, s) => n + (s.demo ? 1 : 0) + count(s.children ?? []), 0);
-    for (const entry of NAV_ENTRIES.filter((e) => e.load)) {
+    // The generated API reference is checked below; the e2e suite renders it in a browser.
+    for (const entry of NAV_ENTRIES.filter((e) => e.load && !e.path.startsWith('reference/'))) {
       const page = (await entry.load!())!;
       const demos = count(page.sections);
       const { el, fixture } = await open(`/${entry.path}`);
@@ -84,8 +98,22 @@ describe('App', () => {
         entry.path,
       ).toBeGreaterThan(0);
       expect(shown(el), `${entry.path} demos`).toBe(demos);
+      fixture.destroy();
     }
   }, 120_000);
+
+  it('builds an API reference page for every entry point, with every export', async () => {
+    const symbols = (sections: readonly DocSection[]): number =>
+      sections.reduce((n, s) => n + (s.children?.length ?? 0), 0);
+    for (const entry of NAV_ENTRIES.filter((e) => e.path.startsWith('reference/'))) {
+      const page = (await entry.load!())!;
+      expect(page.title, entry.path).toMatch(/^ngu-form/);
+      expect(symbols(page.sections), entry.path).toBeGreaterThan(0);
+    }
+    const core = (await NAV_ENTRIES.find((e) => e.path === 'reference/ngu-form')!.load!())!;
+    const form = core.sections.flatMap((s) => s.children ?? []).find((s) => s.id === 'NguForm')!;
+    expect(form.api?.find((row) => row.name === 'form')?.note).toBe('input, required');
+  });
 
   it('redirects the old guide addresses', async () => {
     const router = TestBed.inject(Router);

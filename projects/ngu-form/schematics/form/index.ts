@@ -46,6 +46,7 @@ export function form(options: FormOptions): Rule {
 /** The project's own TypeScript, so the generator reads the syntax the project uses. */
 export function loadTypeScript(): TypeScript {
   try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports -- the app's own TypeScript, loaded at run time
     return require(require.resolve('typescript', { paths: [process.cwd()] }));
   } catch {
     throw new SchematicsException('The form generator needs the "typescript" package in your project.');

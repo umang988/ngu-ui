@@ -54,5 +54,6 @@ import { NguPrimeFrame } from './frame';
   `,
 })
 export class NguPrimeSelect {
+  /** The field's render context: texts, state and options, from ngu-form. */
   readonly context = input.required<NguFieldRenderContext>();
 }

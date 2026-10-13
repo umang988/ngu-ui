@@ -141,14 +141,23 @@ const SCRIPT_FONTS =
 })
 export class NguSignaturePad {
   protected readonly look = injectNguLook();
+  /** The signature as a PNG data URL, or `''` when not signed. Bound by `[formField]`. */
   readonly value = model<string>('');
+  /** Emits when the user finishes a stroke or leaves the name input. */
   readonly touch = output<void>();
+  /** Stops drawing and typing, and disables the buttons. Bound by `[formField]`. */
   readonly disabled = input(false);
+  /** Shows the signature but stops changes to it, as `disabled`. Bound by `[formField]`. */
   readonly readonly = input(false);
+  /** Sets `required` on the name input of "Type instead". Bound by `[formField]`. */
   readonly required = input(false);
+  /** The field's spec, with the signature options. */
   readonly def = input.required<LeafDef & NguSignatureOptions>();
+  /** Id of the name input while typing, else of the pad; the label's `for` points at it. */
   readonly id = input.required<string>();
+  /** True while the field's error shows: sets the error style and the name input's `aria-invalid`. */
   readonly errorShown = input(false);
+  /** Ids for the name input's `aria-describedby`: the field's hint and messages. */
   readonly describedBy = input<string | undefined>();
 
   protected readonly i18n = inject(NguFormContext, { optional: true })?.i18n ?? injectNguI18n();
@@ -342,6 +351,10 @@ export class NguSignaturePad {
     }
   }
 
+  /**
+   * Focuses the name input while typing, else the "Type instead" button. Signal Forms calls it to
+   * focus the field.
+   */
   focus(options?: FocusOptions): void {
     this.host
       .querySelector<HTMLElement>('.ngu-signature__name, .ngu-signature__button')

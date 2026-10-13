@@ -3,29 +3,28 @@ import { TestBed } from '@angular/core/testing';
 import { FormField, type Field } from '@angular/forms/signals';
 import { defineForm } from '../define';
 import { provideNguFieldTypes } from '../field-types';
-import type { LeafDef } from '../types';
 import { NguForm } from './ngu-form';
 import { NguControlTemplate, NguFieldTemplate } from './ngu-templates';
 
 declare module '../types' {
   interface NguFieldTypeMap {
-    rating: number;
+    score: number;
   }
 }
 
 @Component({
-  selector: 'test-rating',
+  selector: 'test-score',
   imports: [FormField],
-  template: `<input class="rating" type="range" [id]="id()" [formField]="field()" />`,
+  template: `<input class="score" type="range" [id]="id()" [formField]="field()" />`,
 })
-class Rating {
+class ScoreInput {
   readonly field = input.required<Field<number>>();
   readonly id = input<string>();
 }
 
 @Component({
   imports: [NguForm, NguFieldTemplate, NguControlTemplate, FormField],
-  providers: [provideNguFieldTypes({ rating: Rating })],
+  providers: [provideNguFieldTypes({ score: ScoreInput })],
   template: `
     <ngu-form [form]="form" submitLabel="Save">
       <ng-template nguField="account.email" let-field let-def="def">
@@ -42,7 +41,7 @@ class Host {
     { account: { email: '' }, score: 3, items: [{ note: '' }] },
     {
       account: { email: { label: 'Email', type: 'email' } },
-      score: { label: 'Score', type: 'rating' },
+      score: { label: 'Score', type: 'score' },
       items: { newItem: { note: '' }, item: { note: { label: 'Note' } } },
     },
   );
@@ -79,13 +78,13 @@ describe('NguField overrides', () => {
 
   it('renders a registered custom type and passes only declared inputs', async () => {
     const { el, fixture } = await setup();
-    const rating = el.querySelector<HTMLInputElement>('test-rating input.rating')!;
-    expect(rating).toBeTruthy();
-    expect(rating.value).toBe('3');
-    expect(el.querySelector(`label[for="${rating.id}"]`)?.textContent).toContain('Score');
+    const score = el.querySelector<HTMLInputElement>('test-score input.score')!;
+    expect(score).toBeTruthy();
+    expect(score.value).toBe('3');
+    expect(el.querySelector(`label[for="${score.id}"]`)?.textContent).toContain('Score');
 
-    rating.value = '5';
-    rating.dispatchEvent(new Event('input'));
+    score.value = '5';
+    score.dispatchEvent(new Event('input'));
     await fixture.whenStable();
     expect(fixture.componentInstance.form.value().score).toBe(5);
   });

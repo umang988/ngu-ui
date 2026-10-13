@@ -251,14 +251,14 @@ function isAutofilled(el: Element): boolean {
                 }
                 @switch (d.type) {
                   @case ('rating') {
-                    @defer (on immediate) {
+                    @defer (on immediate; hydrate on immediate) {
                       <ngu-rating [formField]="field()" [count]="ratingCount()" [i18n]="i18n" />
                     } @placeholder {
                       <span class="ngu-skeleton" aria-hidden="true"></span>
                     }
                   }
                   @case ('daterange') {
-                    @defer (on immediate) {
+                    @defer (on immediate; hydrate on immediate) {
                       <ngu-date-range [formField]="field()" [def]="d" [id]="id" [errorShown]="showErrors()" [describedBy]="describedBy() ?? undefined" [i18n]="i18n" />
                     } @placeholder {
                       <span class="ngu-skeleton" aria-hidden="true"></span>
@@ -287,7 +287,7 @@ function isAutofilled(el: Element): boolean {
                 @if (label()) {
                   <span class="ngu-label" [class]="look().classes.label" [id]="id + '-label'">{{ label() }}</span>
                 }
-                @defer (on immediate) {
+                @defer (on immediate; hydrate on immediate) {
                   <ngu-captcha [id]="id" [formField]="field()" [field]="field()" [adapter]="d.captcha" [i18n]="i18n" />
                 } @placeholder {
                   <span class="ngu-skeleton" aria-hidden="true"></span>
@@ -298,7 +298,7 @@ function isAutofilled(el: Element): boolean {
               <ng-container *ngTemplateOutlet="labelTpl" />
               @switch (d.type) {
                 @case ('tags') {
-                  @defer (on immediate) {
+                  @defer (on immediate; hydrate on immediate) {
                     <ngu-tags
                       [formField]="field()"
                       [id]="id"
@@ -314,7 +314,7 @@ function isAutofilled(el: Element): boolean {
                   }
                 }
                 @case ('phone') {
-                  @defer (on immediate) {
+                  @defer (on immediate; hydrate on immediate) {
                     <ngu-phone
                       [formField]="field()"
                       [id]="id"
@@ -331,21 +331,21 @@ function isAutofilled(el: Element): boolean {
                   }
                 }
                 @case ('range') {
-                  @defer (on immediate) {
+                  @defer (on immediate; hydrate on immediate) {
                     <ngu-range [field]="field()" [id]="id" [step]="d.step" [text]="rangeText()" [errorShown]="showErrors()" [describedBy]="describedBy() ?? undefined" />
                   } @placeholder {
                     <span class="ngu-skeleton" aria-hidden="true"></span>
                   }
                 }
                 @case ('color') {
-                  @defer (on immediate) {
+                  @defer (on immediate; hydrate on immediate) {
                     <ngu-color [field]="field()" [id]="id" [errorShown]="showErrors()" [describedBy]="describedBy() ?? undefined" />
                   } @placeholder {
                     <span class="ngu-skeleton" aria-hidden="true"></span>
                   }
                 }
                 @case ('otp') {
-                  @defer (on immediate) {
+                  @defer (on immediate; hydrate on immediate) {
                     <ngu-otp
                       [field]="field()"
                       [id]="id"
@@ -862,6 +862,10 @@ function isAutofilled(el: Element): boolean {
 export class NguField {
   /** The field's definition: from a form, or a plain spec when the field is used on its own. */
   readonly def = input.required<LeafDef, LeafDef | NguFieldSpec>({ transform: toLeafDef });
+  /**
+   * The field to render: a node of the form's tree, set by ngu-form, or a field of your own
+   * `form()` when used alone.
+   */
   readonly field = input.required<Field<any>>();
   /** Dot path of this field inside the form, for template overrides. */
   readonly path = input<string>('');

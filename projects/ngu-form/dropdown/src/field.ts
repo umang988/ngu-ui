@@ -20,7 +20,7 @@ export interface NguDropdownFieldOptions {
   optionLabel?: string | ((row: any) => string);
   /** Sent to `fetch` with every query; a signal re-queries when it changes. */
   filters?: Record<string, unknown> | Signal<Record<string, unknown>>;
-  /** Show the search box. Default: when there is a `fetch`, or more than 10 options. */
+  /** Show the search box. Default: with a `fetch`, or more than 8 options (ngu-dropdown's `searchThreshold`). */
   search?: boolean;
   /** Rows per request. */
   pageSize?: number;
@@ -35,9 +35,11 @@ export type NguDropdownValue = string | number | null | readonly (string | numbe
 
 declare module 'ngu-form' {
   interface NguFieldTypeMap {
+    /** `type: 'dropdown'`, on properties holding a row's key or a list of keys. */
     dropdown: NguDropdownValue;
   }
   interface NguFieldOptionsMap {
+    /** The options of `type: 'dropdown'`. */
     dropdown: NguDropdownFieldOptions;
   }
 }
@@ -62,13 +64,13 @@ declare module 'ngu-form' {
       [options]="rows()"
       [fetchFn]="o.fetch ?? null"
       [lookupFn]="o.lookup ?? null"
-      [optionValue]="o.optionValue ?? 'value'"
-      [optionLabel]="o.optionLabel ?? 'label'"
+      [optionValue]="o.optionValue"
+      [optionLabel]="o.optionLabel"
       [filters]="filters()"
       [multiple]="!!d.multiple"
       [placeholder]="placeholder()"
       [showSearch]="o.search ?? null"
-      [pageSize]="o.pageSize ?? 50"
+      [pageSize]="o.pageSize"
       [clearable]="o.clearable ?? true"
       [maxChips]="o.maxChips ?? 2"
     />
@@ -80,10 +82,15 @@ declare module 'ngu-form' {
   `,
 })
 export class NguDropdownField {
+  /** The field to edit, bound to the dropdown with `[formField]`. Set by ngu-form. */
   readonly field = input.required<Field<unknown>>();
+  /** The field's spec, with the dropdown options. Set by ngu-form. */
   readonly def = input.required<LeafDef>();
+  /** Id of the dropdown's trigger, used by the label's `for`. Set by ngu-form. */
   readonly id = input<string>();
+  /** True while ngu-form shows the field's error; the dropdown then shows its error state. */
   readonly invalid = input(false);
+  /** Ids of the field's hint and messages, for `aria-describedby`. Set by ngu-form. */
   readonly describedBy = input<string>();
   /** Options resolved by ngu-form: lists, signals and functions of the model. */
   readonly choices = input<readonly unknown[]>([]);

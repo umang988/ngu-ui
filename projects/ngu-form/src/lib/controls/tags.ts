@@ -3,7 +3,6 @@ import {
   Component,
   computed,
   ElementRef,
-  inject,
   input,
   model,
   output,

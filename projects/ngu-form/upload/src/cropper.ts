@@ -215,6 +215,7 @@ const MAX_ZOOM = 4;
 })
 export class NguImageCropper {
   protected readonly look = injectNguLook();
+  /** Texts of the dialog's title, hint, sliders and buttons; `<ngu-file-input>` passes the form's. */
   readonly i18n = input.required<NguI18n>();
 
   protected readonly titleId = `ngu-crop-title-${nextId}`;

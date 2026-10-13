@@ -86,9 +86,13 @@ export type NguClassMerge = (...classLists: string[]) => string;
 
 /** The resolved look of one form, or of one part of it. */
 export interface NguLook {
+  /** `'none'` when ngu-form's CSS is dropped, else `'default'`. */
   readonly theme: NguTheme;
+  /** Space between and inside fields. */
   readonly density: NguDensity;
+  /** Text size of controls, labels and buttons. */
   readonly size: NguSize;
+  /** The class map: the app-wide classes with those of the form, groups, lists and field added. */
   readonly classes: NguClassMap;
   /** How classes from different levels are joined: `mergeClasses` from the config, else a plain join. */
   readonly mergeClasses: NguClassMerge;

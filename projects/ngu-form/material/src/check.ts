@@ -95,6 +95,7 @@ import { SUBSCRIPT_STYLES } from './shared';
   `,
 })
 export class NguMatCheck {
+  /** The field's render context: texts, state and options, from ngu-form. */
   readonly context = input.required<NguFieldRenderContext>();
 
   protected readonly kind = computed(() => {

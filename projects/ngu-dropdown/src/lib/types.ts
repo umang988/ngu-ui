@@ -1,3 +1,4 @@
+/** A sort direction, passed to `fetchFn` as `order`. */
 export type NguDropdownSortDirection = 'asc' | 'desc';
 
 /**
@@ -6,7 +7,9 @@ export type NguDropdownSortDirection = 'asc' | 'desc';
  * neither: a path the option does not have falls back to the option itself.
  */
 export interface NguDropdownItem<V = string> {
+  /** The key, which the default `optionValue` path reads. */
   value: V;
+  /** The text shown, searched and announced, which the default `optionLabel` path reads. */
   label: string;
 }
 
@@ -17,10 +20,13 @@ export interface NguDropdownItem<V = string> {
 export interface NguDropdownQuery {
   /** Zero-based page index. */
   page: number;
+  /** Rows per page, from `[pageSize]`. */
   size: number;
   /** The search term, trimmed. `''` when empty. */
   search: string;
+  /** The `[sortBy]` binding, or `null`. */
   sort: string | null;
+  /** The `[sortOrder]` binding, or `null`. */
   order: NguDropdownSortDirection | null;
   /** The `[filters]` binding, as of its last change. */
   filters: Record<string, unknown>;
@@ -31,10 +37,15 @@ export interface NguDropdownQuery {
  * `Page` serializes to; only `content` and `totalElements` are read.
  */
 export interface NguDropdownPage<T> {
+  /** The rows of this page. */
   content: readonly T[];
+  /** Rows in the whole result set, which sizes the scrollbar. */
   totalElements: number;
+  /** Pages in the whole result set, as Spring Data sends it. Not read. */
   totalPages?: number;
+  /** This page's zero-based index, as Spring Data sends it. Not read. */
   number?: number;
+  /** Rows per page, as Spring Data sends it. Not read. */
   size?: number;
 }
 
@@ -46,10 +57,11 @@ export interface NguDropdownFetchContext {
 
 /**
  * Anything with a `subscribe` method, which includes every RxJS `Observable` and so
- * `HttpClient`'s results. The dropdown takes the first value and unsubscribes when it no
- * longer needs the answer.
+ * `HttpClient`'s results. Each value it sends is used (`HttpClient` sends one); the
+ * dropdown unsubscribes when it no longer needs the answer before the first value arrives.
  */
 export interface NguSubscribable<T> {
+  /** Starts the request. Its subscription is unsubscribed if the answer is no longer needed. */
   subscribe(observer: {
     next: (value: T) => void;
     error: (error: unknown) => void;
@@ -77,13 +89,16 @@ export type NguDropdownLookup<T> = (
 
 /** `<ng-template nguDropdownOption let-row let-selected="selected">` */
 export interface NguDropdownOptionContext<T = any> {
+  /** The row, as `let-row`. */
   $implicit: T;
   /** Position in the whole result set, not in the rendered window. */
   index: number;
+  /** Whether the row is chosen, as `let-selected="selected"`. */
   selected: boolean;
 }
 
 /** `<ng-template nguDropdownSelection let-row>`, the closed control's display. */
 export interface NguDropdownSelectionContext<T = any> {
+  /** The chosen row, as `let-row`. */
   $implicit: T;
 }

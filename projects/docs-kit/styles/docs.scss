@@ -298,6 +298,13 @@
   white-space: normal;
 }
 
+.doc-table__note {
+  display: block;
+  margin-top: 0.125rem;
+  color: var(--ink-2);
+  font-size: 0.8125rem;
+}
+
 /* --- on this page ------------------------------------------------------------- */
 
 .toc {

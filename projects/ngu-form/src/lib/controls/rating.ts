@@ -31,6 +31,7 @@ let nextName = 0;
   },
   template: `
     @for (star of stars(); track star) {
+      <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events, @angular-eslint/template/interactive-supports-focus -- the label wraps a radio input, which takes the keyboard -->
       <label
         class="ngu-star"
         [class.ngu-star--on]="star <= shown()"

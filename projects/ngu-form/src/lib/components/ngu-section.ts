@@ -14,6 +14,7 @@ export class NguSection {
   /** Whether Next was pressed on this part, so its errors show. */
   readonly tried = input(false, { alias: 'nguSectionTried' });
   /** Asks the owner to show this part. */
+  // eslint-disable-next-line @angular-eslint/no-output-rename -- prefixed like the directive's inputs
   readonly revealRequest = output<void>({ alias: 'nguSectionReveal' });
 
   private readonly parent = inject(NguSection, { optional: true, skipSelf: true });

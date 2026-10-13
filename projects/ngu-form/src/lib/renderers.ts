@@ -13,14 +13,21 @@ import type { Choice, LeafDef } from './types';
 export interface NguFieldRenderContext {
   /** The field node; bind it with `[formField]`, or read and write `field().value`. */
   readonly field: Field<any>;
+  /** The field's state, `field()`: disabled, read-only, pending and the rest, as signals. */
   readonly state: FieldState<any>;
+  /** The field's definition, with its type's own options. */
   readonly def: LeafDef;
   /** The id for the control, so the error summary can link to it. */
   readonly id: string;
+  /** The translated label, or `undefined` when the field has none. */
   readonly label: string | undefined;
+  /** The translated hint. */
   readonly hint: string | undefined;
+  /** The translated placeholder, or `''`. */
   readonly placeholder: string;
+  /** The translated `prefix` text. */
   readonly prefix: string | undefined;
+  /** The translated `suffix` text. */
   readonly suffix: string | undefined;
   /** Options of choice fields, with translated labels. */
   readonly choices: readonly Choice<any>[];
@@ -32,6 +39,7 @@ export interface NguFieldRenderContext {
   readonly pending: string | undefined;
   /** True while the error shows. Use it for the control's invalid state. */
   readonly showErrors: boolean;
+  /** True while the field is required; for an asterisk and `aria-required`. */
   readonly required: boolean;
   /**
    * Parse and format for masks, locale numbers, currency and `parse`/`format`. Put it on a
@@ -40,7 +48,9 @@ export interface NguFieldRenderContext {
   readonly transform: FieldTransform | undefined;
   /** Character count against `maxLength`, when the field shows a counter. */
   readonly counter: { readonly length: number; readonly max: number; readonly text: string } | undefined;
+  /** Messages and translation for the form's language. */
   readonly i18n: NguI18n;
+  /** Theme, density, size and class map for this field, with its spec's `classes` added. */
   readonly look: NguLook;
   /** Marks the field touched, as leaving it does; for controls that have no native blur. */
   touch(): void;

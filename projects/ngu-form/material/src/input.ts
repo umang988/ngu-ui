@@ -147,6 +147,7 @@ const NATIVE = new Set(['text', 'email', 'password', 'number', 'url', 'search', 
   `,
 })
 export class NguMatInput {
+  /** The field's render context: texts, state and options, from ngu-form. */
   readonly context = input.required<NguFieldRenderContext>();
   protected readonly options = inject(NGU_MATERIAL_OPTIONS);
   protected readonly matcher = errorMatcher(this.context);

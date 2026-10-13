@@ -251,7 +251,12 @@ export function parseLocalNumber(text: string, locale: string, options: Intl.Num
 
 /** How `NguTransform` converts between text and the model value. */
 export interface FieldTransform {
+  /**
+   * Text to model value. Throw to report a `parse` error; a thrown error's message replaces the
+   * default one.
+   */
   parse(text: string): unknown;
+  /** Model value to the text the input shows. */
   format(value: unknown): string;
   /** Re-format while typing (masks). Otherwise the text is re-formatted on blur. */
   readonly live?: boolean;
@@ -275,9 +280,11 @@ export interface FieldTransform {
   },
 })
 export class NguTransform {
+  /** The model value; `[formField]` binds it. */
   readonly value = model<unknown>(null);
   /** Marks the field touched. */
   readonly touch = output<void>();
+  /** How to convert between the input's text and the model value. */
   readonly transform = input.required<FieldTransform>({ alias: 'nguTransform' });
 
   private readonly el = inject<ElementRef<HTMLInputElement | HTMLTextAreaElement>>(ElementRef).nativeElement;
@@ -342,9 +349,13 @@ export class NguTransform {
     }
   }
 
-  /** Works inside shadow roots, where the document's activeElement is the shadow host. */
+  /**
+   * Works inside shadow roots, where the document's activeElement is the shadow host. The
+   * server's DOM has no `getRootNode`, and nothing is focused there.
+   */
   private focused(): boolean {
-    return (this.el.getRootNode() as Document | ShadowRoot).activeElement === this.el;
+    const root = this.el.getRootNode?.() as Document | ShadowRoot | undefined;
+    return root?.activeElement === this.el;
   }
 
   private render(text: string, value: unknown, t: FieldTransform): void {

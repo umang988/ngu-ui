@@ -55,6 +55,7 @@ import { SUBSCRIPT_STYLES } from './shared';
   `,
 })
 export class NguMatChoice {
+  /** The field's render context: texts, state and options, from ngu-form. */
   readonly context = input.required<NguFieldRenderContext>();
   protected readonly describedBy = computed(() => subscriptId(this.context()));
 }

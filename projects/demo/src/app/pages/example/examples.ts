@@ -110,6 +110,33 @@ export const EXAMPLES: readonly Example[] = [
     ],
   },
   {
+    id: 'settings',
+    title: 'Settings with autosave',
+    summary: 'Tabs of preferences that save themselves a moment after each change.',
+    highlights: '`changes()` sent as a PATCH, `patch()` to mark values saved, tabs, conditional switches',
+    useCase:
+      'A settings page has no Save button: people flip a switch and expect it to stick. Each valid change is sent shortly after the last edit, only the values that changed go to the server, and the page says whether everything is saved. A failed save keeps the changes and offers to try again.',
+    shows: [
+      "`layout: 'tabs'` with one tab per group, and `load` for the saved settings",
+      'An `effect` on `changes()` that saves after a pause, and only while the form is `valid()`',
+      '`patch()` after a save, so `changes()` empties without touching what the user typed meanwhile',
+      'A field `disabled` by another answer, and one `hidden` until it applies',
+      'A `role="status"` line for Saving, Saved and failures',
+    ],
+    tryThis: [
+      'Switch Product news on. After a moment the status says the change is saved.',
+      'Change several settings quickly. They go to the server together, once you pause.',
+      'Clear Display name. Nothing is saved until it is filled in again.',
+      'Type offline as the display name to see a failed save, then use Try again after fixing it.',
+      'Choose Only me under Privacy: showing your email is turned off, and the search engine switch leaves.',
+    ],
+    component: { load: () => import('../../examples/settings/settings').then((m) => m.SettingsForm) },
+    files: [
+      { name: 'settings.ts', src: 'settings/settings.ts' },
+      { name: 'fake-settings.ts', src: 'api/fake-settings.ts' },
+    ],
+  },
+  {
     id: 'languages',
     title: 'In three languages',
     summary: 'English, Hindi and Arabic, right to left, validated by a Zod schema.',
@@ -161,6 +188,32 @@ export const EXAMPLES: readonly Example[] = [
     files: [
       { name: 'checkout.ts', src: 'checkout/checkout.ts' },
       { name: 'catalog.ts', src: 'api/catalog.ts' },
+    ],
+  },
+  {
+    id: 'team',
+    title: 'Team admin',
+    summary: 'Records you can view, edit, add and delete, with the server checking emails.',
+    highlights: '`<ngu-view>` for reading, `reset()` per record, server errors by field',
+    useCase:
+      'An admin screen lists records; choosing one shows it read-only, Edit turns the same definition into a form, and Save goes to a server that rejects duplicate emails. One form definition serves every record: choosing a record resets the form to it.',
+    shows: [
+      '`<ngu-view>` to show a record with the labels, option names and dates of its form',
+      '`reset(record)` when another record is chosen, and on Cancel',
+      "An `action` that returns `{ email: '…' } satisfies SubmitErrors<Member>` when the server says no",
+      '`display` to show an empty note as None',
+      'Delete with an inline confirmation instead of a browser dialog',
+    ],
+    tryThis: [
+      'Choose Ravi Kumar, then Edit. Change his email to asha@example.com and save: the server error appears under Email.',
+      'Use New member, leave it empty and press Add member. Focus moves to Name.',
+      'Edit a member, change something, then Cancel. The record is as it was.',
+      'Delete a member and keep or confirm it.',
+    ],
+    component: { load: () => import('../../examples/team/team').then((m) => m.TeamPage) },
+    files: [
+      { name: 'team.ts', src: 'team/team.ts' },
+      { name: 'fake-team.ts', src: 'api/fake-team.ts' },
     ],
   },
   {

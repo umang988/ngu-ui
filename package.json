@@ -10,7 +10,12 @@
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "build:form": "ng build ngu-form && node projects/ngu-form/schematics/build.mjs && node projects/docs-kit/agents/generate.mjs projects/demo/agent-docs.json --package dist/ngu-form",
-    "build:dropdown": "ng build ngu-dropdown && node projects/docs-kit/agents/generate.mjs projects/ngu-dropdown-demo/agent-docs.json --package dist/ngu-dropdown"
+    "build:dropdown": "ng build ngu-dropdown && node projects/docs-kit/agents/generate.mjs projects/ngu-dropdown-demo/agent-docs.json --package dist/ngu-dropdown",
+    "lint": "eslint projects evals e2e scripts",
+    "test:schematics": "vitest run --config projects/ngu-form/schematics/vitest.config.mts",
+    "e2e": "playwright test -c e2e",
+    "api:update": "node projects/docs-kit/api/api.mjs dist/ngu-form --report api --docs projects/demo/src/app/docs/content/reference && node projects/docs-kit/api/api.mjs dist/ngu-dropdown --report api",
+    "api:check": "node projects/docs-kit/api/api.mjs dist/ngu-form --report api --docs projects/demo/src/app/docs/content/reference --check && node projects/docs-kit/api/api.mjs dist/ngu-dropdown --report api --check"
   },
   "private": true,
   "packageManager": "npm@11.19.0",
@@ -30,8 +35,15 @@
     "@angular/cli": "^22.2.2",
     "@angular/compiler-cli": "^22.2.0",
     "@angular/material": "22.2.2",
+    "@angular/platform-server": "22.2.2",
+    "@angular/ssr": "22.2.2",
+    "@axe-core/playwright": "4.13.0",
+    "@eslint/js": "10.0.1",
+    "@playwright/test": "1.63.0",
     "@primeuix/themes": "3.0.1",
     "@tailwindcss/postcss": "4.3.3",
+    "angular-eslint": "22.5.0",
+    "eslint": "10.11.0",
     "jsdom": "^30.0.0",
     "ng-packagr": "^22.2.0",
     "prettier": "^3.8.1",
@@ -39,6 +51,7 @@
     "shiki": "4.4.3",
     "tailwindcss": "4.3.3",
     "typescript": "~6.0.2",
+    "typescript-eslint": "8.71.0",
     "vitest": "^5.0.0",
     "zod": "4.6.5"
   }

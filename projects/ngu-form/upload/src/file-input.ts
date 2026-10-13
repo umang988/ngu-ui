@@ -308,14 +308,26 @@ let nextKey = 0;
 })
 export class NguFileInput {
   protected readonly look = injectNguLook();
+  /**
+   * The finished files, as `File` objects or what `upload` returned: a list when the spec sets
+   * `multiple`, else one file or `null`. Bound by `[formField]`.
+   */
   readonly value = model<readonly NguFileValue[] | NguFileValue | null>(null);
+  /** Emits when the user leaves the file input, adds files or removes one. */
   readonly touch = output<void>();
+  /** Stops choosing and dropping files, and hides Retry and Remove. Bound by `[formField]`. */
   readonly disabled = input(false);
+  /** Shows the files but stops adding and removing them, as `disabled`. Bound by `[formField]`. */
   readonly readonly = input(false);
+  /** Sets `required` on the file input. Bound by `[formField]`. */
   readonly required = input(false);
+  /** The field's spec, with the file and image options. */
   readonly def = input.required<LeafDef & NguImageOptions>();
+  /** Id of the file input, used by the label's `for`. */
   readonly id = input.required<string>();
+  /** True while the field's error shows: sets `aria-invalid` and the drop zone's error style. */
   readonly errorShown = input(false);
+  /** Ids for the file input's `aria-describedby`: the field's hint and messages. */
   readonly describedBy = input<string | undefined>();
   /** `'image'` crops and resizes images before they are added. */
   readonly mode = input<'file' | 'image'>('file');
@@ -647,6 +659,7 @@ export class NguFileInput {
     this.status.set(this.status() === text ? text + ' ' : text);
   }
 
+  /** Focuses the file input. Signal Forms calls it to focus the field. */
   focus(options?: FocusOptions): void {
     this.picker().nativeElement.focus(options);
   }

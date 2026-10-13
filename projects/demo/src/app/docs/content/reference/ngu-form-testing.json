@@ -1,0 +1,315 @@
+{
+ "entry": "ngu-form/testing",
+ "symbols": [
+  {
+   "name": "NguFieldHarness",
+   "kind": "class",
+   "summary": "Harness for one `<ngu-field>`: read its label, state and messages, and enter values.",
+   "signature": "export declare class NguFieldHarness extends ComponentHarness {\n    static hostSelector: string;\n    static with(options?: NguFieldHarnessFilters): HarnessPredicate<NguFieldHarness>;\n    getLabel(): Promise<string>;\n    getPath(): Promise<string | null>;\n    getType(): Promise<string>;\n    getError(): Promise<string | null>;\n    getHint(): Promise<string | null>;\n    getWarning(): Promise<string | null>;\n    isInvalid(): Promise<boolean>;\n    isDisabled(): Promise<boolean>;\n    isRequired(): Promise<boolean>;\n    isPending(): Promise<boolean>;\n    getValue(): Promise<NguFieldValue>;\n    setValue(value: NguFieldValue): Promise<void>;\n    focus(): Promise<void>;\n    blur(): Promise<void>;\n}",
+   "members": [
+    {
+     "name": "hostSelector",
+     "kind": "property",
+     "type": "string",
+     "description": "Selector of the harness's host element: `ngu-field`."
+    },
+    {
+     "name": "with",
+     "kind": "method",
+     "type": "(options?: NguFieldHarnessFilters): HarnessPredicate<NguFieldHarness>;",
+     "description": "Matches fields by label, model path or type."
+    },
+    {
+     "name": "getLabel",
+     "kind": "method",
+     "type": "(): Promise<string>;",
+     "description": "The label, without the asterisk of required fields."
+    },
+    {
+     "name": "getPath",
+     "kind": "method",
+     "type": "(): Promise<string | null>;",
+     "description": "The model path, such as `account.email` or `items.0.sku`."
+    },
+    {
+     "name": "getType",
+     "kind": "method",
+     "type": "(): Promise<string>;",
+     "description": "The `type` from the spec."
+    },
+    {
+     "name": "getError",
+     "kind": "method",
+     "type": "(): Promise<string | null>;",
+     "description": "The error message on screen, or `null`. Errors appear per `errorsOn`."
+    },
+    {
+     "name": "getHint",
+     "kind": "method",
+     "type": "(): Promise<string | null>;",
+     "description": "The hint on screen, or `null`. An error, warning or pending text shows in its place."
+    },
+    {
+     "name": "getWarning",
+     "kind": "method",
+     "type": "(): Promise<string | null>;",
+     "description": "The warning on screen, without its \"Warning:\" prefix for screen readers."
+    },
+    {
+     "name": "isInvalid",
+     "kind": "method",
+     "type": "(): Promise<boolean>;",
+     "description": "True while an error shows."
+    },
+    {
+     "name": "isDisabled",
+     "kind": "method",
+     "type": "(): Promise<boolean>;",
+     "description": "True while the field is disabled."
+    },
+    {
+     "name": "isRequired",
+     "kind": "method",
+     "type": "(): Promise<boolean>;",
+     "description": "True when the label shows the required asterisk (`.ngu-required`); a single checkbox has none."
+    },
+    {
+     "name": "isPending",
+     "kind": "method",
+     "type": "(): Promise<boolean>;",
+     "description": "True while an async check runs."
+    },
+    {
+     "name": "getValue",
+     "kind": "method",
+     "type": "(): Promise<NguFieldValue>;",
+     "description": "The value as shown; see `NguFieldValue`."
+    },
+    {
+     "name": "setValue",
+     "kind": "method",
+     "type": "(value: NguFieldValue): Promise<void>;",
+     "description": "Enters a value the way a user would, then leaves the field. Text is typed key by key, so\nmasks, transforms and `onChange` run; choices are picked by their label."
+    },
+    {
+     "name": "focus",
+     "kind": "method",
+     "type": "(): Promise<void>;",
+     "description": "Focuses the field's control."
+    },
+    {
+     "name": "blur",
+     "kind": "method",
+     "type": "(): Promise<void>;",
+     "description": "Leaves the field, as a user tabbing away: it becomes touched and may show its error."
+    }
+   ]
+  },
+  {
+   "name": "NguFieldHarnessFilters",
+   "kind": "interface",
+   "summary": "Filters for `NguFieldHarness.with`, on top of the CDK base filters (`selector`, `ancestor`).",
+   "signature": "export interface NguFieldHarnessFilters extends BaseHarnessFilters {\n    readonly label?: string | RegExp;\n    readonly path?: string;\n    readonly type?: string;\n}",
+   "members": [
+    {
+     "name": "label",
+     "kind": "property",
+     "type": "string | RegExp",
+     "description": "The label text, without the required asterisk.",
+     "optional": true
+    },
+    {
+     "name": "path",
+     "kind": "property",
+     "type": "string",
+     "description": "The model path, with numbers for list rows: `items.0.sku`.",
+     "optional": true
+    },
+    {
+     "name": "type",
+     "kind": "property",
+     "type": "string",
+     "description": "The field's `type`.",
+     "optional": true
+    }
+   ]
+  },
+  {
+   "name": "NguFieldValue",
+   "kind": "type",
+   "summary": "A value as the user sees and enters it: text for inputs, `true`/`false` for checkboxes and\nswitches, option labels for selects, radios and segments, a list of labels for checkbox\ngroups and multiple selects, a list of tags, and `{ from, to }` for date ranges.",
+   "signature": "export type NguFieldValue = string | number | boolean | Date | readonly string[] | {\n    readonly from?: string;\n    readonly to?: string;\n};"
+  },
+  {
+   "name": "NguFormHarness",
+   "kind": "class",
+   "summary": "Harness for `<ngu-form>`: fill fields by model path, submit, and read the errors on screen.\n\n```ts\nconst form = await TestbedHarnessEnvironment.harnessForFixture(fixture, NguFormHarness);\nawait form.fill({ 'account.email': 'ada@example.com', plan: 'Pro', remember: true });\nawait form.submit();\nexpect(await form.getErrors()).toEqual({});\n```",
+   "signature": "export declare class NguFormHarness extends ComponentHarness {\n    static hostSelector: string;\n    static with(options?: NguFormHarnessFilters): HarnessPredicate<NguFormHarness>;\n    field(pathOrLabel: string): Promise<NguFieldHarness>;\n    fields(filter?: NguFieldHarnessFilters): Promise<NguFieldHarness[]>;\n    list(path: string): Promise<NguListHarness>;\n    fill(values: Readonly<Record<string, NguFieldValue>>): Promise<void>;\n    submit(): Promise<void>;\n    next(): Promise<void>;\n    back(): Promise<void>;\n    getStep(): Promise<string | null>;\n    getErrors(): Promise<Record<string, string>>;\n    getFormError(): Promise<string | null>;\n    isBusy(): Promise<boolean>;\n}",
+   "members": [
+    {
+     "name": "hostSelector",
+     "kind": "property",
+     "type": "string",
+     "description": "Selector of the harness's host element: `ngu-form`."
+    },
+    {
+     "name": "with",
+     "kind": "method",
+     "type": "(options?: NguFormHarnessFilters): HarnessPredicate<NguFormHarness>;",
+     "description": "Matches forms by the CDK base filters, `selector` and `ancestor`."
+    },
+    {
+     "name": "field",
+     "kind": "method",
+     "type": "(pathOrLabel: string): Promise<NguFieldHarness>;",
+     "description": "The field at a model path (`items.0.sku`), or with this label. Throws when there is none."
+    },
+    {
+     "name": "fields",
+     "kind": "method",
+     "type": "(filter?: NguFieldHarnessFilters): Promise<NguFieldHarness[]>;",
+     "description": "Every field on screen; hidden fields, closed steps and collapsed rows are not rendered."
+    },
+    {
+     "name": "list",
+     "kind": "method",
+     "type": "(path: string): Promise<NguListHarness>;",
+     "description": "The list at a model path, such as `items`."
+    },
+    {
+     "name": "fill",
+     "kind": "method",
+     "type": "(values: Readonly<Record<string, NguFieldValue>>): Promise<void>;",
+     "description": "Enters each value into the field at its model path (or label), in order."
+    },
+    {
+     "name": "submit",
+     "kind": "method",
+     "type": "(): Promise<void>;",
+     "description": "Presses the submit button, or submits the form when it has none."
+    },
+    {
+     "name": "next",
+     "kind": "method",
+     "type": "(): Promise<void>;",
+     "description": "Presses Next in a wizard."
+    },
+    {
+     "name": "back",
+     "kind": "method",
+     "type": "(): Promise<void>;",
+     "description": "Presses Back in a wizard."
+    },
+    {
+     "name": "getStep",
+     "kind": "method",
+     "type": "(): Promise<string | null>;",
+     "description": "The heading of the wizard step on screen, such as \"Step 2 of 4: Address\"."
+    },
+    {
+     "name": "getErrors",
+     "kind": "method",
+     "type": "(): Promise<Record<string, string>>;",
+     "description": "Errors on screen by model path; a form-level error is under `$form`."
+    },
+    {
+     "name": "getFormError",
+     "kind": "method",
+     "type": "(): Promise<string | null>;",
+     "description": "The form-level error: from `$form`, a string returned by the action, or a failed load."
+    },
+    {
+     "name": "isBusy",
+     "kind": "method",
+     "type": "(): Promise<boolean>;",
+     "description": "True while the form submits or loads (`aria-busy`)."
+    }
+   ]
+  },
+  {
+   "name": "NguFormHarnessFilters",
+   "kind": "interface",
+   "summary": "Filters for `NguFormHarness.with`: the CDK base filters (`selector`, `ancestor`).",
+   "signature": "export interface NguFormHarnessFilters extends BaseHarnessFilters {\n}",
+   "members": []
+  },
+  {
+   "name": "NguListHarness",
+   "kind": "class",
+   "summary": "Harness for a list (`<ngu-array>`): count, add and remove rows.",
+   "signature": "export declare class NguListHarness extends ComponentHarness {\n    static hostSelector: string;\n    static with(options?: NguListHarnessFilters): HarnessPredicate<NguListHarness>;\n    getPath(): Promise<string | null>;\n    getTitle(): Promise<string>;\n    getRowCount(): Promise<number>;\n    addRow(): Promise<void>;\n    removeRow(index: number): Promise<void>;\n    getRowFields(index: number): Promise<NguFieldHarness[]>;\n}",
+   "members": [
+    {
+     "name": "hostSelector",
+     "kind": "property",
+     "type": "string",
+     "description": "Selector of the harness's host element: `ngu-array`."
+    },
+    {
+     "name": "with",
+     "kind": "method",
+     "type": "(options?: NguListHarnessFilters): HarnessPredicate<NguListHarness>;",
+     "description": "Matches lists by model path or title."
+    },
+    {
+     "name": "getPath",
+     "kind": "method",
+     "type": "(): Promise<string | null>;",
+     "description": "The model path, such as `items`, or `null`."
+    },
+    {
+     "name": "getTitle",
+     "kind": "method",
+     "type": "(): Promise<string>;",
+     "description": "The list's title, or `''` when it has none."
+    },
+    {
+     "name": "getRowCount",
+     "kind": "method",
+     "type": "(): Promise<number>;",
+     "description": "Rows on screen (long lists render only the rows in view)."
+    },
+    {
+     "name": "addRow",
+     "kind": "method",
+     "type": "(): Promise<void>;",
+     "description": "Presses the add button."
+    },
+    {
+     "name": "removeRow",
+     "kind": "method",
+     "type": "(index: number): Promise<void>;",
+     "description": "Presses the remove button of the row at `index`."
+    },
+    {
+     "name": "getRowFields",
+     "kind": "method",
+     "type": "(index: number): Promise<NguFieldHarness[]>;",
+     "description": "The fields of the row at `index`."
+    }
+   ]
+  },
+  {
+   "name": "NguListHarnessFilters",
+   "kind": "interface",
+   "summary": "Filters for `NguListHarness.with`, on top of the CDK base filters (`selector`, `ancestor`).",
+   "signature": "export interface NguListHarnessFilters extends BaseHarnessFilters {\n    readonly path?: string;\n    readonly title?: string | RegExp;\n}",
+   "members": [
+    {
+     "name": "path",
+     "kind": "property",
+     "type": "string",
+     "description": "The model path of the list, such as `items`.",
+     "optional": true
+    },
+    {
+     "name": "title",
+     "kind": "property",
+     "type": "string | RegExp",
+     "description": "The list title.",
+     "optional": true
+    }
+   ]
+  }
+ ]
+}

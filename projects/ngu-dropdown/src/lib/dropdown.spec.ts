@@ -556,3 +556,56 @@ describe('NguDropdown labels', () => {
     expect(chips).toEqual(['SKU-0001 - Part 1', 'SKU-0008 - Steel bolt M8']);
   });
 });
+
+describe('NguDropdown inputs', () => {
+  @Component({
+    selector: 'test-state-host',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [NguDropdown],
+    template: `
+      <ngu-dropdown
+        [options]="options"
+        [(value)]="picked"
+        [optionValue]="valuePath()"
+        [disabled]="disabled()"
+        [readonly]="locked()"
+      />
+    `,
+  })
+  class StateHost {
+    readonly options = [
+      { value: 'a', label: 'Alpha' },
+      { value: 'b', label: 'Beta' },
+    ];
+    readonly valuePath = signal<string | undefined>(undefined);
+    readonly disabled = signal(false);
+    readonly locked = signal(false);
+    picked: any = 'b';
+  }
+
+  it('reads undefined optionValue as the default path', async () => {
+    const fixture = TestBed.createComponent(StateHost);
+    await fixture.whenStable();
+    expect(driver(fixture).trigger().textContent).toContain('Beta');
+  });
+
+  it('closes the open panel when it becomes disabled or read-only', async () => {
+    const fixture = TestBed.createComponent(StateHost);
+    await fixture.whenStable();
+    const d = driver(fixture);
+    await d.open();
+    expect(d.panel()).not.toBeNull();
+    fixture.componentInstance.disabled.set(true);
+    await fixture.whenStable();
+    expect(d.panel()).toBeNull();
+
+    fixture.componentInstance.disabled.set(false);
+    await fixture.whenStable();
+    await d.open();
+    expect(d.panel()).not.toBeNull();
+    fixture.componentInstance.locked.set(true);
+    await fixture.whenStable();
+    expect(d.panel()).toBeNull();
+  });
+});
+

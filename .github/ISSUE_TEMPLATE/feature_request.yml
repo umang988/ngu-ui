@@ -1,0 +1,31 @@
+name: Feature request
+description: Suggest a feature or an API change.
+labels: [enhancement]
+body:
+  - type: dropdown
+    id: package
+    attributes:
+      label: Package
+      options:
+        - ngu-form
+        - ngu-dropdown
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: The problem
+      description: What are you trying to build, and what gets in the way today?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: What you would like
+      description: How you would write it in a spec or template, if you have an idea.
+      render: ts
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: What you do instead today
+      description: Workarounds you use, such as `nguField` templates or a custom type.

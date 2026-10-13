@@ -21,10 +21,15 @@ type FileFieldValue = readonly NguFileValue[] | NguFileValue | null;
   />`,
 })
 export class NguFileUpload {
+  /** The field to edit, bound to `<ngu-file-input>` with `[formField]`. Set by ngu-form. */
   readonly field = input.required<Field<FileFieldValue>>();
+  /** The field's spec, with the file options. Set by ngu-form. */
   readonly def = input<LeafDef>();
+  /** Id of the file input, used by the label's `for`. Set by ngu-form. */
   readonly id = input<string>();
+  /** True while ngu-form shows the field's error. Set by ngu-form. */
   readonly invalid = input(false);
+  /** Ids of the field's hint and messages, for `aria-describedby`. Set by ngu-form. */
   readonly describedBy = input<string>();
 }
 
@@ -43,10 +48,15 @@ export class NguFileUpload {
   />`,
 })
 export class NguImageUpload {
+  /** The field to edit, bound to `<ngu-file-input>` with `[formField]`. Set by ngu-form. */
   readonly field = input.required<Field<FileFieldValue>>();
+  /** The field's spec, with the image options. Set by ngu-form. */
   readonly def = input<LeafDef>();
+  /** Id of the file input, used by the label's `for`. Set by ngu-form. */
   readonly id = input<string>();
+  /** True while ngu-form shows the field's error. Set by ngu-form. */
   readonly invalid = input(false);
+  /** Ids of the field's hint and messages, for `aria-describedby`. Set by ngu-form. */
   readonly describedBy = input<string>();
 
   /** Images only, unless the spec sets its own `accept`. */
@@ -70,10 +80,15 @@ export class NguImageUpload {
   />`,
 })
 export class NguSignature {
+  /** The field to edit, bound to `<ngu-signature-pad>` with `[formField]`. Set by ngu-form. */
   readonly field = input.required<Field<string>>();
+  /** The field's spec, with the signature options. Set by ngu-form. */
   readonly def = input<LeafDef>();
+  /** Id of the signature control, used by the label's `for`. Set by ngu-form. */
   readonly id = input<string>();
+  /** True while ngu-form shows the field's error. Set by ngu-form. */
   readonly invalid = input(false);
+  /** Ids of the field's hint and messages, for `aria-describedby`. Set by ngu-form. */
   readonly describedBy = input<string>();
 }
 

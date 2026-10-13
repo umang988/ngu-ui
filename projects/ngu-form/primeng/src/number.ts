@@ -1,7 +1,8 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import { NguBind, type NguFieldRenderContext } from 'ngu-form';
 import { InputNumber } from 'primeng/inputnumber';
-import { messageId, NguPrimeFrame } from './frame';
+import { NguPrimeFrame } from './frame';
+import { messageId } from './message-id';
 
 /** Numbers and amounts with `p-inputnumber`, formatted for the form's locale. */
 @Component({
@@ -43,6 +44,7 @@ import { messageId, NguPrimeFrame } from './frame';
   `,
 })
 export class NguPrimeNumber {
+  /** The field's render context: texts, state and options, from ngu-form. */
   readonly context = input.required<NguFieldRenderContext>();
   protected readonly describedBy = computed(() => messageId(this.context()));
 

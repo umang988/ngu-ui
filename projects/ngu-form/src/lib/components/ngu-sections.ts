@@ -124,7 +124,7 @@ abstract class SectionBase {
           [attr.aria-selected]="entry.key === current"
           [attr.aria-controls]="idPrefix() + '-panel-' + entry.key"
           [tabIndex]="entry.key === current ? 0 : -1"
-          (click)="select.emit(entry.key)"
+          (click)="tabSelect.emit(entry.key)"
         >
           <span>{{ heading(entry) }}</span>
           ${BADGE}
@@ -140,7 +140,7 @@ abstract class SectionBase {
         [hidden]="entry.key !== current"
         nguSection
         [nguSectionOpen]="entry.key === current"
-        (nguSectionReveal)="select.emit(entry.key)"
+        (nguSectionReveal)="tabSelect.emit(entry.key)"
       >
         <p class="ngu-print-title" aria-hidden="true">{{ heading(entry) }}</p>
         ${CONTENT}
@@ -213,7 +213,7 @@ export class NguTabs extends SectionBase {
   readonly active = input<string>();
   readonly labelledBy = input<string | null>(null);
   readonly idPrefix = input.required<string>();
-  readonly select = output<string>();
+  readonly tabSelect = output<string>();
 
   /** Arrow keys move between tabs (mirrored right to left), Home and End go to the ends. */
   protected onKeydown(event: KeyboardEvent): void {
@@ -246,7 +246,7 @@ export class NguTabs extends SectionBase {
     target.focus();
     const key = target.dataset['key'];
     if (key) {
-      this.select.emit(key);
+      this.tabSelect.emit(key);
     }
   }
 }
@@ -272,7 +272,7 @@ export class NguTabs extends SectionBase {
         [id]="idPrefix() + '-tab-' + entry.key"
         [attr.aria-expanded]="open()"
         [attr.aria-controls]="idPrefix() + '-panel-' + entry.key"
-        (click)="toggle.emit()"
+        (click)="toggled.emit()"
       >
         <span class="ngu-panel__chevron" aria-hidden="true"></span>
         <span class="ngu-panel__title">{{ heading(entry) }}</span>
@@ -287,7 +287,7 @@ export class NguTabs extends SectionBase {
       [hidden]="!open()"
       nguSection
       [nguSectionOpen]="open()"
-      (nguSectionReveal)="toggle.emit()"
+      (nguSectionReveal)="toggled.emit()"
     >
       ${CONTENT}
     </div>
@@ -371,5 +371,5 @@ export class NguPanel extends SectionBase {
   readonly open = input(false);
   readonly idPrefix = input.required<string>();
   /** The header was pressed, or a summary link asked to reveal the closed panel. */
-  readonly toggle = output<void>();
+  readonly toggled = output<void>();
 }

@@ -1,0 +1,103 @@
+{
+ "entry": "ngu-form/debug",
+ "symbols": [
+  {
+   "name": "debugRows",
+   "kind": "function",
+   "summary": "Walks a form along its definition and lists every field, group and list with its state.\n`<ngu-form-debug>` renders this; tests and tools can use it directly.",
+   "signature": "export declare function debugRows(form: FormDef<any, any>, message?: (error: ValidationError, def: LeafDef | undefined) => string): NguDebugRow[];"
+  },
+  {
+   "name": "NguDebugRow",
+   "kind": "interface",
+   "summary": "One field, group or list in the debug panel, with its state.",
+   "signature": "export interface NguDebugRow {\n    readonly path: string;\n    readonly kind: \"field\" | \"group\" | \"list\";\n    readonly dirty: boolean;\n    readonly touched: boolean;\n    readonly hidden: boolean;\n    readonly pending: boolean;\n    readonly errors: readonly string[];\n}",
+   "members": [
+    {
+     "name": "path",
+     "kind": "property",
+     "type": "string",
+     "description": "Model path, with numbers for list rows: `items.0.sku`."
+    },
+    {
+     "name": "kind",
+     "kind": "property",
+     "type": "'field' | 'group' | 'list'",
+     "description": "`'field'`, `'list'`, or `'group'` for a nested object, including an object row of a list."
+    },
+    {
+     "name": "dirty",
+     "kind": "property",
+     "type": "boolean",
+     "description": "True once the user changed it, or a field inside it."
+    },
+    {
+     "name": "touched",
+     "kind": "property",
+     "type": "boolean",
+     "description": "True once the user left it or a field inside it, or after a submit attempt."
+    },
+    {
+     "name": "hidden",
+     "kind": "property",
+     "type": "boolean",
+     "description": "True while a `hidden` rule hides it or its parent."
+    },
+    {
+     "name": "pending",
+     "kind": "property",
+     "type": "boolean",
+     "description": "True while an async check runs on it, or on a field inside it."
+    },
+    {
+     "name": "errors",
+     "kind": "property",
+     "type": "readonly string[]",
+     "description": "Its own errors, as `kind: message`."
+    }
+   ]
+  },
+  {
+   "name": "NguFormDebug",
+   "kind": "component",
+   "summary": "Shows a form's model, state, unsaved changes and every error by path, for development.\nImport it from `ngu-form/debug`, so production bundles never include it.\n\n```html\n<ngu-form [form]=\"signup\" />\n<ngu-form-debug [form]=\"signup\" />\n```",
+   "signature": "export declare class NguFormDebug {\n    readonly form: import(\"@angular/core\").InputSignal<FormDef<any, any>>;\n    readonly open: import(\"@angular/core\").InputSignal<boolean>;\n    readonly title: import(\"@angular/core\").InputSignal<string>;\n}",
+   "selector": "ngu-form-debug",
+   "inputs": {
+    "form": {
+     "alias": "form",
+     "required": true
+    },
+    "open": {
+     "alias": "open",
+     "required": false
+    },
+    "title": {
+     "alias": "title",
+     "required": false
+    }
+   },
+   "members": [
+    {
+     "name": "form",
+     "kind": "input",
+     "type": "FormDef<any, any>",
+     "description": "The form to show, as `defineForm` returns it: the one given to `<ngu-form>`.",
+     "required": true
+    },
+    {
+     "name": "open",
+     "kind": "input",
+     "type": "boolean",
+     "description": "Start expanded. Default `true`."
+    },
+    {
+     "name": "title",
+     "kind": "input",
+     "type": "string",
+     "description": "The summary line. Default \"ngu-form debug\"."
+    }
+   ]
+  }
+ ]
+}

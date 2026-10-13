@@ -10,8 +10,9 @@ export interface NguCaptchaEvents {
   error(): void;
 }
 
+/** Options ngu-form passes to `NguCaptchaAdapter.render`. */
 export interface NguCaptchaRenderOptions {
-  /** The form's language, such as `'en'` or `'hi'`, for providers that translate their widget. */
+  /** The form's locale, such as `'en-US'` or `'hi-IN'`, for providers that translate their widget. */
   readonly language: string;
 }
 
@@ -37,6 +38,10 @@ export interface NguCaptchaWidget {
  * ```
  */
 export interface NguCaptchaAdapter {
+  /**
+   * Renders the widget into `host` once the field is on the page, and returns it or a promise of
+   * it. Report results through `events`; a throw or rejection counts as `events.error()`.
+   */
   render(
     host: HTMLElement,
     events: NguCaptchaEvents,
@@ -44,6 +49,7 @@ export interface NguCaptchaAdapter {
   ): NguCaptchaWidget | Promise<NguCaptchaWidget>;
 }
 
+/** The app's captcha provider, set by `provideNguCaptcha`. */
 export const NGU_CAPTCHA = new InjectionToken<NguCaptchaAdapter>('NGU_CAPTCHA');
 
 /** Sets the captcha provider for `type: 'captcha'` fields that do not name their own. */

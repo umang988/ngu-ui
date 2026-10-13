@@ -6,6 +6,7 @@ export interface NguToken {
   readonly default: string;
   /** What it styles. */
   readonly use: string;
+  /** The kind of property, for grouping the list. */
   readonly group: 'color' | 'shape' | 'space' | 'text' | 'parts';
   /** True when `density` or `size` changes the default. */
   readonly scaled?: boolean;

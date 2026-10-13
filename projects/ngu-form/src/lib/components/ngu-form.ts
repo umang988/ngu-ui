@@ -122,7 +122,7 @@ function focusProblem(el: HTMLElement | null | undefined): void {
         <!-- Without its data the form could overwrite a record with blanks, so it is not shown. -->
         <p class="ngu-form-error" [class]="look().classes.error" role="alert">{{ i18n.message('loadFailed') }}</p>
       } @else if (steps()) {
-        @defer (on immediate) {
+        @defer (on immediate; hydrate on immediate) {
           <ngu-wizard [form]="d" (navigate)="goToStep($event)" (edit)="edit($event)" />
         }
       } @else {
@@ -330,6 +330,7 @@ function focusProblem(el: HTMLElement | null | undefined): void {
   `,
 })
 export class NguForm<TModel extends object, TPayload = TModel> {
+  /** The form to render, from `defineForm`. */
   readonly form = input.required<FormDef<TModel, TPayload>>();
   /** Renders a submit button with this label when set. */
   readonly submitLabel = input<string>();

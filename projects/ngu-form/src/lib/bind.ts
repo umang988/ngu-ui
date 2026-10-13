@@ -35,6 +35,7 @@ class NguBindControl extends NgControl {
   providers: [{ provide: NgControl, useFactory: () => new NguBindControl() }],
 })
 export class NguBind {
+  /** The field to bind, such as `context().field`. */
   readonly field = input.required<Field<any>>({ alias: 'nguBind' });
   /** Model value to control value. */
   readonly format = input<(value: any) => unknown>((v) => v, { alias: 'nguBindFormat' });

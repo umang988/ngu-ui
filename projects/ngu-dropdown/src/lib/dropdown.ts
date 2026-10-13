@@ -196,23 +196,39 @@ export class NguDropdown<T = any> implements ControlValueAccessor, DoCheck {
   /** Client mode's rows. Ignored while `fetchFn` is bound. */
   readonly options = input<readonly T[]>([]);
 
-  /** Dot path to each row's key, such as `employee.id`. A row without it is its own key. */
-  readonly optionValue = input(this.config.optionValue);
+  /**
+   * Dot path to each row's key, such as `employee.id`. A row without it is its own key.
+   * `undefined` means the default from `provideNguDropdownConfig` (`'value'` unless set).
+   */
+  readonly optionValue = input(this.config.optionValue, {
+    transform: (path: string | undefined) => path ?? this.config.optionValue,
+  });
 
   /**
    * Dot path to each row's label, such as `employee.name`, or a function that builds one from
    * several fields. The label is what search, type-ahead, chips and screen readers use; a
-   * `nguDropdownOption` template changes only how rows look.
+   * `nguDropdownOption` template changes only how rows look. `undefined` means the default from
+   * `provideNguDropdownConfig` (`'label'` unless set).
    */
-  readonly optionLabel = input<string | ((row: T) => string)>(this.config.optionLabel);
+  readonly optionLabel = input<string | ((row: T) => string), string | ((row: T) => string) | undefined>(
+    this.config.optionLabel,
+    { transform: (label) => label ?? this.config.optionLabel },
+  );
 
+  /** Returns `true` for rows that are shown but cannot be picked. By default every row can be. */
   readonly optionDisabled = input<(row: T) => boolean>(() => false);
 
-  /** Rows per request. More than a screenful, so a slow scroll is not always waiting. */
-  readonly pageSize = input(this.config.pageSize);
+  /**
+   * Rows per request. More than a screenful, so a slow scroll is not always waiting.
+   * `undefined` means the default from `provideNguDropdownConfig` (50 unless set).
+   */
+  readonly pageSize = input(this.config.pageSize, {
+    transform: (size: number | undefined) => size ?? this.config.pageSize,
+  });
 
   /** Passed through to `fetchFn`. */
   readonly sortBy = input<string | null>(null);
+  /** Sort direction, passed through to `fetchFn` as `order`. A change reloads the list. */
   readonly sortOrder = input<NguDropdownSortDirection | null>(null);
 
   /**
@@ -225,24 +241,49 @@ export class NguDropdown<T = any> implements ControlValueAccessor, DoCheck {
   /** The chosen key, or keys with `multiple`. Bind this or a form directive, not both. */
   readonly value = model<any>(null);
 
+  /**
+   * Lets people pick several rows. `value` is then an array of keys, the panel stays open
+   * while they pick, and the closed control shows chips. Default `false`.
+   */
   readonly multiple = input(false, { transform: booleanAttribute });
 
   /** Rows for a value set from outside, so the closed control shows names, not keys. */
   readonly selectedOption = input<T | readonly T[] | null>(null);
 
+  /**
+   * Disables the control. `[formField]` sets it from a `disabled` rule, and a reactive form's
+   * `control.disable()` disables it too. Default `false`.
+   */
   readonly disabled = input(false, { transform: booleanAttribute });
+  /**
+   * Shows the value but does not open the list or offer the clear button. `[formField]` sets
+   * it from a `readonly` rule. Default `false`.
+   */
   readonly readonly = input(false, { transform: booleanAttribute });
+  /**
+   * Sets `aria-required` on the trigger; it does not validate. `[formField]` sets it from a
+   * `required` rule. Default `false`.
+   */
   readonly required = input(false, { transform: booleanAttribute });
+  /** Shows a button that clears the selection while something is chosen. Default `true`. */
   readonly clearable = input(true, { transform: booleanAttribute });
 
-  /** Bound by Signal Forms. With other forms the host's `ng-invalid` state is read instead. */
+  /**
+   * Bound by Signal Forms. With reactive and template-driven forms, the control's
+   * `invalid && touched` state is read instead.
+   */
   readonly invalid = input(false);
+  /**
+   * Bound by Signal Forms. The invalid style shows once `invalid` and `touched` are both
+   * `true`. With other forms the control's touched state is read instead.
+   */
   readonly touched = input(false);
 
   /** Overrides when the invalid style shows, for forms with their own error timing. */
   readonly errorShown = input<boolean | undefined>(undefined);
 
   // ── Chrome ─────────────────────────────────────────────────────────────────
+  /** Shown in the closed control while nothing is chosen. Default: the `placeholder` message. */
   readonly placeholder = input<string | undefined>(undefined);
 
   /** The trigger's id, so `<label for>` names it. */
@@ -256,9 +297,15 @@ export class NguDropdown<T = any> implements ControlValueAccessor, DoCheck {
 
   /** `null` shows a search box in server mode and over long client lists. */
   readonly showSearch = input<boolean | null>(null);
+  /** The search box's placeholder and accessible name. Default: the `searchPlaceholder` message. */
   readonly searchPlaceholder = input<string | undefined>(undefined);
+  /**
+   * How long a search waits after the last keystroke, in ms. Default `300`, or as set with
+   * `provideNguDropdownConfig`.
+   */
   readonly searchDebounce = input(this.config.searchDebounce);
 
+  /** `sm` gives the closed control less padding and smaller text. Default `md`. */
   readonly size = input<'md' | 'sm'>('md');
 
   /** Panel width floor in px, for a field narrower than its options. `0` matches the field. */
@@ -272,14 +319,24 @@ export class NguDropdown<T = any> implements ControlValueAccessor, DoCheck {
 
   /** A number, not a CSS length: the virtual scroller does arithmetic with it. */
   readonly optionHeight = input(this.config.optionHeight);
+  /**
+   * Panel height ceiling in px. Default `320`, or as set with `provideNguDropdownConfig`. Below
+   * the field the panel keeps at least 160px, so smaller values act as 160 there.
+   */
   readonly panelMaxHeight = input(this.config.panelMaxHeight);
 
   /** Chips shown before the rest become "+N more". */
   readonly maxChips = input(2);
 
+  /** Heading of the notice shown when the list has no rows. Default: the `emptyTitle` message. */
   readonly emptyTitle = input<string | undefined>(undefined);
+  /** Text under `emptyTitle`. Default: the `emptyMessage` message. */
   readonly emptyMessage = input<string | undefined>(undefined);
 
+  /**
+   * Shows the panel's footer: the number of options, a loading note while a page loads, and
+   * with `multiple` how many are chosen. Default `true`.
+   */
   readonly showCount = input(true, { transform: booleanAttribute });
 
   // ── Outputs ────────────────────────────────────────────────────────────────
@@ -287,10 +344,16 @@ export class NguDropdown<T = any> implements ControlValueAccessor, DoCheck {
   readonly selectionChange = output<T | T[] | null>();
   /** The search term once the debounce has passed. */
   readonly searchChange = output<string>();
+  /** The query of each `fetchFn` request, as it is made. */
   readonly queryChange = output<NguDropdownQuery>();
-  /** A `fetchFn` or `lookupFn` call failed. The panel shows a retry notice either way. */
+  /**
+   * A `fetchFn` or `lookupFn` call failed. A failed `fetchFn` also shows a retry notice in the
+   * panel; a failed lookup only emits this event.
+   */
   readonly loadError = output<unknown>();
+  /** The panel opened. */
   readonly opened = output<void>();
+  /** The panel closed, whatever closed it. */
   readonly closed = output<void>();
 
   private readonly optionTemplate = contentChild<NguDropdownOption<T>>(NguDropdownOption);
@@ -569,6 +632,13 @@ export class NguDropdown<T = any> implements ControlValueAccessor, DoCheck {
   });
 
   constructor() {
+    // A dropdown that becomes disabled or read-only while open closes, so nothing can be picked.
+    effect(() => {
+      if (this.isDisabled() || this.readonly()) {
+        untracked(() => this.close());
+      }
+    });
+
     // Search, debounced. The term stays a plain signal that the client filter and the query
     // both read.
     effect((onCleanup) => {
@@ -699,20 +769,33 @@ export class NguDropdown<T = any> implements ControlValueAccessor, DoCheck {
 
   // ── ControlValueAccessor ───────────────────────────────────────────────────
   // `writeValue` only sets. The callbacks fire from `commit`, the one path a choice takes.
+  /**
+   * Called by Angular forms to write a value in. `null` becomes `[]` with `multiple`, and a
+   * configured `rowMemory` is asked for the rows behind the keys.
+   */
   writeValue(value: any): void {
     const next = value ?? (this.multiple() ? [] : null);
     this.recall(next);
     this.value.set(next);
   }
 
+  /** Called by Angular forms with the function that reports a value picked or cleared. */
   registerOnChange(fn: (value: any) => void): void {
     this.onChange = fn;
   }
 
+  /**
+   * Called by Angular forms with the function that marks the control touched, which runs on
+   * a pick or clear, when people close the list, and when they tab past the closed field.
+   */
   registerOnTouched(fn: () => void): void {
     this.onTouched = fn;
   }
 
+  /**
+   * Called by Angular forms to disable or enable the control. Disabling closes the panel.
+   * Either this or the `disabled` input disables it.
+   */
   setDisabledState(disabled: boolean): void {
     this.formDisabled.set(disabled);
     if (disabled) this.close();

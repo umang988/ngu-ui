@@ -1,0 +1,12 @@
+/* Builds against the packed library in dist/ngu-form, the way an app installs it from npm. */
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "outDir": "../../out-tsc/size-check",
+    "types": [],
+    "paths": {
+      "ngu-form": ["../../dist/ngu-form"]
+    }
+  },
+  "include": ["src/**/*.ts"]
+}

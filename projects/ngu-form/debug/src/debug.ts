@@ -6,10 +6,15 @@ import { injectNguI18n, isLeafDef, type AnyFieldDef, type FormDef, type FormDefi
 export interface NguDebugRow {
   /** Model path, with numbers for list rows: `items.0.sku`. */
   readonly path: string;
+  /** `'field'`, `'list'`, or `'group'` for a nested object, including an object row of a list. */
   readonly kind: 'field' | 'group' | 'list';
+  /** True once the user changed it, or a field inside it. */
   readonly dirty: boolean;
+  /** True once the user left it or a field inside it, or after a submit attempt. */
   readonly touched: boolean;
+  /** True while a `hidden` rule hides it or its parent. */
   readonly hidden: boolean;
+  /** True while an async check runs on it, or on a field inside it. */
   readonly pending: boolean;
   /** Its own errors, as `kind: message`. */
   readonly errors: readonly string[];
@@ -237,6 +242,7 @@ function show(value: unknown): string {
   `,
 })
 export class NguFormDebug {
+  /** The form to show, as `defineForm` returns it: the one given to `<ngu-form>`. */
   readonly form = input.required<FormDef<any, any>>();
   /** Start expanded. Default `true`. */
   readonly open = input(true);

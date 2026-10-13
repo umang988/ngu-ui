@@ -348,6 +348,7 @@ export class NguViewList {
   `,
 })
 export class NguView<TModel extends object = any> {
+  /** The form to show, from `defineForm`. */
   readonly form = input.required<FormDef<TModel, any>>();
   /** Show only these top-level entries, in this order. */
   readonly keys = input<readonly string[]>();

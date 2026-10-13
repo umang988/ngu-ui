@@ -13,6 +13,7 @@ import {
  */
 export type NguFieldValue = string | number | boolean | Date | readonly string[] | { readonly from?: string; readonly to?: string };
 
+/** Filters for `NguFieldHarness.with`, on top of the CDK base filters (`selector`, `ancestor`). */
 export interface NguFieldHarnessFilters extends BaseHarnessFilters {
   /** The label text, without the required asterisk. */
   readonly label?: string | RegExp;
@@ -31,6 +32,7 @@ function isoDate(value: string | Date): string {
 
 /** Harness for one `<ngu-field>`: read its label, state and messages, and enter values. */
 export class NguFieldHarness extends ComponentHarness {
+  /** Selector of the harness's host element: `ngu-field`. */
   static hostSelector = 'ngu-field';
 
   /** Matches fields by label, model path or type. */
@@ -78,6 +80,7 @@ export class NguFieldHarness extends ComponentHarness {
     return el ? (await el.text()).trim() : null;
   }
 
+  /** The hint on screen, or `null`. An error, warning or pending text shows in its place. */
   async getHint(): Promise<string | null> {
     const el = await this.hintEl();
     return el ? (await el.text()).trim() : null;
@@ -94,12 +97,15 @@ export class NguFieldHarness extends ComponentHarness {
     return (await this.host()).hasClass('ngu-field--invalid');
   }
 
+  /** True while the field is disabled. */
   async isDisabled(): Promise<boolean> {
     return (await this.host()).hasClass('ngu-field--disabled');
   }
 
+  /** True when the label shows the required asterisk (`.ngu-required`); a single checkbox has none. */
   async isRequired(): Promise<boolean> {
-    return (await this.locatorForOptional('.ngu-required')()) !== null;
+    // The host's state attribute, so single checkboxes and design-system renderers count too.
+    return (await (await this.host()).getAttribute('data-required')) !== null;
   }
 
   /** True while an async check runs. */
@@ -306,6 +312,7 @@ function asList(value: NguFieldValue): readonly string[] {
   return Array.isArray(value) ? value : [String(value)];
 }
 
+/** Filters for `NguListHarness.with`, on top of the CDK base filters (`selector`, `ancestor`). */
 export interface NguListHarnessFilters extends BaseHarnessFilters {
   /** The model path of the list, such as `items`. */
   readonly path?: string;
@@ -319,21 +326,26 @@ const ROWS =
 
 /** Harness for a list (`<ngu-array>`): count, add and remove rows. */
 export class NguListHarness extends ComponentHarness {
+  /** Selector of the harness's host element: `ngu-array`. */
   static hostSelector = 'ngu-array';
 
+  /** Matches lists by model path or title. */
   static with(options: NguListHarnessFilters = {}): HarnessPredicate<NguListHarness> {
     return new HarnessPredicate(NguListHarness, options)
       .addOption('path', options.path, async (h, path) => (await h.getPath()) === path)
       .addOption('title', options.title, (h, title) => HarnessPredicate.stringMatches(h.getTitle(), title));
   }
 
-  private readonly titleEl = this.locatorForOptional('.ngu-array__title');
-  private readonly addButton = this.locatorForOptional('.ngu-array__add');
+  // `:scope >`: lists inside the rows have titles and add buttons of their own.
+  private readonly titleEl = this.locatorForOptional(':scope > .ngu-array__title');
+  private readonly addButton = this.locatorForOptional(':scope > .ngu-array__add');
 
+  /** The model path, such as `items`, or `null`. */
   async getPath(): Promise<string | null> {
     return (await this.host()).getAttribute('data-ngu-path');
   }
 
+  /** The list's title, or `''` when it has none. */
   async getTitle(): Promise<string> {
     const el = await this.titleEl();
     return el ? (await el.text()).trim() : '';
@@ -355,8 +367,11 @@ export class NguListHarness extends ComponentHarness {
 
   /** Presses the remove button of the row at `index`. */
   async removeRow(index: number): Promise<void> {
+    const [card, tableRow] = ROWS.split(', ').map((row) => row.replace('[data-index]', `[data-index="${index}"]`));
+    // A card's own buttons, beside its fields or in its summary header, never those of a list
+    // inside it. Table rows hold plain fields only.
     const removes = await this.locatorForAll(
-      ROWS.split(', ').map((row) => `${row.replace('[data-index]', `[data-index="${index}"]`)} .ngu-array__remove`).join(', '),
+      `${card} > .ngu-array__actions .ngu-array__remove, ${card} > .ngu-array__head > .ngu-array__actions .ngu-array__remove, ${tableRow} .ngu-array__remove`,
     )();
     if (!removes.length) {
       throw new Error(`ngu-form/testing: no remove button on row ${index}.`);
@@ -383,6 +398,8 @@ export class NguListHarness extends ComponentHarness {
   }
 }
 
+/** Filters for `NguFormHarness.with`: the CDK base filters (`selector`, `ancestor`). */
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type -- CDK harness convention; filters can grow without a breaking change
 export interface NguFormHarnessFilters extends BaseHarnessFilters {}
 
 /**
@@ -396,8 +413,10 @@ export interface NguFormHarnessFilters extends BaseHarnessFilters {}
  * ```
  */
 export class NguFormHarness extends ComponentHarness {
+  /** Selector of the harness's host element: `ngu-form`. */
   static hostSelector = 'ngu-form';
 
+  /** Matches forms by the CDK base filters, `selector` and `ancestor`. */
   static with(options: NguFormHarnessFilters = {}): HarnessPredicate<NguFormHarness> {
     return new HarnessPredicate(NguFormHarness, options);
   }

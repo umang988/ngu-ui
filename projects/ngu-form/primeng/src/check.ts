@@ -2,7 +2,8 @@ import { ChangeDetectionStrategy, Component, computed, input } from '@angular/co
 import { NguBind, type NguFieldRenderContext } from 'ngu-form';
 import { Checkbox } from 'primeng/checkbox';
 import { ToggleSwitch } from 'primeng/toggleswitch';
-import { messageId, NguPrimeFrame } from './frame';
+import { NguPrimeFrame } from './frame';
+import { messageId } from './message-id';
 
 /**
  * Checkboxes, checkbox groups, switches and consent boxes with `p-checkbox` and
@@ -93,6 +94,7 @@ import { messageId, NguPrimeFrame } from './frame';
   `,
 })
 export class NguPrimeCheck {
+  /** The field's render context: texts, state and options, from ngu-form. */
   readonly context = input.required<NguFieldRenderContext>();
 
   protected readonly kind = computed(() => {

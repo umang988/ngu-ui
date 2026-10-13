@@ -32,6 +32,8 @@ export const appConfig: ApplicationConfig = {
         ],
         demo: {
           src: 'material/material.ts',
+          // Loads the docs site's own theme files.
+          stackblitz: false,
           load: () => import('../demos/material/material').then((m) => m.MaterialDemo),
         },
       },
@@ -154,6 +156,8 @@ export const appConfig: ApplicationConfig = {
         ],
         demo: {
           src: 'primeng/primeng.ts',
+          // Loads the docs site's own theme files.
+          stackblitz: false,
           load: () => import('../demos/primeng/primeng').then((m) => m.PrimeNgDemo),
         },
       },
@@ -254,6 +258,8 @@ export const appConfig: ApplicationConfig = {
         ],
         demo: {
           src: 'tailwind/preset.ts',
+          // Loads the docs site's own theme files.
+          stackblitz: false,
           load: () => import('../demos/tailwind/preset').then((m) => m.TailwindPresetDemo),
         },
       },
@@ -293,6 +299,8 @@ export const appConfig: ApplicationConfig = {
         ],
         demo: {
           src: 'tailwind/wizard.ts',
+          // Loads the docs site's own theme files.
+          stackblitz: false,
           load: () => import('../demos/tailwind/wizard').then((m) => m.TailwindWizardDemo),
         },
       },
@@ -305,6 +313,8 @@ export const appConfig: ApplicationConfig = {
         ],
         demo: {
           src: 'tailwind/levels.ts',
+          // Loads the docs site's own theme files.
+          stackblitz: false,
           load: () => import('../demos/tailwind/levels').then((m) => m.TailwindLevelsDemo),
         },
         after: [
@@ -357,6 +367,8 @@ export const appConfig: ApplicationConfig = {
         ],
         demo: {
           src: 'tailwind/tailwind.ts',
+          // Loads the docs site's own theme files.
+          stackblitz: false,
           load: () => import('../demos/tailwind/tailwind').then((m) => m.TailwindDemo),
         },
         after: [

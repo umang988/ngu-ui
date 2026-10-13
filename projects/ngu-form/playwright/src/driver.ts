@@ -3,26 +3,43 @@
  * scope) fits it, so this package needs no dependency on Playwright.
  */
 export interface NguPlaywrightLocator {
+  /** The elements matching `selector` inside this one, such as a field's input. */
   locator(selector: string): NguPlaywrightLocator;
+  /** The first matching element. */
   first(): NguPlaywrightLocator;
+  /** The matching element at `index`, from 0, such as one star of a rating. */
   nth(index: number): NguPlaywrightLocator;
+  /** How many elements match; the helpers use it to check whether an element exists. */
   count(): Promise<number>;
+  /** A locator for each matching element, such as each option of a checkbox group. */
   all(): Promise<NguPlaywrightLocator[]>;
+  /** Clicks the element; `force` skips Playwright's actionability checks. */
   click(options?: { force?: boolean }): Promise<void>;
+  /** Focuses an input or textarea and replaces its value, firing an `input` event. */
   fill(value: string): Promise<void>;
+  /** Presses a key on the element, such as `Enter` to add a tag. */
   press(key: string): Promise<void>;
+  /** Removes focus from the element, so the field counts as touched. */
   blur(): Promise<void>;
+  /** Checks or unchecks a checkbox or radio; `force` skips Playwright's actionability checks. */
   setChecked(checked: boolean, options?: { force?: boolean }): Promise<void>;
+  /** Selects the options of a `<select>` with these labels, and resolves with their values. */
   selectOption(values: { label: string }[]): Promise<string[]>;
+  /** The value of an attribute, such as `data-ngu-path`, or `null` when it is missing. */
   getAttribute(name: string): Promise<string | null>;
+  /** The element's text, such as a label or an error message. */
   textContent(): Promise<string | null>;
+  /** The current value of an input, textarea or select. */
   inputValue(): Promise<string>;
+  /** Whether a checkbox or radio button is checked. */
   isChecked(): Promise<boolean>;
+  /** Waits until the element reaches `state`, `'visible'` by default, for up to `timeout` ms. */
   waitFor(options?: { state?: 'attached' | 'detached' | 'visible' | 'hidden'; timeout?: number }): Promise<void>;
 }
 
 /** A Playwright `Page`, `Frame` or `Locator` to look for forms in. */
 export interface NguPlaywrightScope {
+  /** The elements matching `selector`, such as `ngu-form`. */
   locator(selector: string): NguPlaywrightLocator;
 }
 
@@ -44,17 +61,25 @@ const TEXT_CONTROL = 'input:not([type="checkbox"]):not([type="radio"]):not([type
 
 /** One `<ngu-field>`. */
 export class NguFieldDriver {
-  constructor(readonly root: NguPlaywrightLocator) {}
+  /** The field's `<ngu-field>` element. */
+  readonly root: NguPlaywrightLocator;
 
+  constructor(root: NguPlaywrightLocator) {
+    this.root = root;
+  }
+
+  /** The label, without the asterisk of required fields; `''` when there is none. */
   async label(): Promise<string> {
     const label = this.root.locator('.ngu-label, .ngu-check__text').first();
     return (await label.count()) ? ((await label.textContent()) ?? '').replace(/\s*\*$/, '').trim() : '';
   }
 
+  /** The model path from `data-ngu-path`, such as `account.email` or `items.0.sku`, or `null`. */
   path(): Promise<string | null> {
     return this.root.getAttribute('data-ngu-path');
   }
 
+  /** The `type` from the spec, read from `data-ngu-type`; `'text'` when the attribute is missing. */
   async type(): Promise<string> {
     return (await this.root.getAttribute('data-ngu-type')) ?? 'text';
   }
@@ -65,17 +90,20 @@ export class NguFieldDriver {
     return (await el.count()) ? ((await el.first().textContent()) ?? '').trim() : null;
   }
 
+  /** The hint on screen, or `null`. An error, warning or pending text shows in its place. */
   async hint(): Promise<string | null> {
     const el = this.root.locator('.ngu-hint:not([id$="-multi"])');
     return (await el.count()) ? ((await el.first().textContent()) ?? '').trim() : null;
   }
 
+  /** True while an error shows. */
   async isInvalid(): Promise<boolean> {
     return ((await this.root.getAttribute('class')) ?? '').split(/\s+/).includes('ngu-field--invalid');
   }
 
+  /** True when the field is required, from its `data-required` attribute (any renderer, any type). */
   async isRequired(): Promise<boolean> {
-    return (await this.root.locator('.ngu-required').count()) > 0;
+    return (await this.root.getAttribute('data-required')) !== null;
   }
 
   /** Enters a value the way a user would, then leaves the field. */
@@ -178,7 +206,12 @@ export class NguFieldDriver {
 
 /** A list (`<ngu-array>`). */
 export class NguListDriver {
-  constructor(readonly root: NguPlaywrightLocator) {}
+  /** The list's `<ngu-array>` element. */
+  readonly root: NguPlaywrightLocator;
+
+  constructor(root: NguPlaywrightLocator) {
+    this.root = root;
+  }
 
   private rows(): NguPlaywrightLocator {
     return this.root.locator(
@@ -186,22 +219,35 @@ export class NguListDriver {
     );
   }
 
+  /** Rows on screen (long lists render only the rows in view). */
   rowCount(): Promise<number> {
     return this.rows().count();
   }
 
+  /** Clicks the list's add button. */
   async addRow(): Promise<void> {
     await this.root.locator(':scope > .ngu-array__add').click();
   }
 
+  /** Clicks the remove button of the row on screen at `index`, from 0. */
   async removeRow(index: number): Promise<void> {
-    await this.rows().nth(index).locator('.ngu-array__remove').first().click();
+    // The row's own button, beside its fields or in its summary header, not a nested list's.
+    await this.rows()
+      .nth(index)
+      .locator(':scope > .ngu-array__actions .ngu-array__remove, :scope > .ngu-array__head > .ngu-array__actions .ngu-array__remove, :scope > td .ngu-array__remove')
+      .first()
+      .click();
   }
 }
 
 /** One `<ngu-form>`: fill by model path, submit, read errors. */
 export class NguFormDriver {
-  constructor(readonly root: NguPlaywrightLocator) {}
+  /** The form's `<ngu-form>` element. */
+  readonly root: NguPlaywrightLocator;
+
+  constructor(root: NguPlaywrightLocator) {
+    this.root = root;
+  }
 
   /** The field at a model path (`items.0.sku`), else the one with this label. */
   field(pathOrLabel: string): NguFieldDriver {
@@ -215,6 +261,7 @@ export class NguFormDriver {
     );
   }
 
+  /** The list at a model path, such as `items`. */
   list(path: string): NguListDriver {
     return new NguListDriver(this.root.locator(`ngu-array[data-ngu-path=${JSON.stringify(path)}]`).first());
   }
@@ -226,14 +273,17 @@ export class NguFormDriver {
     }
   }
 
+  /** Clicks the submit button. */
   async submit(): Promise<void> {
     await this.root.locator('.ngu-submit').click();
   }
 
+  /** Clicks Next in a wizard. */
   async next(): Promise<void> {
     await this.root.locator('.ngu-next').click();
   }
 
+  /** Clicks Back in a wizard. */
   async back(): Promise<void> {
     await this.root.locator('.ngu-back').click();
   }

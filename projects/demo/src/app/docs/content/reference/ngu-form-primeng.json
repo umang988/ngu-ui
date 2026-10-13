@@ -1,0 +1,219 @@
+{
+ "entry": "ngu-form/primeng",
+ "symbols": [
+  {
+   "name": "NguPrimeCheck",
+   "kind": "component",
+   "summary": "Checkboxes, checkbox groups, switches and consent boxes with `p-checkbox` and\n`p-toggleswitch`. A consent box stores the time it was ticked.",
+   "signature": "export declare class NguPrimeCheck {\n    readonly context: import(\"@angular/core\").InputSignal<NguFieldRenderContext>;\n}",
+   "selector": "ngu-prime-check",
+   "inputs": {
+    "context": {
+     "alias": "context",
+     "required": true
+    }
+   },
+   "members": [
+    {
+     "name": "context",
+     "kind": "input",
+     "type": "NguFieldRenderContext",
+     "description": "The field's render context: texts, state and options, from ngu-form.",
+     "required": true
+    }
+   ]
+  },
+  {
+   "name": "NguPrimeChoice",
+   "kind": "component",
+   "summary": "Radios with `p-radiobutton`, segmented controls with `p-selectbutton`.",
+   "signature": "export declare class NguPrimeChoice {\n    readonly context: import(\"@angular/core\").InputSignal<NguFieldRenderContext>;\n}",
+   "selector": "ngu-prime-choice",
+   "inputs": {
+    "context": {
+     "alias": "context",
+     "required": true
+    }
+   },
+   "members": [
+    {
+     "name": "context",
+     "kind": "input",
+     "type": "NguFieldRenderContext",
+     "description": "The field's render context: texts, state and options, from ngu-form.",
+     "required": true
+    }
+   ]
+  },
+  {
+   "name": "NguPrimeDate",
+   "kind": "component",
+   "summary": "Dates and `{ from, to }` ranges with `p-datepicker`. The model keeps ngu-form's shape: a\n`Date` at midnight UTC, or ISO strings when the model holds strings.",
+   "signature": "export declare class NguPrimeDate {\n    readonly context: import(\"@angular/core\").InputSignal<NguFieldRenderContext>;\n}",
+   "selector": "ngu-prime-date",
+   "inputs": {
+    "context": {
+     "alias": "context",
+     "required": true
+    }
+   },
+   "members": [
+    {
+     "name": "context",
+     "kind": "input",
+     "type": "NguFieldRenderContext",
+     "description": "The field's render context: texts, state and options, from ngu-form.",
+     "required": true
+    }
+   ]
+  },
+  {
+   "name": "NguPrimeFrame",
+   "kind": "component",
+   "summary": "The label above a PrimeNG control and the message under it: the error as a `p-message`,\nelse the pending text, warning or hint.",
+   "signature": "export declare class NguPrimeFrame {\n    readonly context: import(\"@angular/core\").InputSignal<NguFieldRenderContext>;\n    readonly group: import(\"@angular/core\").InputSignal<boolean>;\n}",
+   "selector": "ngu-prime-frame",
+   "inputs": {
+    "context": {
+     "alias": "context",
+     "required": true
+    },
+    "group": {
+     "alias": "group",
+     "required": false
+    }
+   },
+   "members": [
+    {
+     "name": "context",
+     "kind": "input",
+     "type": "NguFieldRenderContext",
+     "description": "The field's render context, passed on by the PrimeNG renderer that uses the frame.",
+     "required": true
+    },
+    {
+     "name": "group",
+     "kind": "input",
+     "type": "boolean",
+     "description": "The control is a group (radios, checkboxes, segments): its label is not a `<label>`."
+    }
+   ]
+  },
+  {
+   "name": "NguPrimeInput",
+   "kind": "component",
+   "summary": "Text, email, URL, search, phone-number text, time, password and textarea fields with\nPrimeNG's `pInputText`, `p-password`, `pTextarea` and `p-inputmask`, with prefix and suffix\ntext as input group add-ons.",
+   "signature": "export declare class NguPrimeInput {\n    readonly context: import(\"@angular/core\").InputSignal<NguFieldRenderContext>;\n}",
+   "selector": "ngu-prime-input",
+   "inputs": {
+    "context": {
+     "alias": "context",
+     "required": true
+    }
+   },
+   "members": [
+    {
+     "name": "context",
+     "kind": "input",
+     "type": "NguFieldRenderContext",
+     "description": "The field's render context: texts, state and options, from ngu-form.",
+     "required": true
+    }
+   ]
+  },
+  {
+   "name": "NguPrimeNumber",
+   "kind": "component",
+   "summary": "Numbers and amounts with `p-inputnumber`, formatted for the form's locale.",
+   "signature": "export declare class NguPrimeNumber {\n    readonly context: import(\"@angular/core\").InputSignal<NguFieldRenderContext>;\n}",
+   "selector": "ngu-prime-number",
+   "inputs": {
+    "context": {
+     "alias": "context",
+     "required": true
+    }
+   },
+   "members": [
+    {
+     "name": "context",
+     "kind": "input",
+     "type": "NguFieldRenderContext",
+     "description": "The field's render context: texts, state and options, from ngu-form.",
+     "required": true
+    }
+   ]
+  },
+  {
+   "name": "NguPrimeRating",
+   "kind": "component",
+   "summary": "Ratings with `p-rating`; `max` is the number of stars.",
+   "signature": "export declare class NguPrimeRating {\n    readonly context: import(\"@angular/core\").InputSignal<NguFieldRenderContext>;\n}",
+   "selector": "ngu-prime-rating",
+   "inputs": {
+    "context": {
+     "alias": "context",
+     "required": true
+    }
+   },
+   "members": [
+    {
+     "name": "context",
+     "kind": "input",
+     "type": "NguFieldRenderContext",
+     "description": "The field's render context: texts, state and options, from ngu-form.",
+     "required": true
+    }
+   ]
+  },
+  {
+   "name": "NguPrimeSelect",
+   "kind": "component",
+   "summary": "Selects with `p-select`, and lists with `p-multiselect`. Option values keep their type.",
+   "signature": "export declare class NguPrimeSelect {\n    readonly context: import(\"@angular/core\").InputSignal<NguFieldRenderContext>;\n}",
+   "selector": "ngu-prime-select",
+   "inputs": {
+    "context": {
+     "alias": "context",
+     "required": true
+    }
+   },
+   "members": [
+    {
+     "name": "context",
+     "kind": "input",
+     "type": "NguFieldRenderContext",
+     "description": "The field's render context: texts, state and options, from ngu-form.",
+     "required": true
+    }
+   ]
+  },
+  {
+   "name": "NguPrimeSlider",
+   "kind": "component",
+   "summary": "Sliders with `p-slider`, the value shown next to the label.",
+   "signature": "export declare class NguPrimeSlider {\n    readonly context: import(\"@angular/core\").InputSignal<NguFieldRenderContext>;\n}",
+   "selector": "ngu-prime-slider",
+   "inputs": {
+    "context": {
+     "alias": "context",
+     "required": true
+    }
+   },
+   "members": [
+    {
+     "name": "context",
+     "kind": "input",
+     "type": "NguFieldRenderContext",
+     "description": "The field's render context: texts, state and options, from ngu-form.",
+     "required": true
+    }
+   ]
+  },
+  {
+   "name": "provideNguPrimeNG",
+   "kind": "function",
+   "summary": "Renders fields with PrimeNG. Text fields become `pInputText` (with input group add-ons,\n`p-inputmask` for masks), passwords `p-password`, textareas `pTextarea`, numbers and amounts\n`p-inputnumber`, selects `p-select` and `p-multiselect`, checkboxes and switches `p-checkbox`\nand `p-toggleswitch`, radios `p-radiobutton`, segments `p-selectbutton`, sliders `p-slider`,\ndates and ranges `p-datepicker` and ratings `p-rating`. Tags, one-time codes, phone, color and\ncaptcha keep ngu-form's own controls: `p-inputtags` and `p-inputotp` render an unnamed empty\nlistbox and unlabeled inputs. Set the PrimeNG theme with `providePrimeNG` as usual.\n\n```ts\nproviders: [providePrimeNG({ theme: { preset: Aura } }), provideNguPrimeNG()]\n```",
+   "signature": "export declare function provideNguPrimeNG(): Provider;"
+  }
+ ]
+}

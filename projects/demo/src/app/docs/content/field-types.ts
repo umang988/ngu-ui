@@ -125,7 +125,7 @@ export const PAGES: Record<string, DocPage> = {
         id: 'basic',
         title: 'Basic',
         text: [
-          '`min`, `max` and `step` are rules and native attributes. Values that cannot go negative get a numeric keypad on phones.',
+          '`min` and `max` are rules and native attributes; `step` is the native attribute only, for the arrow keys and spinner. Values that cannot go negative get a numeric keypad on phones.',
         ],
         demo: {
           src: 'number/basic.ts',
@@ -976,7 +976,7 @@ providers: [provideNguDropdown()]`,
         { name: 'optionValue', type: 'string', default: "'value'", description: 'Path of the value in a row.' },
         { name: 'optionLabel', type: 'string | (row) => string', default: "'label'", description: 'Path of the label, or a function.' },
         { name: 'filters', type: 'Record | Signal<Record>', description: 'Sent with every query; a signal re-queries on change.' },
-        { name: 'search', type: 'boolean', description: 'Show the search box. Default: with `fetch`, or more than 10 options.' },
+        { name: 'search', type: 'boolean', description: 'Show the search box. Default: with `fetch`, or more than 8 options.' },
         { name: 'pageSize', type: 'number', default: '50', description: 'Rows per request.' },
         { name: 'clearable', type: 'boolean', default: 'true', description: 'A clear button.' },
         { name: 'maxChips', type: 'number', default: '2', description: 'Chips before "+3 more" in multiple mode.' },

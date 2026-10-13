@@ -69,13 +69,13 @@ interface Entry {
       <p class="ngu-group__description" [class]="look().classes.description">{{ i18n.text(description()) }}</p>
     }
     @if (layout() === 'tabs') {
-      @defer (on immediate) {
+      @defer (on immediate; hydrate on immediate) {
         <ngu-tabs
           [tabs]="tabs()"
           [active]="activeTab()"
           [labelledBy]="title() ? titleId : null"
           [idPrefix]="titleId"
-          (select)="selectTab($event)"
+          (tabSelect)="selectTab($event)"
         />
       }
     } @else {
@@ -83,13 +83,13 @@ interface Entry {
         @for (entry of entries(); track entry.key) {
           @if (!isHidden(entry)) {
             @if (entry.panel) {
-              @defer (on immediate) {
+              @defer (on immediate; hydrate on immediate) {
                 <ngu-panel
                   [style.grid-column]="entry.column"
                   [section]="entry"
                   [open]="openPanels().has(entry.key)"
                   [idPrefix]="titleId"
-                  (toggle)="togglePanel(entry.key)"
+                  (toggled)="togglePanel(entry.key)"
                 />
               }
             } @else {
@@ -126,19 +126,19 @@ interface Entry {
                     @default {
                       @switch (s.level) {
                         @case (2) {
-                          <h2 class="ngu-static ngu-static__heading" [class]="staticClass(\'title\', s.class)" [style.grid-column]="entry.column">{{ i18n.text(s.text) }}</h2>
+                          <h2 class="ngu-static ngu-static__heading" [class]="staticClass('title', s.class)" [style.grid-column]="entry.column">{{ i18n.text(s.text) }}</h2>
                         }
                         @case (4) {
-                          <h4 class="ngu-static ngu-static__heading" [class]="staticClass(\'title\', s.class)" [style.grid-column]="entry.column">{{ i18n.text(s.text) }}</h4>
+                          <h4 class="ngu-static ngu-static__heading" [class]="staticClass('title', s.class)" [style.grid-column]="entry.column">{{ i18n.text(s.text) }}</h4>
                         }
                         @case (5) {
-                          <h5 class="ngu-static ngu-static__heading" [class]="staticClass(\'title\', s.class)" [style.grid-column]="entry.column">{{ i18n.text(s.text) }}</h5>
+                          <h5 class="ngu-static ngu-static__heading" [class]="staticClass('title', s.class)" [style.grid-column]="entry.column">{{ i18n.text(s.text) }}</h5>
                         }
                         @case (6) {
-                          <h6 class="ngu-static ngu-static__heading" [class]="staticClass(\'title\', s.class)" [style.grid-column]="entry.column">{{ i18n.text(s.text) }}</h6>
+                          <h6 class="ngu-static ngu-static__heading" [class]="staticClass('title', s.class)" [style.grid-column]="entry.column">{{ i18n.text(s.text) }}</h6>
                         }
                         @default {
-                          <h3 class="ngu-static ngu-static__heading" [class]="staticClass(\'title\', s.class)" [style.grid-column]="entry.column">{{ i18n.text(s.text) }}</h3>
+                          <h3 class="ngu-static ngu-static__heading" [class]="staticClass('title', s.class)" [style.grid-column]="entry.column">{{ i18n.text(s.text) }}</h3>
                         }
                       }
                     }
@@ -206,10 +206,15 @@ interface Entry {
   `,
 })
 export class NguGroup {
+  /** The definitions of the group's fields. Set by ngu-form; apps rarely need it. */
   readonly fields = input.required<FormDefinition>();
+  /** The group's field node. Set by ngu-form; apps rarely need it. */
   readonly tree = input.required<Field<any>>();
+  /** Grid columns: a number, or a count per breakpoint. Default `1`. */
   readonly cols = input<Cols>(1);
+  /** The group's title, shown above its fields; it also names the group for screen readers. */
   readonly title = input<string>();
+  /** Text shown under the title. */
   readonly description = input<string>();
   /** `'tabs'` shows each child group or list as a tab. */
   readonly layout = input<'grid' | 'tabs'>('grid');

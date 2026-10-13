@@ -19,6 +19,7 @@ export interface NguMaterialOptions {
   readonly dateAdapter?: boolean;
 }
 
+/** The options given to `provideNguMaterial`, read by the Material renderers. Default `{}`. */
 export const NGU_MATERIAL_OPTIONS = new InjectionToken<NguMaterialOptions>('NGU_MATERIAL_OPTIONS', {
   factory: () => ({}),
 });

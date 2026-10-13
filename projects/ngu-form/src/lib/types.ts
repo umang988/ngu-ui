@@ -9,6 +9,7 @@ import type { NguClassMap } from './look';
  */
 export type LogicFn<TModel, R, TScope = TModel> = (model: TModel, scope: TScope) => R;
 
+/** The built-in input types a field's `type` can name. */
 export type FieldType =
   | 'text'
   | 'email'
@@ -74,9 +75,13 @@ export type CustomTypeFor<V> = {
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 type OptionsOf<K> = K extends keyof NguFieldOptionsMap ? NguFieldOptionsMap[K] : {};
 
+/** One option of a select, radio, segmented or checkbox group field. */
 export interface Choice<V> {
+  /** The value written to the model when this option is picked. Number values stay numbers. */
   readonly value: V;
+  /** The text shown for the option. */
   readonly label: string;
+  /** Shows the option but prevents picking it. */
   readonly disabled?: boolean;
 }
 
@@ -102,7 +107,9 @@ export type Cols = number | ({ readonly base?: number } & { readonly [B in Break
 export interface ChangeContext<V, TModel, TScope = TModel> {
   /** The value before this change. */
   readonly previous: V;
+  /** The whole model, after this change. */
   readonly model: TModel;
+  /** The current array item after this change, or the model outside arrays. */
   readonly scope: TScope;
   /** Deep-merges into the model. Arrays are replaced. */
   patch(partial: DeepPartial<TModel>): void;
@@ -116,15 +123,29 @@ export type InputMode = 'none' | 'text' | 'decimal' | 'numeric' | 'tel' | 'searc
 /** Label of the Enter key on mobile keyboards, the HTML `enterkeyhint` attribute. */
 export type EnterKeyHint = 'enter' | 'done' | 'go' | 'next' | 'previous' | 'search' | 'send';
 
+/** Length and pattern rules for text fields. */
 export interface TextRules {
+  /** Fewest characters. An empty value passes unless the field is `required`. */
   minLength?: number;
+  /** Most characters. Text and textarea fields show a counter. */
   maxLength?: number;
+  /**
+   * A regular expression the value must match. It is not anchored, so add `^` and `$` to match
+   * the whole value. An empty value passes unless the field is `required`.
+   */
   pattern?: RegExp;
 }
 
+/** Bounds and step for number fields. */
 export interface NumberRules {
+  /** Smallest value allowed, also set as the input's `min` attribute. */
   min?: number;
+  /** Largest value allowed, also set as the input's `max` attribute. */
   max?: number;
+  /**
+   * The input's `step` attribute: how far the arrow keys and the slider move. It is not
+   * checked as a rule.
+   */
   step?: number;
 }
 
@@ -159,6 +180,7 @@ export type ErrorDisplay = 'dirty' | 'touched' | 'submit';
  * ArkType and others. Only the parts ngu-form uses are listed.
  */
 export interface StandardSchemaV1<Input = unknown, Output = Input> {
+  /** The schema's Standard Schema interface: its version, vendor, `validate` function and types. */
   readonly '~standard': {
     readonly version: 1;
     readonly vendor: string;
@@ -167,6 +189,7 @@ export interface StandardSchemaV1<Input = unknown, Output = Input> {
   };
 }
 
+/** What a Standard Schema's `validate` returns: the value, or a list of issues with their paths. */
 export type StandardSchemaResult<Output> =
   | { readonly value: Output; readonly issues?: undefined }
   | {
@@ -176,6 +199,7 @@ export type StandardSchemaResult<Output> =
       }[];
     };
 
+/** Validation options of a field. Groups and lists take only `validate`. */
 export interface ValidationSpec<V, TModel, TScope = TModel> {
   /** One or more custom rules. The returned string becomes the message. */
   validate?: Validator<V, TModel, TScope> | readonly Validator<V, TModel, TScope>[];
@@ -193,8 +217,17 @@ export interface ValidationSpec<V, TModel, TScope = TModel> {
 
 /** Options every input accepts. */
 export interface BaseFieldSpec<V, TModel, TScope = TModel> extends ValidationSpec<V, TModel, TScope> {
+  /**
+   * The text that names the field, also used in its error messages. Looked up through
+   * `translate` when one is set.
+   */
   label?: string;
+  /** Shown in the input while it is empty; on a select, as a first option that cannot be picked. */
   placeholder?: string;
+  /**
+   * Help text under the control. An error, a running async check or a warning takes its place
+   * while shown.
+   */
   hint?: string;
   /** HTML `autocomplete` token, for example `email`, `current-password` or `off`. */
   autocomplete?: string;
@@ -205,8 +238,20 @@ export interface BaseFieldSpec<V, TModel, TScope = TModel> extends ValidationSpe
    * required while it returns `true` or a message.
    */
   required?: boolean | string | LogicFn<TModel, boolean | string, TScope>;
+  /**
+   * Hides the field while it returns `true`. Hidden fields are not validated, and `omitHidden`
+   * leaves their values out of the payload.
+   */
   hidden?: LogicFn<TModel, boolean, TScope>;
+  /**
+   * Disables the control, always or while the function returns `true`. Disabled fields are not
+   * validated.
+   */
   disabled?: boolean | LogicFn<TModel, boolean, TScope>;
+  /**
+   * Makes the control read-only, always or while the function returns `true`. Read-only fields
+   * are not validated.
+   */
   readonly?: boolean | LogicFn<TModel, boolean, TScope>;
   /** Derives the value from the model. The field becomes read-only and updates live. */
   compute?: LogicFn<TModel, V, TScope>;
@@ -215,16 +260,21 @@ export interface BaseFieldSpec<V, TModel, TScope = TModel> extends ValidationSpe
    * Writes made here, by `patch` or anywhere else in code, never trigger `onChange` again.
    */
   onChange?: (value: V, ctx: ChangeContext<V, TModel, TScope>) => void;
-  /** Text shown before or after the control, such as a currency sign or a unit. */
+  /** Text shown before the control, inside its border, such as a currency sign. */
   prefix?: string;
+  /** Text shown after the control, inside its border, such as a unit or a domain. */
   suffix?: string;
   /**
-   * Name of an icon registered with `provideNguIcons`, shown before or after the control,
-   * inside its border. Icons are decorative; the label still names the field.
+   * Name of an icon registered with `provideNguIcons`, shown before the control, inside its
+   * border. Icons are decorative; the label still names the field.
    */
   prefixIcon?: string;
+  /** Name of an icon registered with `provideNguIcons`, shown after the control, inside its border. */
   suffixIcon?: string;
-  /** Mobile keyboard. Inferred for `email` and for number fields that cannot go negative. */
+  /**
+   * Mobile keyboard. Inferred when unset: `email` for email fields, `numeric` or `decimal` for
+   * number and currency fields that cannot go negative, and `numeric` for digit-only masks.
+   */
   inputmode?: InputMode;
   /** Label of the Enter key on mobile keyboards. */
   enterkeyhint?: EnterKeyHint;
@@ -235,7 +285,10 @@ export interface BaseFieldSpec<V, TModel, TScope = TModel> extends ValidationSpe
    * warning style once the field would show errors, and never prevents a submit.
    */
   warn?: Validator<V, TModel, TScope> | readonly Validator<V, TModel, TScope>[];
-  /** Keep this field out of saved drafts. Password fields are never saved. */
+  /**
+   * `false` keeps this field out of saved drafts. Passwords, one-time codes and captcha
+   * tokens are never saved, whatever this says.
+   */
   persist?: boolean;
   /**
    * Position inside its group, like CSS `order`: entries sort by it, lowest first, and
@@ -286,7 +339,9 @@ export interface LocalizedNumberOptions {
 
 /** One line of the password checklist. */
 export interface StrengthRule {
+  /** The text of the checklist line, such as "At least 12 characters". */
   readonly label: string;
+  /** True when the password meets this rule. */
   readonly test: (value: string) => boolean;
 }
 
@@ -299,13 +354,19 @@ export interface StrengthOptions {
   min?: number;
   /** The checklist. Defaults: length (`minLength` or 8), upper and lower case, a number, a symbol. */
   rules?: readonly StrengthRule[];
-  /** Score from 0 to 4, for example from zxcvbn. Defaults to the share of rules met. */
+  /**
+   * Score from 0 to 4, for example from zxcvbn. Without it, custom `rules` score the share
+   * of rules met; the built-in checklist adds a point at 1.5 and at 2 times the minimum
+   * length, and scores at most 1 while the password is too short.
+   */
   score?: (value: string) => number;
 }
 
 /** Bounds for date fields: a `Date`, or an ISO date string such as `'2026-01-31'`. */
 export interface DateRules {
+  /** Earliest date allowed. On a date range it bounds the start. */
   min?: Date | string;
+  /** Latest date allowed. On a date range it bounds the end. */
   max?: Date | string;
 }
 
@@ -326,7 +387,9 @@ export interface TextInputOptions {
  * format: `'09:00'`, `'2026-01-31T09:00'`, `'2026-01'` or `'2026-W05'`.
  */
 export interface TimeRules {
+  /** Earliest value allowed, also set as the input's `min` attribute. */
   min?: string;
+  /** Latest value allowed, also set as the input's `max` attribute. */
   max?: string;
   /** In seconds for `time` and `datetime-local` (`900` is 15 minutes), else in months or weeks. */
   step?: number;
@@ -334,7 +397,9 @@ export interface TimeRules {
 
 /** Limits on the number of entries in a list value: chosen options, tags or files. */
 export interface ListRules {
+  /** Fewest entries. An empty list passes unless the field is `required`. */
   min?: number;
+  /** Most entries. */
   max?: number;
 }
 
@@ -385,8 +450,9 @@ export interface TagsOptions {
 
 /** Options for date range fields. */
 export interface DateRangeOptions {
-  /** Labels of the two inputs. Default "From" and "To", from the message catalog. */
+  /** Label of the start date input. Default "From", from the message catalog. */
   fromLabel?: string;
+  /** Label of the end date input. Default "To", from the message catalog. */
   toLabel?: string;
 }
 
@@ -432,6 +498,7 @@ export type DateFieldSpec<V extends Date | null, TModel, TScope = TModel> = Base
 
 /** Spec for a `boolean` property: a checkbox, or a switch. */
 export interface BooleanFieldSpec<TModel, TScope = TModel> extends BaseFieldSpec<boolean, TModel, TScope> {
+  /** `'checkbox'` (default) or `'switch'`. */
   type?: 'checkbox' | 'switch';
 }
 
@@ -489,12 +556,18 @@ export type FieldSpec<V, TModel, TScope = TModel> =
 
 /** A nested object with layout options. Without options, write the fields directly. */
 export interface GroupSpec<T, TModel, TScope = TModel> extends Pick<ValidationSpec<T, TModel, TScope>, 'validate'> {
+  /**
+   * Heading shown above the fields. It names the group for screen readers, and heads the
+   * group's tab, panel or wizard step.
+   */
   title?: string;
+  /** Text shown under the title, above the fields. */
   description?: string;
   /** Grid columns for this group, fixed or per breakpoint. Defaults to 1. */
   cols?: Cols;
   /** Columns this group spans inside its parent group. */
   span?: number;
+  /** Hides the group and everything in it while it returns `true`. Hidden fields are not validated. */
   hidden?: LogicFn<TModel, boolean, TScope>;
   /** Position inside the parent group; see `order` on fields. */
   order?: number;
@@ -509,6 +582,7 @@ export interface GroupSpec<T, TModel, TScope = TModel> extends Pick<ValidationSp
   class?: string;
   /** Classes added to the class map's slots for everything inside this group. */
   classes?: NguClassMap;
+  /** The group's fields: a spec for the nested object, written like the top level. */
   fields: FormSpec<T, TModel, TScope>;
 }
 
@@ -521,20 +595,25 @@ export type SectionLayout = 'tabs' | 'accordion';
  */
 export interface ArraySpec<TItem, TModel, TScope = TModel>
   extends Pick<ValidationSpec<readonly TItem[], TModel, TScope>, 'validate'> {
+  /** Heading shown above the rows. It names the list for screen readers and in its error messages. */
   title?: string;
+  /** Text shown under the title, above the rows. */
   description?: string;
   /** Columns this list spans inside its parent group. */
   span?: number;
+  /** Hides the list and its rows while it returns `true`. Hidden fields are not validated. */
   hidden?: LogicFn<TModel, boolean, TScope>;
   /** One element: a field map for objects, or a field spec for primitives. */
   item: [TItem] extends [object] ? FormSpec<TItem, TModel, TItem> : FieldSpec<TItem, TModel, TItem>;
   /** Value (cloned) or factory used when a row is added. */
   newItem: TItem | (() => TItem);
-  /** Minimum and maximum number of rows. */
+  /** Fewest rows: fewer is an error, and the remove buttons are disabled at this many. */
   min?: number;
+  /** Most rows. The add and duplicate buttons are disabled once the list has this many. */
   max?: number;
-  /** Button labels. Defaults: "Add" and "Remove". Set `addLabel: ''` to hide the add button. */
+  /** Label of the add button. Default "Add"; `''` hides the button. */
   addLabel?: string;
+  /** Label of each row's remove button. Default "Remove"; `''` hides the button. */
   removeLabel?: string;
   /** Grid columns inside each row, for object items. Defaults to 1. */
   cols?: Cols;
@@ -574,32 +653,51 @@ export interface ArraySpec<TItem, TModel, TScope = TModel>
 export interface DynamicField<V = any, TModel = any> {
   /** Property name inside the dynamic object. */
   key: string;
+  /** The text that names the field, also used in its error messages. */
   label?: string;
   /** Defaults to the type of `default`, else `text`. */
   type?: FieldType | (string & {});
+  /** Shown in the input while it is empty. */
   placeholder?: string;
+  /** Help text under the control. */
   hint?: string;
+  /** HTML `autocomplete` token. */
   autocomplete?: string;
+  /** Number of grid columns this field spans. */
   span?: number;
+  /** `true` for the default message, or a string for a custom one. */
   required?: boolean | string;
+  /** Text shown before the control, inside its border. */
   prefix?: string;
+  /** Text shown after the control, inside its border. */
   suffix?: string;
-  /** Icons registered with `provideNguIcons`, by name. */
+  /** Name of an icon registered with `provideNguIcons`, shown before the control. */
   prefixIcon?: string;
+  /** Name of an icon registered with `provideNguIcons`, shown after the control. */
   suffixIcon?: string;
+  /** Mobile keyboard, the HTML `inputmode` attribute. */
   inputmode?: InputMode;
+  /** Label of the Enter key on mobile keyboards. */
   enterkeyhint?: EnterKeyHint;
+  /** Show a character counter. Defaults to `true` on text and textarea fields with `maxLength`. */
   counter?: boolean;
+  /** Show a button that reveals the password. Defaults to `true` on password fields. */
   reveal?: boolean;
+  /** Textarea height in rows. */
   rows?: number;
+  /** Textarea grows with its content up to this many rows. */
   maxRows?: number;
+  /** Fewest characters. An empty value passes unless the field is `required`. */
   minLength?: number;
+  /** Most characters. Text and textarea fields show a counter. */
   maxLength?: number;
   /** A RegExp, or a string that must match the whole value. */
   pattern?: RegExp | string;
   /** A number, or an ISO date string on date fields. */
   min?: number | string;
+  /** Upper bound, written like `min`. On a rating it is the number of stars. */
   max?: number | string;
+  /** The input's `step` attribute, as on static fields. */
   step?: number;
   /** Input mask, as on static fields: `'(000) 000-0000'`. */
   mask?: string;
@@ -610,11 +708,13 @@ export interface DynamicField<V = any, TModel = any> {
   multiple?: boolean;
   /** `currency` fields: ISO 4217 code. */
   currency?: string;
-  /** `otp` fields: number of characters, and which characters. */
+  /** `otp` fields: number of characters. Default 6. */
   length?: number;
+  /** `otp` fields: `'digits'` (default) or `'alphanumeric'`. */
   characters?: 'digits' | 'alphanumeric';
-  /** `phone` fields: countries offered and the one picked first. */
+  /** `phone` fields: ISO 3166 codes of the countries offered, in this order. */
   countries?: readonly string[];
+  /** `phone` fields: ISO 3166 code of the country picked while the value is empty. */
   country?: string;
   /** `consent` fields: a link shown after the label. */
   policy?: { readonly href: string; readonly label: string };
@@ -622,6 +722,7 @@ export interface DynamicField<V = any, TModel = any> {
   separators?: readonly string[];
   /** `daterange` fields: labels of the two inputs. */
   fromLabel?: string;
+  /** `daterange` fields: label of the end date input. */
   toLabel?: string;
   /** When this field shows its errors. Overrides `errorsOn` on `<ngu-form>`. */
   errorsOn?: ErrorDisplay;
@@ -629,14 +730,26 @@ export interface DynamicField<V = any, TModel = any> {
   debounce?: number;
   /** Text shown while `validateAsync` runs. */
   pendingText?: string;
+  /** Choices for `select`, `radio`, `segmented` and checkbox groups, as a plain list. */
   options?: readonly Choice<V>[];
-  /** Value used when the field first appears. Defaults: `''`, `0` for number, `false` for checkbox. */
+  /**
+   * Value used when the field first appears. Defaults: `0` for number, currency and rating,
+   * `min` (or 0) for range, `false` for checkbox and switch, `null` for consent, `[]` for
+   * lists, `{ from: '', to: '' }` for date ranges, and `''` for the rest.
+   */
   default?: V;
   /** JSON-friendly condition on a sibling field. */
   showIf?: { key: string; equals?: unknown; notEquals?: unknown; in?: readonly unknown[] };
+  /**
+   * Hides the field while it returns `true`, as well as when `showIf` fails. Receives the model
+   * and the values of this field list. Hidden fields are not validated.
+   */
   hidden?: (model: TModel, values: Readonly<Record<string, V>>) => boolean;
+  /** Disables the control: `true`, or a function of the model and the values of this field list. */
   disabled?: boolean | ((model: TModel, values: Readonly<Record<string, V>>) => boolean);
+  /** Makes the control read-only: `true`, or a function of the model and the values of this field list. */
   readonly?: boolean | ((model: TModel, values: Readonly<Record<string, V>>) => boolean);
+  /** One or more custom rules. The third argument is the values of this field list. */
   validate?:
     | Validator<V, TModel, Readonly<Record<string, V>>>
     | readonly Validator<V, TModel, Readonly<Record<string, V>>>[];
@@ -650,11 +763,15 @@ export interface DynamicField<V = any, TModel = any> {
 
 /** Spec for a `Record<string, V>` property whose fields come from a signal or a list. */
 export interface DynamicSpec<V, TModel, TScope = TModel> {
+  /** Heading shown above the fields. */
   title?: string;
+  /** Text shown under the title, above the fields. */
   description?: string;
   /** Grid columns. Defaults to 1. */
   cols?: Cols;
+  /** Columns this field list spans inside its parent group. */
   span?: number;
+  /** Hides every field in the list while it returns `true`. Hidden fields are not validated. */
   hidden?: LogicFn<TModel, boolean, TScope>;
   /**
    * The field list, plain or as a signal (for example from an HTTP resource). An untyped
@@ -724,6 +841,7 @@ export type FormSpec<T, TModel = T, TScope = TModel> = {
   readonly [K in keyof T]-?: SpecFor<T[K], TModel, TScope>;
 } & { readonly [K in `$${string}`]: StaticSpec<TModel, TScope> };
 
+/** Options for `defineForm`. */
 export interface FormDefOptions<TModel = any, TPayload = TModel> {
   /** Grid columns at the root level, fixed or per breakpoint. Defaults to 1. */
   cols?: Cols;
@@ -782,8 +900,11 @@ export interface FormSteps {
   readonly current: Signal<string>;
   /** Position of the current step among `keys`, from 0. */
   readonly index: Signal<number>;
+  /** Number of steps in `keys`, the review step included. */
   readonly count: Signal<number>;
+  /** True on the first step. */
   readonly first: Signal<boolean>;
+  /** True on the last step, which is the review step when `review` is on. */
   readonly last: Signal<boolean>;
   /**
    * Shows the current step's errors and moves on when it is valid. Returns `false`, and
@@ -803,8 +924,11 @@ export interface FormSteps {
 
 /** Data the form waits for. An Angular `Resource` or `httpResource` fits. */
 export interface FormLoader<T> {
+  /** The loaded data; `undefined` until it arrives. Each value it delivers resets the form to it. */
   readonly value: Signal<T | undefined>;
+  /** True while the data is being fetched; the form shows placeholders meanwhile. */
   readonly isLoading: Signal<boolean>;
+  /** The error of a failed load. The form shows it as `loadError` and leaves the loading state. */
   readonly error?: Signal<unknown>;
   /**
    * A resource's status. `'idle'` means there is nothing to load, such as a create form whose
@@ -815,11 +939,18 @@ export interface FormLoader<T> {
 
 /** Where drafts are kept. Methods may return promises. */
 export interface DraftStorage {
+  /** Returns what `save` stored under `key`, or `undefined` when there is none. A failed load is ignored. */
   load(key: string): unknown | Promise<unknown>;
+  /** Stores `value` under `key`. The value is plain JSON data, with dates encoded. */
   save(key: string, value: unknown): void | Promise<void>;
+  /**
+   * Deletes the draft under `key`: after a successful submit, a reset or a discard, or once
+   * nothing is unsaved.
+   */
   remove(key: string): void | Promise<void>;
 }
 
+/** Options for `draft` on `defineForm`: where unsent changes are saved, and how often. */
 export interface DraftOptions {
   /** Storage key; include the record id when editing records, such as `'profile:42'`. */
   key: string;
@@ -841,10 +972,18 @@ export interface FormDraft {
 
 /** Undo history of a form, from `defineForm({ history: true })`. */
 export interface FormHistory {
+  /** True when there is a change to undo. */
   readonly canUndo: Signal<boolean>;
+  /** True when there is an undone change to redo. */
   readonly canRedo: Signal<boolean>;
+  /**
+   * Returns the model to its value before the last change. Typing in one field is one step
+   * until a pause or a change elsewhere.
+   */
   undo(): void;
+  /** Applies the last undone change again. A new change drops every redo step. */
   redo(): void;
+  /** Drops every undo and redo step. Runs on its own when `load` delivers a value. */
   clear(): void;
 }
 
@@ -852,6 +991,10 @@ export interface FormHistory {
 // Normalized definition: what the renderer consumes
 // ---------------------------------------------------------------------------
 
+/**
+ * A normalized field, as `<ngu-field>` renders it: the spec's options with `type` resolved
+ * and `options` stored as `choices`.
+ */
 export interface LeafDef
   extends BaseFieldSpec<any, any, any>,
     TextRules,
@@ -866,9 +1009,11 @@ export interface LeafDef
     CaptchaOptions,
     TagsOptions,
     DateRangeOptions {
+  /** Marks a field definition. Set by `defineForm` and `toLeafDef`; do not write it. */
   readonly __ngu: 'leaf';
   /** A built-in type, or a custom one registered with `provideNguFieldTypes`. */
   readonly type: FieldType | (string & {});
+  /** The spec's `options`: a list, a signal, or a function of the model. */
   readonly choices?: OptionsSpec<any, any, any>;
   /**
    * True when the value is a list edited as one field: checkboxes or a multiple select over
@@ -877,8 +1022,11 @@ export interface LeafDef
   readonly multiple?: boolean;
   /** A number, a date bound on date fields, or a bound in the input's format on time fields. */
   min?: number | Date | string;
+  /** Upper bound, in the same forms as `min`. On a rating it is the number of stars. */
   max?: number | Date | string;
+  /** The input's `step` attribute, from `NumberRules` or `TimeRules`. */
   step?: number;
+  /** Password fields: `true` or options for the strength meter and checklist. */
   strength?: boolean | StrengthOptions;
 }
 
@@ -903,71 +1051,128 @@ export function toLeafDef(spec: LeafDef | NguFieldSpec): LeafDef {
   return { ...rest, __ngu: 'leaf', type: type ?? 'text', choices: options ?? (spec as Partial<LeafDef>).choices };
 }
 
+/** A normalized group, from a `GroupSpec` or a plain nested field map. */
 export interface GroupDef {
+  /** Marks a group definition. Set by `defineForm`; do not write it. */
   readonly __ngu: 'group';
+  /** Custom rules for the whole group. Their message shows under the group. */
   readonly validate?: Validator<any, any, any> | readonly Validator<any, any, any>[];
+  /** Heading shown above the fields. */
   readonly title?: string;
+  /** Text shown under the title, above the fields. */
   readonly description?: string;
+  /** Grid columns; unset is 1. */
   readonly cols?: Cols;
+  /** Columns this group spans inside its parent group. */
   readonly span?: number;
+  /** Hides the group and everything in it while it returns `true`. */
   readonly hidden?: LogicFn<any, boolean, any>;
+  /** Position inside the parent group; see `order` on fields. */
   readonly order?: number;
+  /**
+   * `'tabs'` shows each child group or list as a tab. `layout: 'accordion'` in the spec sets
+   * `collapsed` on the children instead.
+   */
   readonly layout?: 'tabs';
+  /** Set for a collapsible panel: `true` starts closed, `false` starts open. */
   readonly collapsed?: boolean;
+  /** Classes added to the group's `<ngu-group>`. */
   readonly class?: string;
+  /** Classes added to the class map's slots for everything inside this group. */
   readonly classes?: NguClassMap;
+  /** The group's normalized fields. */
   readonly fields: FormDefinition;
 }
 
+/** A normalized list, from an `ArraySpec`. */
 export interface ArrayDef {
+  /** Marks a list definition. Set by `defineForm`; do not write it. */
   readonly __ngu: 'array';
+  /** Custom rules for the whole list. Their message shows under the list. */
   readonly validate?: Validator<any, any, any> | readonly Validator<any, any, any>[];
+  /** Heading shown above the rows. */
   readonly title?: string;
+  /** Text shown under the title, above the rows. */
   readonly description?: string;
+  /** Columns this list spans inside its parent group. */
   readonly span?: number;
+  /** Hides the list and its rows while it returns `true`. */
   readonly hidden?: LogicFn<any, boolean, any>;
+  /** One row: a normalized field map for object items, or a single field. */
   readonly item: FormDefinition | LeafDef;
+  /** Returns the value of a new row. A value given in the spec is cloned on each call. */
   readonly newItem: () => unknown;
+  /** Fewest rows. The remove buttons are disabled at this count. */
   readonly min?: number;
+  /** Most rows. The add and duplicate buttons are disabled at this count. */
   readonly max?: number;
   /** Unset means the translated default; `''` hides the button. */
   readonly addLabel?: string;
+  /** Label of the remove buttons. Unset means the translated default; `''` hides the buttons. */
   readonly removeLabel?: string;
+  /** Grid columns inside each row; `1` when the spec leaves it out. */
   readonly cols: Cols;
+  /** Position inside the parent group; see `order` on fields. */
   readonly order?: number;
+  /** Set for a collapsible panel: `true` starts closed, `false` starts open. */
   readonly collapsed?: boolean;
+  /** Move up and Move down buttons on each row, and a drag handle. */
   readonly reorder?: boolean;
+  /** A button that copies a row next to itself: `true`, or the button's label. */
   readonly duplicate?: boolean | string;
+  /** A one-line summary per row; rows then collapse to it. */
   readonly summary?: (item: any, index: number) => string;
+  /** `'table'` edits object items as a grid with one column per field. */
   readonly layout?: 'table';
+  /** Renders only the rows in view, inside a scrolling box. */
   readonly virtual?: boolean;
+  /** Classes added to the list's `<ngu-array>`. */
   readonly class?: string;
+  /** Classes added to the class map's slots for everything inside this list. */
   readonly classes?: NguClassMap;
 }
 
 /** One run-time field, compiled. */
 export interface DynamicEntry {
+  /** The field definition `<ngu-field>` renders, built from the run-time field. */
   readonly leaf: LeafDef;
+  /** The run-time field this entry was compiled from. */
   readonly field: DynamicField<any, any>;
+  /** The field's `pattern` as a RegExp; a string pattern is anchored to match the whole value. */
   readonly pattern?: RegExp;
+  /** Returns `true` while the field is hidden by its `hidden` function or its `showIf` condition. */
   readonly hidden?: (model: any, values: any) => boolean;
+  /** The field's `validate` rules, as a list. */
   readonly validators: readonly Validator<any, any, any>[];
-  /** Date bounds, parsed once, for date fields. */
+  /** Lower date bound, parsed once, for date fields. */
   readonly minDate?: Date;
+  /** Upper date bound, parsed once, for date fields. */
   readonly maxDate?: Date;
 }
 
+/** A normalized run-time field list, from a `DynamicSpec`. */
 export interface DynamicDef {
+  /** Marks a run-time field list. Set by `defineForm`; do not write it. */
   readonly __ngu: 'dynamic';
+  /** Heading shown above the fields. */
   readonly title?: string;
+  /** Text shown under the title, above the fields. */
   readonly description?: string;
+  /** Grid columns; `1` when the spec leaves it out. */
   readonly cols: Cols;
+  /** Columns this field list spans inside its parent group. */
   readonly span?: number;
+  /** Hides every field in the list while it returns `true`. */
   readonly hidden?: LogicFn<any, boolean, any>;
+  /** Keep values of fields that leave the list; `false` when the spec leaves it out. */
   readonly keepRemoved: boolean;
+  /** Position inside the parent group; see `order` on fields. */
   readonly order?: number;
+  /** Set for a collapsible panel: `true` starts closed, `false` starts open. */
   readonly collapsed?: boolean;
+  /** Classes added to the list's `<ngu-dynamic>`. */
   readonly class?: string;
+  /** Classes added to the class map's slots for every field in the list. */
   readonly classes?: NguClassMap;
   /** Compiled fields by key, in list order. */
   readonly entries: Signal<ReadonlyMap<string, DynamicEntry>>;
@@ -975,30 +1180,49 @@ export interface DynamicDef {
 
 /** A heading, paragraph or divider; it has no model value. */
 export interface StaticDef {
+  /** Marks static content. Set by `defineForm`; do not write it. */
   readonly __ngu: 'static';
+  /** Which spec key it came from: `heading`, `text` or `divider`. */
   readonly kind: 'heading' | 'text' | 'divider';
+  /** The heading or paragraph text; `''` for a divider. */
   readonly text: string;
+  /** Heading level; `3` when the spec leaves it out. */
   readonly level: 2 | 3 | 4 | 5 | 6;
+  /** Columns it spans. Without it, it takes a whole row of a multi-column group. */
   readonly span?: number;
+  /** Hides the content while it returns `true`. */
   readonly hidden?: LogicFn<any, boolean, any>;
+  /** Position inside the group; see `order` on fields. */
   readonly order?: number;
+  /** Classes added to the heading, paragraph or divider. */
   readonly class?: string;
 }
 
+/** One entry of a normalized definition: a field, group, list, run-time field list or static content. */
 export type AnyFieldDef = LeafDef | GroupDef | ArrayDef | DynamicDef | StaticDef;
+/** A normalized field map, keyed like the model, as `defineForm` builds it from the spec. */
 export type FormDefinition = Readonly<Record<string, AnyFieldDef>>;
 
 /** The result of `defineForm`: model, normalized definition and the live signal-forms tree. */
 export interface FormDef<TModel extends object, TPayload = TModel> {
+  /** Marks the result of `defineForm`; do not write it. */
   readonly __ngu: 'form';
+  /**
+   * The model: the signal passed to `defineForm`, or one made from the initial value. Writes to
+   * it update the form.
+   */
   readonly model: WritableSignal<TModel>;
   /** Read-only view of the model. */
   readonly value: Signal<TModel>;
   /** What `(submitted)` and the action receive: the value after `omitHidden` and `mapValue`. */
   readonly payload: Signal<TPayload>;
+  /** The Signal Forms field tree, which holds each field's value, state and errors. */
   readonly tree: FieldTree<TModel>;
+  /** The spec passed to `defineForm`. */
   readonly spec: FormSpec<TModel>;
+  /** The normalized definition the renderers walk. */
   readonly fields: FormDefinition;
+  /** Grid columns at the root level; `1` when `cols` is not set. */
   readonly cols: Cols;
   /** How the top-level groups and lists render; unset is one grid. */
   readonly layout?: FormLayout;

@@ -11,8 +11,9 @@ import { NGU_MATERIAL_OPTIONS, type NguMaterialOptions } from './shared';
 import { NguMatSlider } from './slider';
 
 /**
- * Renders fields as Angular Material form fields. Text, number, amount, password, textarea,
- * time, month and week fields become `mat-form-field` inputs; selects `mat-select`; checkboxes,
+ * Renders fields as Angular Material form fields. Text, email, URL, search, telephone, number,
+ * amount, password, textarea, time, date-time, month and week fields become `mat-form-field`
+ * inputs; selects `mat-select`; checkboxes,
  * groups, switches and consent `mat-checkbox` and `mat-slide-toggle`; radios and segments
  * `mat-radio-group` and `mat-button-toggle-group`; sliders `mat-slider`; tags chips; dates
  * and date ranges Material's datepicker. One-time codes, phone, rating, color and captcha

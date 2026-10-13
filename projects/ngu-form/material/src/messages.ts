@@ -42,6 +42,7 @@ import type { NguFieldRenderContext } from 'ngu-form';
   `,
 })
 export class NguMatSubscript {
+  /** The field's render context, passed on by the Material renderer that shows the messages. */
   readonly context = input.required<NguFieldRenderContext>();
 }
 

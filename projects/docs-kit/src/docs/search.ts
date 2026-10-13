@@ -44,6 +44,7 @@ interface Hit {
       <span class="search-button__text">Search</span>
       <kbd class="search-button__key" aria-hidden="true">{{ mac ? '⌘K' : 'Ctrl K' }}</kbd>
     </button>
+    <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events, @angular-eslint/template/interactive-supports-focus -- a click on the backdrop closes it; Escape does the same by keyboard -->
     <dialog
       #dialog
       class="search"
@@ -81,6 +82,7 @@ interface Hit {
       </div>
       <ul id="search-results" class="search__results" role="listbox" aria-label="Results">
         @for (hit of results(); track hit.key; let i = $index) {
+          <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events, @angular-eslint/template/interactive-supports-focus -- options are chosen from the search box with the arrow keys and Enter (aria-activedescendant) -->
           <li
             role="option"
             class="search__hit"

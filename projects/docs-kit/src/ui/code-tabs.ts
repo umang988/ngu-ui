@@ -27,6 +27,7 @@ let nextId = 0;
   imports: [CodeBlock],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
+    <!-- eslint-disable-next-line @angular-eslint/template/interactive-supports-focus -- arrow keys from the focused tab bubble up here -->
     <div class="tabs" role="tablist" [attr.aria-label]="label()" (keydown)="onKeydown($event)">
       @for (file of files(); track file.name; let i = $index) {
         <button

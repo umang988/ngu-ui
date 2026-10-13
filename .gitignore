@@ -42,3 +42,10 @@ __screenshots__/
 # System files
 .DS_Store
 Thumbs.db
+
+# Playwright
+/test-results
+/playwright-report
+# Screenshot baselines are made on Linux only; local ones from other systems stay local.
+/e2e/snapshots/**/*-darwin.png
+/e2e/snapshots/**/*-win32.png

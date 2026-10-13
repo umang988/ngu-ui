@@ -1,8 +1,6 @@
 # Changelog
 
-## 0.1.2 (unreleased): Docs for AI coding agents
-
-No changes to the component.
+## 0.1.2 (unreleased): Docs for AI coding agents and two fixes
 
 ### Added
 
@@ -14,6 +12,14 @@ No changes to the component.
   out.
 - `skills/ngu-dropdown`, the same notes as an Agent Skill.
 - The docs site serves `llms.txt`, `llms-full.txt` and every page as `.md`.
+- `optionValue`, `optionLabel` and `pageSize` accept `undefined`, which means the default from
+  `provideNguDropdownConfig`. Wrappers can now pass an option through without overriding the
+  app's config.
+
+### Fixed
+
+- A dropdown that becomes disabled or read-only while its panel is open now closes the panel.
+  Before, only a reactive form's `setDisabledState` closed it, and options could still be picked.
 
 ## 0.1.1 (2026-10-11): Docs links
 

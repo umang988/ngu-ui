@@ -3,7 +3,7 @@ import { InjectionToken, reflectComponentType, type Provider, type Type } from '
 /**
  * Contract for a custom field renderer. Declare the inputs you need; only the ones
  * you declare are set: `field` (required), and optionally `def`, `id`, `invalid` (true while
- * an error is shown; use it for `aria-invalid`) and `describedBy` (id of the hint or error).
+ * an error is shown; use it for `aria-invalid`) and `describedBy` (space-separated ids of the field's messages, for `aria-describedby`).
  *
  * ```ts
  * @Component({ imports: [FormField], template: `<input type="color" [id]="id()" [formField]="field()" />` })
@@ -23,6 +23,7 @@ export type NguFieldTypes = Readonly<Record<string, Type<unknown> | NguFieldType
  */
 export type NguFieldTypeLoader = () => Promise<Type<unknown> | { readonly default: Type<unknown> }>;
 
+/** Every registry passed to `provideNguFieldTypes`, in order; later ones win. */
 export const NGU_FIELD_TYPES = new InjectionToken<readonly NguFieldTypes[]>('NGU_FIELD_TYPES');
 
 /**

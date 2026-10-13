@@ -1,6 +1,7 @@
 import { inject, InjectionToken, type Provider } from '@angular/core';
 import type { Routes } from '@angular/router';
 import type { DocPage } from './docs/model';
+import type { StackBlitzConfig } from './ui/stackblitz';
 
 export interface NavItem {
   readonly title: string;
@@ -38,6 +39,8 @@ export interface DocsSite {
   readonly footer: { readonly text: string; readonly links: readonly SiteLink[] };
   /** The repository folder `/source` files are copied from, named when one fails to load. */
   readonly sourceDir: string;
+  /** Package versions for "Open in StackBlitz"; without it, demos have no such button. */
+  readonly stackblitz?: StackBlitzConfig;
 }
 
 export const DOCS_SITE = new InjectionToken<DocsSite>('DOCS_SITE');

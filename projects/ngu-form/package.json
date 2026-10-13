@@ -12,6 +12,13 @@
   ],
   "license": "MIT",
   "author": "Umang",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/umang988/ngu-ui.git",
+    "directory": "projects/ngu-form"
+  },
+  "homepage": "https://ngu-form.netlify.app",
+  "bugs": "https://github.com/umang988/ngu-ui/issues",
   "peerDependencies": {
     "@angular/common": "^22.2.0",
     "@angular/core": "^22.2.0",
@@ -19,7 +26,7 @@
     "@angular/cdk": "^22.2.0",
     "@angular/material": "^22.2.0",
     "primeng": "^22.1.0",
-    "ngu-dropdown": "^0.1.1"
+    "ngu-dropdown": "^0.1.2"
   },
   "peerDependenciesMeta": {
     "@angular/cdk": {

@@ -1,0 +1,55 @@
+name: Bug report
+description: Something in ngu-form or ngu-dropdown does not work as documented.
+labels: [bug]
+body:
+  - type: dropdown
+    id: package
+    attributes:
+      label: Package
+      options:
+        - ngu-form
+        - ngu-dropdown
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Package version
+      placeholder: "0.6.0"
+    validations:
+      required: true
+  - type: input
+    id: angular
+    attributes:
+      label: Angular version
+      description: The output of `ng version`, or the `@angular/core` version in your package.json.
+      placeholder: "22.2.2"
+    validations:
+      required: true
+  - type: input
+    id: browser
+    attributes:
+      label: Browser and OS
+      placeholder: "Safari 26, macOS 26"
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened, and what did you expect?
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Reproduction
+      description: >
+        A StackBlitz link (each docs demo has an "Open in StackBlitz" button), or the smallest
+        model and spec that shows the problem.
+      render: ts
+    validations:
+      required: true
+  - type: textarea
+    id: console
+    attributes:
+      label: Console output
+      description: Errors or `ngu-form [NGU-xxx]` diagnostics from the browser console, if any.
+      render: text

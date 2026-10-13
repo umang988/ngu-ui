@@ -85,7 +85,7 @@ interface Drag {
       (scroll)="onScroll()"
     >
       @if (table()) {
-        @defer (on immediate) {
+        @defer (on immediate; hydrate on immediate) {
           <ngu-array-table [host]="this" [actions]="actionsTpl" />
         }
       } @else {
@@ -514,21 +514,26 @@ export class NguArray {
   /** The look around this list with the `classes` of its spec; its rows read this one. */
   readonly look = computed(() => extendLook(this.outerLook(), this.def().classes));
   protected readonly hostClass = computed(() => slotClass(this.look(), 'list', this.def().class));
+  /** The list's definition. Set by ngu-form; apps rarely need it. */
   readonly def = input.required<ArrayDef>();
+  /** The list's field node. Set by ngu-form; apps rarely need it. */
   readonly tree = input.required<Field<any>>();
   /** Dot path of this list inside the form. */
   readonly path = input<string>('');
 
+  /** Path of the list's rows for template overrides: `path` plus `[]`, such as `items[]`. */
   readonly itemPath = computed(() => this.path() + '[]');
   /** The list's model path, `orders.0.lines`; for tests and tools. */
   protected readonly modelPath = computed(() => this.tree()().metadata(NGU_PATH)?.() ?? (this.path() || null));
 
+  /** Id of the list's title, used for `aria-labelledby` and the error message's id. */
   readonly titleId = `ngu-array-${nextArrayId++}`;
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly injector = inject(Injector);
   private readonly cdr = inject(ChangeDetectorRef);
   private readonly context = inject(NguFormContext, { optional: true });
   private readonly section = inject(NguSection, { optional: true });
+  /** Messages and translation for the form's language. */
   readonly i18n = this.context?.i18n ?? injectNguI18n();
   private readonly viewport = viewChild.required<ElementRef<HTMLElement>>('viewport');
 
@@ -554,6 +559,7 @@ export class NguArray {
   protected readonly itemFields = computed(() => this.def().item as FormDefinition);
 
   protected readonly state = computed(() => this.tree()());
+  /** The field node of each item, in order. */
   readonly rows = computed<readonly Field<any>[]>(() => {
     const list = this.tree() as unknown as ArrayLike<Field<any>>;
     return Array.from({ length: list.length }, (_, i) => list[i]);
@@ -569,10 +575,12 @@ export class NguArray {
     const min = this.def().min ?? 0;
     return this.rows().length > min;
   });
+  /** True when rows show buttons: the list is editable and has reorder, copy or remove buttons. */
   readonly hasActions = computed(() => {
     const d = this.def();
     return this.editable() && Boolean(d.reorder || this.duplicateLabel() || this.removeLabel());
   });
+  /** Text shown when the list has no rows: `emptyList`, or `emptyListNoAdd` without an add button. */
   readonly emptyText = computed(() => {
     const add = this.addLabel();
     return add && this.editable() ? this.i18n.message('emptyList', { add }) : this.i18n.message('emptyListNoAdd');
@@ -635,6 +643,7 @@ export class NguArray {
     return width != null && width < (this.context?.breakpoints.sm ?? 0);
   });
   protected readonly table = computed(() => this.def().layout === 'table' && !this.narrow());
+  /** Table columns, one per item field, with `layout: 'table'`; else empty. */
   readonly columns = computed<readonly Column[]>(() => {
     if (this.def().layout !== 'table') {
       return [];
@@ -701,6 +710,7 @@ export class NguArray {
 
   // --- virtual scrolling ----------------------------------------------------------
 
+  /** True when only the rows in view render: `virtual` is set and the page is not printing. */
   readonly virtual = computed(() => Boolean(this.def().virtual) && !this.printing());
   private readonly printing = signal(false);
   private readonly scrollTop = signal(0);
@@ -739,13 +749,16 @@ export class NguArray {
     },
     { equal: (a, b) => a[0] === b[0] && a[1] === b[1] },
   );
+  /** The rows rendered now, with their indexes: all of them, or those in view in a virtual list. */
   readonly visibleRows = computed<readonly Row[]>(() => {
     const [start, end] = this.range();
     return this.rows()
       .slice(start, end)
       .map((field, i) => ({ field, index: start + i }));
   });
+  /** Height in pixels of the space that stands in for unrendered rows above, in a virtual list. */
   readonly padStart = computed(() => (this.virtual() ? this.range()[0] * this.estimate() : 0));
+  /** Height in pixels of the space that stands in for unrendered rows below, in a virtual list. */
   readonly padEnd = computed(() =>
     this.virtual() ? (this.rows().length - this.range()[1]) * this.estimate() : 0,
   );
@@ -926,13 +939,16 @@ export class NguArray {
 
   // --- dragging -----------------------------------------------------------------
 
+  /** The row being dragged by its handle and the gap it would drop into, or `null`. */
   readonly drag = signal<Drag | null>(null);
 
+  /** True when the dragged row would drop just before row `index`. */
   dropBefore(index: number): boolean {
     const d = this.drag();
     return !!d && d.over === index && d.over !== d.from && d.over !== d.from + 1;
   }
 
+  /** True when the dragged row would drop after row `index`, the last row. */
   dropAfter(index: number): boolean {
     const d = this.drag();
     return !!d && d.over === this.rows().length && index === this.rows().length - 1 && d.from !== index;

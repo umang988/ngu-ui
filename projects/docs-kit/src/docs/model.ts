@@ -26,6 +26,8 @@ export interface DocSection {
   /** Code without a live demo. */
   readonly code?: readonly DocCode[];
   readonly table?: DocTable;
+  /** Members, inputs or options as an API table, whose names and types always show as code. */
+  readonly api?: readonly ApiRow[];
   /** Paragraphs after the demo, code or table. */
   readonly after?: readonly string[];
   /** A Markdown file under `/source`, rendered in place (the changelog). */
@@ -42,6 +44,8 @@ export interface DocDemo {
   readonly value?: boolean;
   /** More source files the demo uses, shown as tabs after its own. */
   readonly files?: readonly string[];
+  /** `false` for demos that use the docs site's own code, so they cannot open on StackBlitz. */
+  readonly stackblitz?: false;
 }
 
 export interface DocCode {
@@ -70,4 +74,6 @@ export interface ApiRow {
   readonly type: string;
   readonly default?: string;
   readonly description: string;
+  /** A short note after the name, such as `input` or `required`. */
+  readonly note?: string;
 }

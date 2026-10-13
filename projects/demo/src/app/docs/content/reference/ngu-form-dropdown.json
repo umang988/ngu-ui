@@ -1,0 +1,188 @@
+{
+ "entry": "ngu-form/dropdown",
+ "symbols": [
+  {
+   "name": "NguDropdownField",
+   "kind": "component",
+   "summary": "Renderer of `type: 'dropdown'`: an `<ngu-dropdown>` with server paging, search and virtual\nscrolling. ngu-form keeps the label, hint and messages; the dropdown shows the error state\nwhen ngu-form shows the error. A list value makes it a multiple select.",
+   "signature": "export declare class NguDropdownField {\n    readonly field: import(\"@angular/core\").InputSignal<Field<unknown>>;\n    readonly def: import(\"@angular/core\").InputSignal<LeafDef>;\n    readonly id: import(\"@angular/core\").InputSignal<string | undefined>;\n    readonly invalid: import(\"@angular/core\").InputSignal<boolean>;\n    readonly describedBy: import(\"@angular/core\").InputSignal<string | undefined>;\n    readonly choices: import(\"@angular/core\").InputSignal<readonly unknown[]>;\n}",
+   "selector": "ngu-dropdown-field",
+   "inputs": {
+    "field": {
+     "alias": "field",
+     "required": true
+    },
+    "def": {
+     "alias": "def",
+     "required": true
+    },
+    "id": {
+     "alias": "id",
+     "required": false
+    },
+    "invalid": {
+     "alias": "invalid",
+     "required": false
+    },
+    "describedBy": {
+     "alias": "describedBy",
+     "required": false
+    },
+    "choices": {
+     "alias": "choices",
+     "required": false
+    }
+   },
+   "members": [
+    {
+     "name": "field",
+     "kind": "input",
+     "type": "Field<unknown>",
+     "description": "The field to edit, bound to the dropdown with `[formField]`. Set by ngu-form.",
+     "required": true
+    },
+    {
+     "name": "def",
+     "kind": "input",
+     "type": "LeafDef",
+     "description": "The field's spec, with the dropdown options. Set by ngu-form.",
+     "required": true
+    },
+    {
+     "name": "id",
+     "kind": "input",
+     "type": "string | undefined",
+     "description": "Id of the dropdown's trigger, used by the label's `for`. Set by ngu-form."
+    },
+    {
+     "name": "invalid",
+     "kind": "input",
+     "type": "boolean",
+     "description": "True while ngu-form shows the field's error; the dropdown then shows its error state."
+    },
+    {
+     "name": "describedBy",
+     "kind": "input",
+     "type": "string | undefined",
+     "description": "Ids of the field's hint and messages, for `aria-describedby`. Set by ngu-form."
+    },
+    {
+     "name": "choices",
+     "kind": "input",
+     "type": "readonly unknown[]",
+     "description": "Options resolved by ngu-form: lists, signals and functions of the model."
+    }
+   ]
+  },
+  {
+   "name": "NguDropdownFieldOptions",
+   "kind": "interface",
+   "summary": "Spec options of `type: 'dropdown'`.",
+   "signature": "export interface NguDropdownFieldOptions {\n    options?: unknown;\n    fetch?: NguDropdownFetch<any>;\n    lookup?: NguDropdownLookup<any>;\n    optionValue?: string;\n    optionLabel?: string | ((row: any) => string);\n    filters?: Record<string, unknown> | Signal<Record<string, unknown>>;\n    search?: boolean;\n    pageSize?: number;\n    clearable?: boolean;\n    maxChips?: number;\n}",
+   "members": [
+    {
+     "name": "options",
+     "kind": "property",
+     "type": "unknown",
+     "description": "A static list of rows, a signal of rows, or a function of the model for cascading lists.\nRows are objects (read with `optionValue` and `optionLabel`) or plain strings.",
+     "optional": true
+    },
+    {
+     "name": "fetch",
+     "kind": "property",
+     "type": "NguDropdownFetch<any>",
+     "description": "Loads one page of rows from the server: `(query, { signal }) => Observable | Promise`.",
+     "optional": true
+    },
+    {
+     "name": "lookup",
+     "kind": "property",
+     "type": "NguDropdownLookup<any>",
+     "description": "Loads the rows of values that are not on a loaded page yet, such as a saved record's.",
+     "optional": true
+    },
+    {
+     "name": "optionValue",
+     "kind": "property",
+     "type": "string",
+     "description": "Path of the value in a row. Default `'value'`, or `provideNguDropdownConfig`.",
+     "optional": true
+    },
+    {
+     "name": "optionLabel",
+     "kind": "property",
+     "type": "string | ((row: any) => string)",
+     "description": "Path of the label, or a function of the row. Default `'label'`.",
+     "optional": true
+    },
+    {
+     "name": "filters",
+     "kind": "property",
+     "type": "Record<string, unknown> | Signal<Record<string, unknown>>",
+     "description": "Sent to `fetch` with every query; a signal re-queries when it changes.",
+     "optional": true
+    },
+    {
+     "name": "search",
+     "kind": "property",
+     "type": "boolean",
+     "description": "Show the search box. Default: with a `fetch`, or more than 8 options (ngu-dropdown's `searchThreshold`).",
+     "optional": true
+    },
+    {
+     "name": "pageSize",
+     "kind": "property",
+     "type": "number",
+     "description": "Rows per request.",
+     "optional": true
+    },
+    {
+     "name": "clearable",
+     "kind": "property",
+     "type": "boolean",
+     "description": "Show a clear button. Default `true`.",
+     "optional": true
+    },
+    {
+     "name": "maxChips",
+     "kind": "property",
+     "type": "number",
+     "description": "Chips shown before \"+3 more\" in multiple mode. Default 2.",
+     "optional": true
+    }
+   ]
+  },
+  {
+   "name": "NguDropdownValue",
+   "kind": "type",
+   "summary": "What a dropdown stores: the chosen row's key, or the keys of a multiple selection.",
+   "signature": "export type NguDropdownValue = string | number | null | readonly (string | number)[];"
+  },
+  {
+   "name": "provideNguDropdown",
+   "kind": "function",
+   "summary": "Registers `type: 'dropdown'`. Add it next to your other providers; importing\n`ngu-form/dropdown` also teaches TypeScript the type and its options.\n\n```ts\nproviders: [provideNguDropdown(), provideNguDropdownConfig({ optionValue: 'id', optionLabel: 'name' })]\n```",
+   "signature": "export declare function provideNguDropdown(): Provider;"
+  },
+  {
+   "name": "declare module 'ngu-form'",
+   "kind": "augmentation",
+   "summary": "Adds to the interfaces of `ngu-form`.",
+   "signature": "declare module 'ngu-form' {\n    interface NguFieldTypeMap {\n        dropdown: NguDropdownValue;\n    }\n    interface NguFieldOptionsMap {\n        dropdown: NguDropdownFieldOptions;\n    }\n}",
+   "members": [
+    {
+     "name": "NguFieldTypeMap.dropdown",
+     "kind": "property",
+     "type": "NguDropdownValue",
+     "description": "`type: 'dropdown'`, on properties holding a row's key or a list of keys."
+    },
+    {
+     "name": "NguFieldOptionsMap.dropdown",
+     "kind": "property",
+     "type": "NguDropdownFieldOptions",
+     "description": "The options of `type: 'dropdown'`."
+    }
+   ]
+  }
+ ]
+}

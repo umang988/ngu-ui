@@ -61,6 +61,7 @@
 
 <!-- In the top layer, so no card, table or transformed ancestor can clip or re-anchor it. -->
 @if (open()) {
+  <!-- eslint-disable-next-line @angular-eslint/template/interactive-supports-focus -- keys from the focused search box bubble up here -->
   <div
     #panel
     class="ngu-dd-panel"
@@ -146,6 +147,7 @@
           >
             @for (option of rendered(); track option.index) {
               @if (!option.loading) {
+                <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events, @angular-eslint/template/interactive-supports-focus -- options are chosen with the arrow keys and Enter on the focused input (aria-activedescendant) -->
                 <div
                   class="ngu-dd-option"
                   role="option"

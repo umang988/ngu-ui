@@ -182,3 +182,56 @@ describe('NguFormHarness with a wizard', () => {
     expect(await form.getStep()).toContain('You');
   });
 });
+
+describe('harnesses with nested lists', () => {
+  @Component({
+    imports: [NguForm],
+    template: `<ngu-form [form]="form" submitLabel="Save" />`,
+  })
+  class NestedHost {
+    readonly form = defineForm(
+      { agree: false, teams: [{ name: 'Core', members: [{ email: 'a@example.com' }] }] },
+      {
+        agree: { label: 'I agree', required: true },
+        teams: {
+          item: {
+            name: 'Team',
+            members: { item: { email: 'Email' }, newItem: { email: '' }, addLabel: 'Add member' },
+          },
+          newItem: { name: '', members: [] },
+          addLabel: 'Add team',
+        },
+      },
+    );
+  }
+
+  async function setup() {
+    const fixture = TestBed.createComponent(NestedHost);
+    await fixture.whenStable();
+    const form = await TestbedHarnessEnvironment.loader(fixture).getHarness(NguFormHarness);
+    return { fixture, form };
+  }
+
+  it("adds and removes the list's own rows, not those of lists inside them", async () => {
+    const { fixture, form } = await setup();
+    const teams = await form.list('teams');
+    const members = await form.list('teams.0.members');
+    expect(await teams.getTitle()).toBe('');
+
+    await teams.addRow();
+    expect(await teams.getRowCount()).toBe(2);
+    expect(await members.getRowCount()).toBe(1);
+
+    await teams.removeRow(0);
+    expect(await teams.getRowCount()).toBe(1);
+    // The first team (with its member) is gone; the new, empty one is left.
+    const left = fixture.componentInstance.form.value().teams;
+    expect(left.map((t) => [t.name, t.members.length])).toEqual([['', 0]]);
+  });
+
+  it('reports a required single checkbox, which shows no asterisk', async () => {
+    const { form } = await setup();
+    expect(await (await form.field('agree')).isRequired()).toBe(true);
+  });
+});
+

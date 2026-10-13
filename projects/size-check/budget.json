@@ -1,0 +1,4 @@
+{
+  "$comment": "What ngu-form may add, gzipped, to the initial JavaScript of the login form in src/form.ts, over the same form written by hand (src/form.plain.ts). Checked by scripts/size.mjs.",
+  "addedGzipBytes": 77824
+}

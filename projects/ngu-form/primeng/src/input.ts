@@ -7,7 +7,8 @@ import { InputMask } from 'primeng/inputmask';
 import { InputText } from 'primeng/inputtext';
 import { Password } from 'primeng/password';
 import { Textarea } from 'primeng/textarea';
-import { messageId, NguPrimeFrame } from './frame';
+import { NguPrimeFrame } from './frame';
+import { messageId } from './message-id';
 
 const NATIVE = new Set(['text', 'email', 'url', 'search', 'tel', 'time', 'datetime-local', 'month', 'week']);
 
@@ -136,6 +137,7 @@ const NATIVE = new Set(['text', 'email', 'url', 'search', 'tel', 'time', 'dateti
   `,
 })
 export class NguPrimeInput {
+  /** The field's render context: texts, state and options, from ngu-form. */
   readonly context = input.required<NguFieldRenderContext>();
 
   protected readonly kind = computed(() => {

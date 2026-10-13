@@ -216,6 +216,9 @@ function section(mode, from, s, level, out) {
   if (s.table) {
     out.push(table(mode, from, s.table.columns, s.table.rows), '');
   }
+  if (s.api?.length) {
+    out.push(apiTable(mode, from, s.api), '');
+  }
   if (s.markdown) {
     out.push(
       embed(readFileSync(join(fromRoot(config.markdown), s.markdown), 'utf8'), level + 1),
@@ -265,19 +268,27 @@ function pageMarkdown(mode, { entry, page, example }) {
       if (g.text) {
         out.push(text(mode, from, g.text), '');
       }
-      const defaults = g.rows.some((r) => r.default);
-      const columns = defaults
-        ? ['Name', 'Type', 'Default', 'Description']
-        : ['Name', 'Type', 'Description'];
-      const rows = g.rows.map((r) =>
-        defaults
-          ? [code(r.name), code(r.type), r.default ? code(r.default) : '', r.description]
-          : [code(r.name), code(r.type), r.description],
-      );
-      out.push(table(mode, from, columns, rows), '');
+      out.push(apiTable(mode, from, g.rows), '');
     }
   }
   return out.join('\n').trim() + '\n';
+}
+
+/** Options, inputs or members: names and types as code, notes after the name. */
+function apiTable(mode, from, rows) {
+  const defaults = rows.some((r) => r.default);
+  const columns = defaults ? ['Name', 'Type', 'Default', 'Description'] : ['Name', 'Type', 'Description'];
+  const name = (r) => code(r.name) + (r.note ? ` (${r.note})` : '');
+  return table(
+    mode,
+    from,
+    columns,
+    rows.map((r) =>
+      defaults
+        ? [name(r), code(r.type), r.default ? code(r.default) : '', r.description]
+        : [name(r), code(r.type), r.description],
+    ),
+  );
 }
 
 function guideMarkdown(mode, guide) {

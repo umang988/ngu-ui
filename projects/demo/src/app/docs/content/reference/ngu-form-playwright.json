@@ -1,0 +1,303 @@
+{
+ "entry": "ngu-form/playwright",
+ "symbols": [
+  {
+   "name": "NguFieldDriver",
+   "kind": "class",
+   "summary": "One `<ngu-field>`.",
+   "signature": "export declare class NguFieldDriver {\n    readonly root: NguPlaywrightLocator;\n    constructor(root: NguPlaywrightLocator);\n    label(): Promise<string>;\n    path(): Promise<string | null>;\n    type(): Promise<string>;\n    error(): Promise<string | null>;\n    hint(): Promise<string | null>;\n    isInvalid(): Promise<boolean>;\n    isRequired(): Promise<boolean>;\n    setValue(value: NguPlaywrightValue): Promise<void>;\n    value(): Promise<NguPlaywrightValue>;\n    leave(): Promise<void>;\n}",
+   "members": [
+    {
+     "name": "root",
+     "kind": "property",
+     "type": "NguPlaywrightLocator",
+     "description": "The field's `<ngu-field>` element."
+    },
+    {
+     "name": "label",
+     "kind": "method",
+     "type": "(): Promise<string>;",
+     "description": "The label, without the asterisk of required fields; `''` when there is none."
+    },
+    {
+     "name": "path",
+     "kind": "method",
+     "type": "(): Promise<string | null>;",
+     "description": "The model path from `data-ngu-path`, such as `account.email` or `items.0.sku`, or `null`."
+    },
+    {
+     "name": "type",
+     "kind": "method",
+     "type": "(): Promise<string>;",
+     "description": "The `type` from the spec, read from `data-ngu-type`; `'text'` when the attribute is missing."
+    },
+    {
+     "name": "error",
+     "kind": "method",
+     "type": "(): Promise<string | null>;",
+     "description": "The error on screen, or `null`."
+    },
+    {
+     "name": "hint",
+     "kind": "method",
+     "type": "(): Promise<string | null>;",
+     "description": "The hint on screen, or `null`. An error, warning or pending text shows in its place."
+    },
+    {
+     "name": "isInvalid",
+     "kind": "method",
+     "type": "(): Promise<boolean>;",
+     "description": "True while an error shows."
+    },
+    {
+     "name": "isRequired",
+     "kind": "method",
+     "type": "(): Promise<boolean>;",
+     "description": "True when the field is required, from its `data-required` attribute (any renderer, any type)."
+    },
+    {
+     "name": "setValue",
+     "kind": "method",
+     "type": "(value: NguPlaywrightValue): Promise<void>;",
+     "description": "Enters a value the way a user would, then leaves the field."
+    },
+    {
+     "name": "value",
+     "kind": "method",
+     "type": "(): Promise<NguPlaywrightValue>;",
+     "description": "The value as shown: input text, `true`/`false` for a checkbox, labels for choices."
+    },
+    {
+     "name": "leave",
+     "kind": "method",
+     "type": "(): Promise<void>;",
+     "description": "Leaves the field, so it counts as touched."
+    }
+   ]
+  },
+  {
+   "name": "nguForm",
+   "kind": "function",
+   "summary": "Drives the first `<ngu-form>` in `scope` (or the one matching `selector`).\n\n```ts\nimport { nguForm } from 'ngu-form/playwright';\n\ntest('signs up', async ({ page }) => {\n  const form = nguForm(page);\n  await form.fill({ 'account.email': 'ada@example.com', plan: 'Pro' });\n  await form.submit();\n  expect(await form.errors()).toEqual({});\n});\n```",
+   "signature": "export declare function nguForm(scope: NguPlaywrightScope, selector?: string): NguFormDriver;"
+  },
+  {
+   "name": "NguFormDriver",
+   "kind": "class",
+   "summary": "One `<ngu-form>`: fill by model path, submit, read errors.",
+   "signature": "export declare class NguFormDriver {\n    readonly root: NguPlaywrightLocator;\n    constructor(root: NguPlaywrightLocator);\n    field(pathOrLabel: string): NguFieldDriver;\n    list(path: string): NguListDriver;\n    fill(values: Readonly<Record<string, NguPlaywrightValue>>): Promise<void>;\n    submit(): Promise<void>;\n    next(): Promise<void>;\n    back(): Promise<void>;\n    step(): Promise<string | null>;\n    errors(): Promise<Record<string, string>>;\n}",
+   "members": [
+    {
+     "name": "root",
+     "kind": "property",
+     "type": "NguPlaywrightLocator",
+     "description": "The form's `<ngu-form>` element."
+    },
+    {
+     "name": "field",
+     "kind": "method",
+     "type": "(pathOrLabel: string): NguFieldDriver;",
+     "description": "The field at a model path (`items.0.sku`), else the one with this label."
+    },
+    {
+     "name": "list",
+     "kind": "method",
+     "type": "(path: string): NguListDriver;",
+     "description": "The list at a model path, such as `items`."
+    },
+    {
+     "name": "fill",
+     "kind": "method",
+     "type": "(values: Readonly<Record<string, NguPlaywrightValue>>): Promise<void>;",
+     "description": "Enters each value into the field at its model path (or label), in order."
+    },
+    {
+     "name": "submit",
+     "kind": "method",
+     "type": "(): Promise<void>;",
+     "description": "Clicks the submit button."
+    },
+    {
+     "name": "next",
+     "kind": "method",
+     "type": "(): Promise<void>;",
+     "description": "Clicks Next in a wizard."
+    },
+    {
+     "name": "back",
+     "kind": "method",
+     "type": "(): Promise<void>;",
+     "description": "Clicks Back in a wizard."
+    },
+    {
+     "name": "step",
+     "kind": "method",
+     "type": "(): Promise<string | null>;",
+     "description": "The heading of the wizard step on screen."
+    },
+    {
+     "name": "errors",
+     "kind": "method",
+     "type": "(): Promise<Record<string, string>>;",
+     "description": "Errors on screen by model path; a form-level error is under `$form`."
+    }
+   ]
+  },
+  {
+   "name": "NguListDriver",
+   "kind": "class",
+   "summary": "A list (`<ngu-array>`).",
+   "signature": "export declare class NguListDriver {\n    readonly root: NguPlaywrightLocator;\n    constructor(root: NguPlaywrightLocator);\n    rowCount(): Promise<number>;\n    addRow(): Promise<void>;\n    removeRow(index: number): Promise<void>;\n}",
+   "members": [
+    {
+     "name": "root",
+     "kind": "property",
+     "type": "NguPlaywrightLocator",
+     "description": "The list's `<ngu-array>` element."
+    },
+    {
+     "name": "rowCount",
+     "kind": "method",
+     "type": "(): Promise<number>;",
+     "description": "Rows on screen (long lists render only the rows in view)."
+    },
+    {
+     "name": "addRow",
+     "kind": "method",
+     "type": "(): Promise<void>;",
+     "description": "Clicks the list's add button."
+    },
+    {
+     "name": "removeRow",
+     "kind": "method",
+     "type": "(index: number): Promise<void>;",
+     "description": "Clicks the remove button of the row on screen at `index`, from 0."
+    }
+   ]
+  },
+  {
+   "name": "NguPlaywrightLocator",
+   "kind": "interface",
+   "summary": "The parts of Playwright's `Locator` this helper uses. A real `Locator` (and a `Page`, as a\nscope) fits it, so this package needs no dependency on Playwright.",
+   "signature": "export interface NguPlaywrightLocator {\n    locator(selector: string): NguPlaywrightLocator;\n    first(): NguPlaywrightLocator;\n    nth(index: number): NguPlaywrightLocator;\n    count(): Promise<number>;\n    all(): Promise<NguPlaywrightLocator[]>;\n    click(options?: {\n        force?: boolean;\n    }): Promise<void>;\n    fill(value: string): Promise<void>;\n    press(key: string): Promise<void>;\n    blur(): Promise<void>;\n    setChecked(checked: boolean, options?: {\n        force?: boolean;\n    }): Promise<void>;\n    selectOption(values: {\n        label: string;\n    }[]): Promise<string[]>;\n    getAttribute(name: string): Promise<string | null>;\n    textContent(): Promise<string | null>;\n    inputValue(): Promise<string>;\n    isChecked(): Promise<boolean>;\n    waitFor(options?: {\n        state?: \"attached\" | \"detached\" | \"visible\" | \"hidden\";\n        timeout?: number;\n    }): Promise<void>;\n}",
+   "members": [
+    {
+     "name": "locator",
+     "kind": "method",
+     "type": "(selector: string): NguPlaywrightLocator;",
+     "description": "The elements matching `selector` inside this one, such as a field's input."
+    },
+    {
+     "name": "first",
+     "kind": "method",
+     "type": "(): NguPlaywrightLocator;",
+     "description": "The first matching element."
+    },
+    {
+     "name": "nth",
+     "kind": "method",
+     "type": "(index: number): NguPlaywrightLocator;",
+     "description": "The matching element at `index`, from 0, such as one star of a rating."
+    },
+    {
+     "name": "count",
+     "kind": "method",
+     "type": "(): Promise<number>;",
+     "description": "How many elements match; the helpers use it to check whether an element exists."
+    },
+    {
+     "name": "all",
+     "kind": "method",
+     "type": "(): Promise<NguPlaywrightLocator[]>;",
+     "description": "A locator for each matching element, such as each option of a checkbox group."
+    },
+    {
+     "name": "click",
+     "kind": "method",
+     "type": "(options?: {\n    force?: boolean;\n}): Promise<void>;",
+     "description": "Clicks the element; `force` skips Playwright's actionability checks."
+    },
+    {
+     "name": "fill",
+     "kind": "method",
+     "type": "(value: string): Promise<void>;",
+     "description": "Focuses an input or textarea and replaces its value, firing an `input` event."
+    },
+    {
+     "name": "press",
+     "kind": "method",
+     "type": "(key: string): Promise<void>;",
+     "description": "Presses a key on the element, such as `Enter` to add a tag."
+    },
+    {
+     "name": "blur",
+     "kind": "method",
+     "type": "(): Promise<void>;",
+     "description": "Removes focus from the element, so the field counts as touched."
+    },
+    {
+     "name": "setChecked",
+     "kind": "method",
+     "type": "(checked: boolean, options?: {\n    force?: boolean;\n}): Promise<void>;",
+     "description": "Checks or unchecks a checkbox or radio; `force` skips Playwright's actionability checks."
+    },
+    {
+     "name": "selectOption",
+     "kind": "method",
+     "type": "(values: {\n    label: string;\n}[]): Promise<string[]>;",
+     "description": "Selects the options of a `<select>` with these labels, and resolves with their values."
+    },
+    {
+     "name": "getAttribute",
+     "kind": "method",
+     "type": "(name: string): Promise<string | null>;",
+     "description": "The value of an attribute, such as `data-ngu-path`, or `null` when it is missing."
+    },
+    {
+     "name": "textContent",
+     "kind": "method",
+     "type": "(): Promise<string | null>;",
+     "description": "The element's text, such as a label or an error message."
+    },
+    {
+     "name": "inputValue",
+     "kind": "method",
+     "type": "(): Promise<string>;",
+     "description": "The current value of an input, textarea or select."
+    },
+    {
+     "name": "isChecked",
+     "kind": "method",
+     "type": "(): Promise<boolean>;",
+     "description": "Whether a checkbox or radio button is checked."
+    },
+    {
+     "name": "waitFor",
+     "kind": "method",
+     "type": "(options?: {\n    state?: 'attached' | 'detached' | 'visible' | 'hidden';\n    timeout?: number;\n}): Promise<void>;",
+     "description": "Waits until the element reaches `state`, `'visible'` by default, for up to `timeout` ms."
+    }
+   ]
+  },
+  {
+   "name": "NguPlaywrightScope",
+   "kind": "interface",
+   "summary": "A Playwright `Page`, `Frame` or `Locator` to look for forms in.",
+   "signature": "export interface NguPlaywrightScope {\n    locator(selector: string): NguPlaywrightLocator;\n}",
+   "members": [
+    {
+     "name": "locator",
+     "kind": "method",
+     "type": "(selector: string): NguPlaywrightLocator;",
+     "description": "The elements matching `selector`, such as `ngu-form`."
+    }
+   ]
+  },
+  {
+   "name": "NguPlaywrightValue",
+   "kind": "type",
+   "summary": "A value as the user enters it; the same shapes as `NguFieldValue` in `ngu-form/testing`.",
+   "signature": "export type NguPlaywrightValue = string | number | boolean | Date | readonly string[] | {\n    readonly from?: string;\n    readonly to?: string;\n};"
+  }
+ ]
+}

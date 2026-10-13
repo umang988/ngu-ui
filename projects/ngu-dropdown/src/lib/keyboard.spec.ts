@@ -11,6 +11,7 @@ const FRUIT = ['Apple', 'Banana', 'Cherry', 'Blueberry', 'Date'];
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [NguDropdown],
   template: `
+    <!-- eslint-disable-next-line @angular-eslint/template/interactive-supports-focus -- records keys that bubble out of the dropdown -->
     <div (keydown)="parentKeys.push($event.key)">
       <ngu-dropdown
         [options]="fruit"

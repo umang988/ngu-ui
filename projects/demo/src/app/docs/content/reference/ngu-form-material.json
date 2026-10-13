@@ -1,0 +1,251 @@
+{
+ "entry": "ngu-form/material",
+ "symbols": [
+  {
+   "name": "NGU_MATERIAL_OPTIONS",
+   "kind": "const",
+   "summary": "The options given to `provideNguMaterial`, read by the Material renderers. Default `{}`.",
+   "signature": "export declare const NGU_MATERIAL_OPTIONS: InjectionToken<NguMaterialOptions>;"
+  },
+  {
+   "name": "NguMatCheck",
+   "kind": "component",
+   "summary": "Checkboxes, checkbox groups, switches and consent boxes as `mat-checkbox` and\n`mat-slide-toggle`. A consent box stores the time it was ticked.",
+   "signature": "export declare class NguMatCheck {\n    readonly context: import(\"@angular/core\").InputSignal<NguFieldRenderContext>;\n}",
+   "selector": "ngu-mat-check",
+   "inputs": {
+    "context": {
+     "alias": "context",
+     "required": true
+    }
+   },
+   "members": [
+    {
+     "name": "context",
+     "kind": "input",
+     "type": "NguFieldRenderContext",
+     "description": "The field's render context: texts, state and options, from ngu-form.",
+     "required": true
+    }
+   ]
+  },
+  {
+   "name": "NguMatChips",
+   "kind": "component",
+   "summary": "Tags as Material chips: Enter or a separator adds one, pasting splits, Backspace removes.",
+   "signature": "export declare class NguMatChips {\n    readonly context: import(\"@angular/core\").InputSignal<NguFieldRenderContext>;\n}",
+   "selector": "ngu-mat-chips",
+   "inputs": {
+    "context": {
+     "alias": "context",
+     "required": true
+    }
+   },
+   "members": [
+    {
+     "name": "context",
+     "kind": "input",
+     "type": "NguFieldRenderContext",
+     "description": "The field's render context: texts, state and options, from ngu-form.",
+     "required": true
+    }
+   ]
+  },
+  {
+   "name": "NguMatChoice",
+   "kind": "component",
+   "summary": "Radios as `mat-radio-group`, segmented controls as `mat-button-toggle-group`.",
+   "signature": "export declare class NguMatChoice {\n    readonly context: import(\"@angular/core\").InputSignal<NguFieldRenderContext>;\n}",
+   "selector": "ngu-mat-choice",
+   "inputs": {
+    "context": {
+     "alias": "context",
+     "required": true
+    }
+   },
+   "members": [
+    {
+     "name": "context",
+     "kind": "input",
+     "type": "NguFieldRenderContext",
+     "description": "The field's render context: texts, state and options, from ngu-form.",
+     "required": true
+    }
+   ]
+  },
+  {
+   "name": "NguMatDate",
+   "kind": "component",
+   "summary": "Date fields with Material's datepicker. The model keeps ngu-form's shape: a `Date` at\nmidnight UTC, or an ISO date string when the model holds strings.",
+   "signature": "export declare class NguMatDate<D = unknown> {\n    readonly context: import(\"@angular/core\").InputSignal<NguFieldRenderContext>;\n}",
+   "selector": "ngu-mat-date",
+   "inputs": {
+    "context": {
+     "alias": "context",
+     "required": true
+    }
+   },
+   "members": [
+    {
+     "name": "context",
+     "kind": "input",
+     "type": "NguFieldRenderContext",
+     "description": "The field's render context: texts, state and options, from ngu-form.",
+     "required": true
+    }
+   ]
+  },
+  {
+   "name": "NguMatDateRange",
+   "kind": "component",
+   "summary": "`{ from, to }` date ranges with Material's range picker.",
+   "signature": "export declare class NguMatDateRange<D = unknown> {\n    readonly context: import(\"@angular/core\").InputSignal<NguFieldRenderContext>;\n}",
+   "selector": "ngu-mat-date-range",
+   "inputs": {
+    "context": {
+     "alias": "context",
+     "required": true
+    }
+   },
+   "members": [
+    {
+     "name": "context",
+     "kind": "input",
+     "type": "NguFieldRenderContext",
+     "description": "The field's render context: texts, state and options, from ngu-form.",
+     "required": true
+    }
+   ]
+  },
+  {
+   "name": "NguMaterialOptions",
+   "kind": "interface",
+   "summary": "Options of `provideNguMaterial`.",
+   "signature": "export interface NguMaterialOptions {\n    readonly appearance?: MatFormFieldAppearance;\n    readonly floatLabel?: FloatLabelType;\n    readonly subscriptSizing?: SubscriptSizing;\n    readonly dateAdapter?: boolean;\n}",
+   "members": [
+    {
+     "name": "appearance",
+     "kind": "property",
+     "type": "MatFormFieldAppearance",
+     "description": "`'fill'` or `'outline'`. Defaults to `MAT_FORM_FIELD_DEFAULT_OPTIONS`, else Material's own.",
+     "optional": true
+    },
+    {
+     "name": "floatLabel",
+     "kind": "property",
+     "type": "FloatLabelType",
+     "description": "When the label floats. Defaults to Material's own.",
+     "optional": true
+    },
+    {
+     "name": "subscriptSizing",
+     "kind": "property",
+     "type": "SubscriptSizing",
+     "description": "`'dynamic'` lets hints and errors take only the room they need. Defaults to Material's own.",
+     "optional": true
+    },
+    {
+     "name": "dateAdapter",
+     "kind": "property",
+     "type": "boolean",
+     "description": "Add Material's native `DateAdapter` for date fields. Default `true`; set `false` when the\napp provides its own adapter, such as Luxon or date-fns.",
+     "optional": true
+    }
+   ]
+  },
+  {
+   "name": "NguMatInput",
+   "kind": "component",
+   "summary": "Text, number, amount, password and textarea fields as a Material form field, with prefix\nand suffix text, a character counter, and a show-password button.",
+   "signature": "export declare class NguMatInput {\n    readonly context: import(\"@angular/core\").InputSignal<NguFieldRenderContext>;\n}",
+   "selector": "ngu-mat-input",
+   "inputs": {
+    "context": {
+     "alias": "context",
+     "required": true
+    }
+   },
+   "members": [
+    {
+     "name": "context",
+     "kind": "input",
+     "type": "NguFieldRenderContext",
+     "description": "The field's render context: texts, state and options, from ngu-form.",
+     "required": true
+    }
+   ]
+  },
+  {
+   "name": "NguMatSelect",
+   "kind": "component",
+   "summary": "Selects, single or multiple, as `mat-select`. Option values keep their type.",
+   "signature": "export declare class NguMatSelect {\n    readonly context: import(\"@angular/core\").InputSignal<NguFieldRenderContext>;\n}",
+   "selector": "ngu-mat-select",
+   "inputs": {
+    "context": {
+     "alias": "context",
+     "required": true
+    }
+   },
+   "members": [
+    {
+     "name": "context",
+     "kind": "input",
+     "type": "NguFieldRenderContext",
+     "description": "The field's render context: texts, state and options, from ngu-form.",
+     "required": true
+    }
+   ]
+  },
+  {
+   "name": "NguMatSlider",
+   "kind": "component",
+   "summary": "Sliders (`type: 'range'`) as `mat-slider`, with the value shown next to the label.",
+   "signature": "export declare class NguMatSlider {\n    readonly context: import(\"@angular/core\").InputSignal<NguFieldRenderContext>;\n}",
+   "selector": "ngu-mat-slider",
+   "inputs": {
+    "context": {
+     "alias": "context",
+     "required": true
+    }
+   },
+   "members": [
+    {
+     "name": "context",
+     "kind": "input",
+     "type": "NguFieldRenderContext",
+     "description": "The field's render context: texts, state and options, from ngu-form.",
+     "required": true
+    }
+   ]
+  },
+  {
+   "name": "NguMatSubscript",
+   "kind": "component",
+   "summary": "Error, pending text, warning or hint under a control that is not in a `mat-form-field`.",
+   "signature": "export declare class NguMatSubscript {\n    readonly context: import(\"@angular/core\").InputSignal<NguFieldRenderContext>;\n}",
+   "selector": "ngu-mat-subscript",
+   "inputs": {
+    "context": {
+     "alias": "context",
+     "required": true
+    }
+   },
+   "members": [
+    {
+     "name": "context",
+     "kind": "input",
+     "type": "NguFieldRenderContext",
+     "description": "The field's render context, passed on by the Material renderer that shows the messages.",
+     "required": true
+    }
+   ]
+  },
+  {
+   "name": "provideNguMaterial",
+   "kind": "function",
+   "summary": "Renders fields as Angular Material form fields. Text, email, URL, search, telephone, number,\namount, password, textarea, time, date-time, month and week fields become `mat-form-field`\ninputs; selects `mat-select`; checkboxes,\ngroups, switches and consent `mat-checkbox` and `mat-slide-toggle`; radios and segments\n`mat-radio-group` and `mat-button-toggle-group`; sliders `mat-slider`; tags chips; dates\nand date ranges Material's datepicker. One-time codes, phone, rating, color and captcha\nkeep ngu-form's own controls, colored by the tokens.\n\n```ts\nproviders: [provideNguMaterial({ appearance: 'outline' })]\n```",
+   "signature": "export declare function provideNguMaterial(options?: NguMaterialOptions): Provider[];"
+  }
+ ]
+}

@@ -1,6 +1,9 @@
 # Changelog
 
-## 0.6.0 (unreleased): Ecosystem and developer experience
+## 0.6.0 (2026-10-13): Ecosystem and developer experience
+
+The first version on npm. It also contains everything listed under 0.2.0 to 0.5.0 below,
+which were never published on their own.
 
 ### Added
 
@@ -118,8 +121,27 @@
 - A field touched by code, for example by Signal Forms' `submit()` around a lone
   `<ngu-field>`, now shows its errors. The autofill guard (a touch needs the user's own blur)
   applies only once autofill has blurred the field.
+- Selecting text in a field inside a tab no longer jumps back to the first tab. The browser's
+  `select` event bubbled out of the input and reached the tabs, which read it as a tab choice.
+- Server-side rendering: fields with a mask, `parse`, `format` or `localized` no longer throw on
+  the server, whose DOM has no `getRootNode`. Drafts are never read or written on the server,
+  even where Node.js has a `localStorage` of its own.
+- Server-side rendering with incremental hydration (`provideClientHydration(withIncrementalHydration())`):
+  wizards, tabs, accordions, table lists and the controls that load on first use (phone, tags,
+  one-time code, rating, date range and others) now render on the server and hydrate on the
+  client. Before, the server sent empty placeholders for them. Without incremental hydration
+  nothing changes.
+- `type: 'dropdown'` fields follow `provideNguDropdownConfig` for `optionValue`, `optionLabel`
+  and `pageSize`; before, ngu-form always passed `'value'`, `'label'` and 50. Needs ngu-dropdown
+  0.1.2.
+- `NguListHarness` and the Playwright list driver add, remove and read the title of the list
+  itself when its rows hold lists of their own. `isRequired()` reads the field's
+  `data-required` attribute, so it is also true for single checkboxes and for fields drawn by
+  the Material and PrimeNG renderers.
+- The types of `ngu-form/upload` no longer let apps import internal helpers (`isFile`,
+  `asList`, `Row` and others) that exist only at the type level.
 
-## 0.5.0 (unreleased): Complex flows and layout
+## 0.5.0 (not published): Complex flows and layout
 
 ### Added
 
@@ -176,7 +198,7 @@
 - Group content inside tabs and panels has no title of its own; the tab or panel header shows
   it. `NguProblemSource` gained an optional `section`.
 
-## 0.4.0 (unreleased): Field type catalogue
+## 0.4.0 (not published): Field type catalogue
 
 ### Added
 
@@ -242,7 +264,7 @@
   and for a moment in the browser, they render a placeholder.
 - The demo's initial bundle warning budget is 520 kB (it was 500 kB).
 
-## 0.3.0 (unreleased): Validation, data and language
+## 0.3.0 (not published): Validation, data and language
 
 ### Added
 
@@ -300,7 +322,7 @@
 - **`deepEqual`, `changes()` and drafts treat only object literals as plain objects.** A
   `File`, `Blob` or `Map` value is compared by identity and is not stored in drafts.
 
-## 0.2.0 (unreleased): Everyday forms
+## 0.2.0 (not published): Everyday forms
 
 ### Added
 

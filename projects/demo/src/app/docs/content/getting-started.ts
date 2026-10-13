@@ -144,6 +144,24 @@ export class Newsletter {
         ],
       },
       {
+        id: 'ssr',
+        title: 'Server-side rendering',
+        text: [
+          'Forms render on the server and hydrate in the browser without mismatches; every example on this site is checked that way on each change. Wizards, tabs, accordions, table lists and the field types that load on first use (phone, tags, one-time code, rating, date range and others) sit in `@defer` blocks. With incremental hydration they render on the server too; without it the server sends an empty placeholder for them and the browser fills it in after start-up.',
+        ],
+        code: [
+          {
+            filename: 'app.config.ts',
+            code: `import { provideClientHydration, withEventReplay, withIncrementalHydration } from '@angular/platform-browser';
+
+providers: [provideClientHydration(withEventReplay(), withIncrementalHydration())]`,
+          },
+        ],
+        after: [
+          "Drafts, undo shortcuts and the unsaved-changes prompt start in the browser only. Data passed to `load` should come from a `resource` (or `httpResource`), which the server waits for, so the form arrives filled in.",
+        ],
+      },
+      {
         id: 'problems',
         title: 'Common problems',
         table: {
@@ -336,6 +354,104 @@ node node_modules/ngu-form/skills/ngu-form-from-image/scripts/snap.mjs http://lo
             code: 'mkdir -p .claude/skills\ncp -R node_modules/ngu-form/skills/ngu-form-from-image .claude/skills/',
             lang: 'bash',
           },
+        ],
+      },
+    ],
+  },
+
+  versioning: {
+    title: 'Versioning and support',
+    description:
+      'Which Angular versions and browsers ngu-form supports, what counts as its public API, how long a deprecated API keeps working, and what it costs in size and speed.',
+    sections: [
+      {
+        id: 'semver',
+        title: 'Version numbers',
+        text: [
+          'ngu-form follows semantic versioning from 1.0.0 on. A patch release fixes bugs, a minor release adds features without breaking your code, and only a major release removes or changes public API. Before 1.0.0, a minor release could break things; each one says how in the [changelog](/changelog).',
+        ],
+      },
+      {
+        id: 'angular',
+        title: 'Angular versions',
+        text: [
+          'Each ngu-form major supports one Angular major. Support for a new Angular major comes in a new ngu-form major, released after Angular\'s and before its next minor. Node.js and TypeScript versions follow what that Angular major supports.',
+        ],
+        table: {
+          caption: 'Supported Angular versions',
+          columns: ['ngu-form', 'Angular', 'Status'],
+          rows: [
+            ['1.x', '22.2 or newer 22.x', 'Active'],
+            ['0.6', '22.2 or newer 22.x', 'Superseded by 1.0'],
+          ],
+        },
+      },
+      {
+        id: 'public-api',
+        title: 'Public API',
+        text: ['Semantic versioning covers what you can use without reading the source:'],
+        list: [
+          'Everything exported from `ngu-form` and its entry points (`ngu-form/upload`, `ngu-form/material`, `ngu-form/primeng`, `ngu-form/dropdown`, `ngu-form/tailwind`, `ngu-form/testing`, `ngu-form/playwright`, `ngu-form/debug`), as listed in the [API reference](/api/define-form).',
+          'Spec options, `DynamicField` JSON, component inputs and outputs, and template directives.',
+          'The documented [theme tokens](/theming) (`--ngu-*` custom properties), the [class map](/tailwind#class-map) slot names, and the `data-*` state attributes on fields.',
+          'Diagnostic codes (`NGU-xxx`) and their meaning.',
+        ],
+        after: [
+          "Not public: ngu-form's internal CSS classes and DOM structure beyond the class map slots, the exact wording of built-in messages (translate them with [messages](/languages) instead of matching them), and anything whose TSDoc says `@internal` or `@experimental`. A change to these can come in any release.",
+        ],
+      },
+      {
+        id: 'deprecations',
+        title: 'Deprecations',
+        text: [
+          'An API is deprecated in a minor release and keeps working through the next major: deprecated in a 1.x release, it still works in all of 2.x and can be removed in 3.0. While it is deprecated, its TSDoc says `@deprecated` with the replacement, your editor strikes it through, and development builds log a diagnostic once. Each removal is listed in the changelog with a migration note.',
+        ],
+      },
+      {
+        id: 'size',
+        title: 'Bundle size',
+        text: [
+          'Every change is measured on a login form with three fields, built once with ngu-form and once written by hand with Signal Forms. The difference is what ngu-form adds to the first JavaScript an app loads; CI fails when it grows past the budget, and each release lists it in its notes.',
+        ],
+        table: {
+          caption: 'Initial JavaScript of the login form, measured for 0.6',
+          columns: ['Login form', 'Gzip', 'Brotli'],
+          rows: [
+            ['Written by hand with Signal Forms', '57.9 kB', '51.2 kB'],
+            ['With ngu-form', '130.9 kB', '113.1 kB'],
+            ['**Added by ngu-form**', '**73.0 kB**', '**62.0 kB**'],
+          ],
+        },
+        after: [
+          'Field types beyond the everyday inputs, wizards, tabs and table lists load on first use, and uploads live in `ngu-form/upload`, so they are not part of this number.',
+        ],
+      },
+      {
+        id: 'performance',
+        title: 'Performance',
+        text: [
+          'A 500-field form is part of the end-to-end suite. It renders in about 0.2 s, typing in any field spends about 3 ms in event handlers, well inside one frame, and checking all 500 fields after a refused submit takes about 0.1 s. CI fails when render, typing or checking go past their budgets (1 s, no long tasks while typing, and 0.3 s).',
+        ],
+      },
+      {
+        id: 'browsers',
+        title: 'Browser support',
+        text: [
+          'ngu-form supports the last two major versions of the evergreen browsers. Every pull request runs the end-to-end suite in Chromium, Firefox and WebKit.',
+        ],
+        table: {
+          caption: 'Supported browsers',
+          columns: ['Browser', 'Versions'],
+          rows: [
+            ['Chrome and Edge', 'Last two'],
+            ['Firefox', 'Last two, and the current ESR'],
+            ['Safari on macOS', 'Last two'],
+            ['Safari on iOS and iPadOS', 'Last two'],
+            ['Chrome on Android', 'Last two'],
+          ],
+        },
+        after: [
+          'Older browsers may work, but issues that only appear there are not fixed. Some field types depend on the platform: date, time, month and week pickers come from the browser, and so differ between browsers.',
         ],
       },
     ],

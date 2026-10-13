@@ -1,5 +1,6 @@
 /** A file stored by your server, as your upload function describes it. */
 export interface NguUploadedFile {
+  /** File name, shown in the file list. */
   readonly name: string;
   /** Size in bytes. */
   readonly size?: number;
@@ -7,6 +8,7 @@ export interface NguUploadedFile {
   readonly type?: string;
   /** Where the file can be fetched; image files with a `url` get a thumbnail. */
   readonly url?: string;
+  /** Your server's id for the file. ngu-form keeps it in the value and does not read it. */
   readonly id?: string | number;
 }
 
@@ -47,8 +49,9 @@ export interface NguImageOptions extends NguFileOptions {
    * `{ aspect: 1 }` crops a square, `{ aspect: 16 / 9 }` a wide frame. `false` skips cropping.
    */
   crop?: boolean | { readonly aspect?: number };
-  /** Largest output size in pixels; larger images are scaled down. */
+  /** Largest output width in pixels; wider images are scaled down. */
   maxWidth?: number;
+  /** Largest output height in pixels; taller images are scaled down. */
   maxHeight?: number;
   /** Output format. Default `'image/jpeg'`, or `'image/png'` for PNG input. */
   output?: 'image/jpeg' | 'image/png' | 'image/webp';
@@ -66,13 +69,19 @@ export interface NguSignatureOptions {
 
 declare module 'ngu-form' {
   interface NguFieldTypeMap {
+    /** `type: 'file'`, on properties holding a `File` or uploaded file, a list of them, or `null`. */
     file: readonly NguFileValue[] | NguFileValue | null;
+    /** `type: 'image'`, on the same properties as `type: 'file'`. */
     image: readonly NguFileValue[] | NguFileValue | null;
+    /** `type: 'signature'`, on `string` properties: a PNG data URL, or `''` when not signed. */
     signature: string;
   }
   interface NguFieldOptionsMap {
+    /** The options of `type: 'file'`. */
     file: NguFileOptions;
+    /** The options of `type: 'image'`. */
     image: NguImageOptions;
+    /** The options of `type: 'signature'`. */
     signature: NguSignatureOptions;
   }
 }

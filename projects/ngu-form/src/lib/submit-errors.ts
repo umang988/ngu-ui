@@ -48,4 +48,3 @@ export function resolvePath(tree: unknown, path: string): unknown {
   return typeof node === 'function' ? node : undefined;
 }
 
-declare const ngDevMode: boolean | undefined;

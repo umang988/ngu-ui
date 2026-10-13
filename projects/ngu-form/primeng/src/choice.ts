@@ -2,7 +2,8 @@ import { ChangeDetectionStrategy, Component, computed, input } from '@angular/co
 import { NguBind, type NguFieldRenderContext } from 'ngu-form';
 import { RadioButton } from 'primeng/radiobutton';
 import { SelectButton } from 'primeng/selectbutton';
-import { messageId, NguPrimeFrame } from './frame';
+import { NguPrimeFrame } from './frame';
+import { messageId } from './message-id';
 
 let nextGroup = 0;
 
@@ -61,6 +62,7 @@ let nextGroup = 0;
   `,
 })
 export class NguPrimeChoice {
+  /** The field's render context: texts, state and options, from ngu-form. */
   readonly context = input.required<NguFieldRenderContext>();
   protected readonly name = `ngu-prime-radio-${nextGroup++}`;
   protected readonly describedBy = computed(() => messageId(this.context()));

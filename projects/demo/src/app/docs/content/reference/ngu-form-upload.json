@@ -1,0 +1,675 @@
+{
+ "entry": "ngu-form/upload",
+ "symbols": [
+  {
+   "name": "formatBytes",
+   "kind": "function",
+   "summary": "\"2.4 MB\", in the locale's digits.",
+   "signature": "export declare function formatBytes(bytes: number, locale: string): string;"
+  },
+  {
+   "name": "matchesAccept",
+   "kind": "function",
+   "summary": "True when a file fits an `accept` list such as `'image/*,.pdf,application/zip'`.",
+   "signature": "export declare function matchesAccept(file: Pick<File, \"name\" | \"type\">, accept: string | undefined): boolean;"
+  },
+  {
+   "name": "NguFileInput",
+   "kind": "component",
+   "summary": "The control behind `type: 'file'` and `type: 'image'`: a file button and drop zone, and a\nlist of files with thumbnails, upload progress, Retry and Remove. Finished files are the\nvalue. Uploads that failed and files that were refused (wrong type, too large) reach the\nfield as Signal Forms parse errors, so they block a submit until the user deals with them;\nrunning uploads make `<ngu-form>` wait before it submits.",
+   "signature": "export declare class NguFileInput {\n    readonly value: import(\"@angular/core\").ModelSignal<NguFileValue | readonly NguFileValue[] | null>;\n    readonly touch: import(\"@angular/core\").OutputEmitterRef<void>;\n    readonly disabled: import(\"@angular/core\").InputSignal<boolean>;\n    readonly readonly: import(\"@angular/core\").InputSignal<boolean>;\n    readonly required: import(\"@angular/core\").InputSignal<boolean>;\n    readonly def: import(\"@angular/core\").InputSignal<LeafDef & NguImageOptions>;\n    readonly id: import(\"@angular/core\").InputSignal<string>;\n    readonly errorShown: import(\"@angular/core\").InputSignal<boolean>;\n    readonly describedBy: import(\"@angular/core\").InputSignal<string | undefined>;\n    readonly mode: import(\"@angular/core\").InputSignal<\"image\" | \"file\">;\n    constructor();\n    add(files: readonly File[]): Promise<void>;\n    focus(options?: FocusOptions): void;\n}",
+   "selector": "ngu-file-input",
+   "inputs": {
+    "value": {
+     "alias": "value",
+     "required": false
+    },
+    "disabled": {
+     "alias": "disabled",
+     "required": false
+    },
+    "readonly": {
+     "alias": "readonly",
+     "required": false
+    },
+    "required": {
+     "alias": "required",
+     "required": false
+    },
+    "def": {
+     "alias": "def",
+     "required": true
+    },
+    "id": {
+     "alias": "id",
+     "required": true
+    },
+    "errorShown": {
+     "alias": "errorShown",
+     "required": false
+    },
+    "describedBy": {
+     "alias": "describedBy",
+     "required": false
+    },
+    "mode": {
+     "alias": "mode",
+     "required": false
+    }
+   },
+   "members": [
+    {
+     "name": "value",
+     "kind": "model",
+     "type": "NguFileValue | readonly NguFileValue[] | null",
+     "description": "The finished files, as `File` objects or what `upload` returned: a list when the spec sets\n`multiple`, else one file or `null`. Bound by `[formField]`."
+    },
+    {
+     "name": "touch",
+     "kind": "output",
+     "type": "void",
+     "description": "Emits when the user leaves the file input, adds files or removes one."
+    },
+    {
+     "name": "disabled",
+     "kind": "input",
+     "type": "boolean",
+     "description": "Stops choosing and dropping files, and hides Retry and Remove. Bound by `[formField]`."
+    },
+    {
+     "name": "readonly",
+     "kind": "input",
+     "type": "boolean",
+     "description": "Shows the files but stops adding and removing them, as `disabled`. Bound by `[formField]`."
+    },
+    {
+     "name": "required",
+     "kind": "input",
+     "type": "boolean",
+     "description": "Sets `required` on the file input. Bound by `[formField]`."
+    },
+    {
+     "name": "def",
+     "kind": "input",
+     "type": "LeafDef & NguImageOptions",
+     "description": "The field's spec, with the file and image options.",
+     "required": true
+    },
+    {
+     "name": "id",
+     "kind": "input",
+     "type": "string",
+     "description": "Id of the file input, used by the label's `for`.",
+     "required": true
+    },
+    {
+     "name": "errorShown",
+     "kind": "input",
+     "type": "boolean",
+     "description": "True while the field's error shows: sets `aria-invalid` and the drop zone's error style."
+    },
+    {
+     "name": "describedBy",
+     "kind": "input",
+     "type": "string | undefined",
+     "description": "Ids for the file input's `aria-describedby`: the field's hint and messages."
+    },
+    {
+     "name": "mode",
+     "kind": "input",
+     "type": "\"image\" | \"file\"",
+     "description": "`'image'` crops and resizes images before they are added."
+    },
+    {
+     "name": "add",
+     "kind": "method",
+     "type": "(files: readonly File[]): Promise<void>;",
+     "description": "Checks, edits (images) and adds or uploads chosen files."
+    },
+    {
+     "name": "focus",
+     "kind": "method",
+     "type": "(options?: FocusOptions): void;",
+     "description": "Focuses the file input. Signal Forms calls it to focus the field."
+    }
+   ]
+  },
+  {
+   "name": "NguFileOptions",
+   "kind": "interface",
+   "summary": "Options of `type: 'file'` fields. `min` and `max` count files on list values.",
+   "signature": "export interface NguFileOptions {\n    accept?: string;\n    maxSize?: number;\n    upload?: NguUploadFn;\n}",
+   "members": [
+    {
+     "name": "accept",
+     "kind": "property",
+     "type": "string",
+     "description": "Accepted types, as the `accept` attribute: `'image/*,.pdf'`. Dropped files are checked too.",
+     "optional": true
+    },
+    {
+     "name": "maxSize",
+     "kind": "property",
+     "type": "number",
+     "description": "Largest file, in bytes.",
+     "optional": true
+    },
+    {
+     "name": "upload",
+     "kind": "property",
+     "type": "NguUploadFn",
+     "description": "Uploads each file as soon as it is chosen; the value then holds what it returns, and a\nsubmit waits for uploads that are still running. Without it, the value holds `File` objects.",
+     "optional": true
+    }
+   ]
+  },
+  {
+   "name": "NguFileUpload",
+   "kind": "component",
+   "summary": "Renderer of `type: 'file'`.",
+   "signature": "export declare class NguFileUpload {\n    readonly field: import(\"@angular/core\").InputSignal<Field<FileFieldValue>>;\n    readonly def: import(\"@angular/core\").InputSignal<LeafDef | undefined>;\n    readonly id: import(\"@angular/core\").InputSignal<string | undefined>;\n    readonly invalid: import(\"@angular/core\").InputSignal<boolean>;\n    readonly describedBy: import(\"@angular/core\").InputSignal<string | undefined>;\n}",
+   "selector": "ngu-file-upload",
+   "inputs": {
+    "field": {
+     "alias": "field",
+     "required": true
+    },
+    "def": {
+     "alias": "def",
+     "required": false
+    },
+    "id": {
+     "alias": "id",
+     "required": false
+    },
+    "invalid": {
+     "alias": "invalid",
+     "required": false
+    },
+    "describedBy": {
+     "alias": "describedBy",
+     "required": false
+    }
+   },
+   "members": [
+    {
+     "name": "field",
+     "kind": "input",
+     "type": "Field<FileFieldValue>",
+     "description": "The field to edit, bound to `<ngu-file-input>` with `[formField]`. Set by ngu-form.",
+     "required": true
+    },
+    {
+     "name": "def",
+     "kind": "input",
+     "type": "LeafDef | undefined",
+     "description": "The field's spec, with the file options. Set by ngu-form."
+    },
+    {
+     "name": "id",
+     "kind": "input",
+     "type": "string | undefined",
+     "description": "Id of the file input, used by the label's `for`. Set by ngu-form."
+    },
+    {
+     "name": "invalid",
+     "kind": "input",
+     "type": "boolean",
+     "description": "True while ngu-form shows the field's error. Set by ngu-form."
+    },
+    {
+     "name": "describedBy",
+     "kind": "input",
+     "type": "string | undefined",
+     "description": "Ids of the field's hint and messages, for `aria-describedby`. Set by ngu-form."
+    }
+   ]
+  },
+  {
+   "name": "NguFileValue",
+   "kind": "type",
+   "summary": "A file field holds `File` objects, or what `upload` returned for them.",
+   "signature": "export type NguFileValue = File | NguUploadedFile;"
+  },
+  {
+   "name": "NguImageCropper",
+   "kind": "component",
+   "summary": "A modal dialog that crops an image to a frame. The image covers the frame; people drag it\nor use the zoom and position sliders, so the dialog works with a keyboard alone. Escape\ncancels. Native `<dialog>` keeps focus inside and returns it afterwards.",
+   "signature": "export declare class NguImageCropper {\n    readonly i18n: import(\"@angular/core\").InputSignal<NguI18n>;\n    open(file: File, options: NguImageOptions & {\n        aspect?: number;\n    }): Promise<File | null>;\n}",
+   "selector": "ngu-image-cropper",
+   "inputs": {
+    "i18n": {
+     "alias": "i18n",
+     "required": true
+    }
+   },
+   "members": [
+    {
+     "name": "i18n",
+     "kind": "input",
+     "type": "NguI18n",
+     "description": "Texts of the dialog's title, hint, sliders and buttons; `<ngu-file-input>` passes the form's.",
+     "required": true
+    },
+    {
+     "name": "open",
+     "kind": "method",
+     "type": "(file: File, options: NguImageOptions & {\n    aspect?: number;\n}): Promise<File | null>;",
+     "description": "Shows the dialog for `file` and resolves with the cropped file, or `null` when cancelled."
+    }
+   ]
+  },
+  {
+   "name": "NguImageOptions",
+   "kind": "interface",
+   "summary": "Options of `type: 'image'` fields: a file field that crops and resizes images first.",
+   "signature": "export interface NguImageOptions extends NguFileOptions {\n    crop?: boolean | {\n        readonly aspect?: number;\n    };\n    maxWidth?: number;\n    maxHeight?: number;\n    output?: \"image/jpeg\" | \"image/png\" | \"image/webp\";\n    quality?: number;\n}",
+   "members": [
+    {
+     "name": "crop",
+     "kind": "property",
+     "type": "boolean | {\n    readonly aspect?: number;\n}",
+     "description": "Opens a crop dialog for each chosen image. `true` (default) keeps the image's own shape;\n`{ aspect: 1 }` crops a square, `{ aspect: 16 / 9 }` a wide frame. `false` skips cropping.",
+     "optional": true
+    },
+    {
+     "name": "maxWidth",
+     "kind": "property",
+     "type": "number",
+     "description": "Largest output width in pixels; wider images are scaled down.",
+     "optional": true
+    },
+    {
+     "name": "maxHeight",
+     "kind": "property",
+     "type": "number",
+     "description": "Largest output height in pixels; taller images are scaled down.",
+     "optional": true
+    },
+    {
+     "name": "output",
+     "kind": "property",
+     "type": "'image/jpeg' | 'image/png' | 'image/webp'",
+     "description": "Output format. Default `'image/jpeg'`, or `'image/png'` for PNG input.",
+     "optional": true
+    },
+    {
+     "name": "quality",
+     "kind": "property",
+     "type": "number",
+     "description": "Output quality from 0 to 1, for JPEG and WebP. Default 0.9.",
+     "optional": true
+    }
+   ]
+  },
+  {
+   "name": "NguImageUpload",
+   "kind": "component",
+   "summary": "Renderer of `type: 'image'`: crops and resizes before adding.",
+   "signature": "export declare class NguImageUpload {\n    readonly field: import(\"@angular/core\").InputSignal<Field<FileFieldValue>>;\n    readonly def: import(\"@angular/core\").InputSignal<LeafDef | undefined>;\n    readonly id: import(\"@angular/core\").InputSignal<string | undefined>;\n    readonly invalid: import(\"@angular/core\").InputSignal<boolean>;\n    readonly describedBy: import(\"@angular/core\").InputSignal<string | undefined>;\n}",
+   "selector": "ngu-image-upload",
+   "inputs": {
+    "field": {
+     "alias": "field",
+     "required": true
+    },
+    "def": {
+     "alias": "def",
+     "required": false
+    },
+    "id": {
+     "alias": "id",
+     "required": false
+    },
+    "invalid": {
+     "alias": "invalid",
+     "required": false
+    },
+    "describedBy": {
+     "alias": "describedBy",
+     "required": false
+    }
+   },
+   "members": [
+    {
+     "name": "field",
+     "kind": "input",
+     "type": "Field<FileFieldValue>",
+     "description": "The field to edit, bound to `<ngu-file-input>` with `[formField]`. Set by ngu-form.",
+     "required": true
+    },
+    {
+     "name": "def",
+     "kind": "input",
+     "type": "LeafDef | undefined",
+     "description": "The field's spec, with the image options. Set by ngu-form."
+    },
+    {
+     "name": "id",
+     "kind": "input",
+     "type": "string | undefined",
+     "description": "Id of the file input, used by the label's `for`. Set by ngu-form."
+    },
+    {
+     "name": "invalid",
+     "kind": "input",
+     "type": "boolean",
+     "description": "True while ngu-form shows the field's error. Set by ngu-form."
+    },
+    {
+     "name": "describedBy",
+     "kind": "input",
+     "type": "string | undefined",
+     "description": "Ids of the field's hint and messages, for `aria-describedby`. Set by ngu-form."
+    }
+   ]
+  },
+  {
+   "name": "NguSignature",
+   "kind": "component",
+   "summary": "Renderer of `type: 'signature'`.",
+   "signature": "export declare class NguSignature {\n    readonly field: import(\"@angular/core\").InputSignal<Field<string>>;\n    readonly def: import(\"@angular/core\").InputSignal<LeafDef | undefined>;\n    readonly id: import(\"@angular/core\").InputSignal<string | undefined>;\n    readonly invalid: import(\"@angular/core\").InputSignal<boolean>;\n    readonly describedBy: import(\"@angular/core\").InputSignal<string | undefined>;\n}",
+   "selector": "ngu-signature",
+   "inputs": {
+    "field": {
+     "alias": "field",
+     "required": true
+    },
+    "def": {
+     "alias": "def",
+     "required": false
+    },
+    "id": {
+     "alias": "id",
+     "required": false
+    },
+    "invalid": {
+     "alias": "invalid",
+     "required": false
+    },
+    "describedBy": {
+     "alias": "describedBy",
+     "required": false
+    }
+   },
+   "members": [
+    {
+     "name": "field",
+     "kind": "input",
+     "type": "Field<string>",
+     "description": "The field to edit, bound to `<ngu-signature-pad>` with `[formField]`. Set by ngu-form.",
+     "required": true
+    },
+    {
+     "name": "def",
+     "kind": "input",
+     "type": "LeafDef | undefined",
+     "description": "The field's spec, with the signature options. Set by ngu-form."
+    },
+    {
+     "name": "id",
+     "kind": "input",
+     "type": "string | undefined",
+     "description": "Id of the signature control, used by the label's `for`. Set by ngu-form."
+    },
+    {
+     "name": "invalid",
+     "kind": "input",
+     "type": "boolean",
+     "description": "True while ngu-form shows the field's error. Set by ngu-form."
+    },
+    {
+     "name": "describedBy",
+     "kind": "input",
+     "type": "string | undefined",
+     "description": "Ids of the field's hint and messages, for `aria-describedby`. Set by ngu-form."
+    }
+   ]
+  },
+  {
+   "name": "NguSignatureOptions",
+   "kind": "interface",
+   "summary": "Options of `type: 'signature'` fields. The value is a PNG data URL, or `''` when not signed.",
+   "signature": "export interface NguSignatureOptions {\n    penColor?: string;\n    height?: number;\n}",
+   "members": [
+    {
+     "name": "penColor",
+     "kind": "property",
+     "type": "string",
+     "description": "Pen color. Default: the text color.",
+     "optional": true
+    },
+    {
+     "name": "height",
+     "kind": "property",
+     "type": "number",
+     "description": "Height of the pad in CSS pixels. Default 160.",
+     "optional": true
+    }
+   ]
+  },
+  {
+   "name": "NguSignaturePad",
+   "kind": "component",
+   "summary": "A signature drawn with a mouse, finger or pen, stored as a PNG data URL (`''` when empty).\n\"Type instead\" offers a text field whose name is drawn in a handwriting font, so the field\ncan be completed with a keyboard alone.",
+   "signature": "export declare class NguSignaturePad {\n    readonly value: import(\"@angular/core\").ModelSignal<string>;\n    readonly touch: import(\"@angular/core\").OutputEmitterRef<void>;\n    readonly disabled: import(\"@angular/core\").InputSignal<boolean>;\n    readonly readonly: import(\"@angular/core\").InputSignal<boolean>;\n    readonly required: import(\"@angular/core\").InputSignal<boolean>;\n    readonly def: import(\"@angular/core\").InputSignal<LeafDef & NguSignatureOptions>;\n    readonly id: import(\"@angular/core\").InputSignal<string>;\n    readonly errorShown: import(\"@angular/core\").InputSignal<boolean>;\n    readonly describedBy: import(\"@angular/core\").InputSignal<string | undefined>;\n    constructor();\n    focus(options?: FocusOptions): void;\n}",
+   "selector": "ngu-signature-pad",
+   "inputs": {
+    "value": {
+     "alias": "value",
+     "required": false
+    },
+    "disabled": {
+     "alias": "disabled",
+     "required": false
+    },
+    "readonly": {
+     "alias": "readonly",
+     "required": false
+    },
+    "required": {
+     "alias": "required",
+     "required": false
+    },
+    "def": {
+     "alias": "def",
+     "required": true
+    },
+    "id": {
+     "alias": "id",
+     "required": true
+    },
+    "errorShown": {
+     "alias": "errorShown",
+     "required": false
+    },
+    "describedBy": {
+     "alias": "describedBy",
+     "required": false
+    }
+   },
+   "members": [
+    {
+     "name": "value",
+     "kind": "model",
+     "type": "string",
+     "description": "The signature as a PNG data URL, or `''` when not signed. Bound by `[formField]`."
+    },
+    {
+     "name": "touch",
+     "kind": "output",
+     "type": "void",
+     "description": "Emits when the user finishes a stroke or leaves the name input."
+    },
+    {
+     "name": "disabled",
+     "kind": "input",
+     "type": "boolean",
+     "description": "Stops drawing and typing, and disables the buttons. Bound by `[formField]`."
+    },
+    {
+     "name": "readonly",
+     "kind": "input",
+     "type": "boolean",
+     "description": "Shows the signature but stops changes to it, as `disabled`. Bound by `[formField]`."
+    },
+    {
+     "name": "required",
+     "kind": "input",
+     "type": "boolean",
+     "description": "Sets `required` on the name input of \"Type instead\". Bound by `[formField]`."
+    },
+    {
+     "name": "def",
+     "kind": "input",
+     "type": "LeafDef & NguSignatureOptions",
+     "description": "The field's spec, with the signature options.",
+     "required": true
+    },
+    {
+     "name": "id",
+     "kind": "input",
+     "type": "string",
+     "description": "Id of the name input while typing, else of the pad; the label's `for` points at it.",
+     "required": true
+    },
+    {
+     "name": "errorShown",
+     "kind": "input",
+     "type": "boolean",
+     "description": "True while the field's error shows: sets the error style and the name input's `aria-invalid`."
+    },
+    {
+     "name": "describedBy",
+     "kind": "input",
+     "type": "string | undefined",
+     "description": "Ids for the name input's `aria-describedby`: the field's hint and messages."
+    },
+    {
+     "name": "focus",
+     "kind": "method",
+     "type": "(options?: FocusOptions): void;",
+     "description": "Focuses the name input while typing, else the \"Type instead\" button. Signal Forms calls it to\nfocus the field."
+    }
+   ]
+  },
+  {
+   "name": "NguUploadContext",
+   "kind": "interface",
+   "summary": "Passed to an upload function.",
+   "signature": "export interface NguUploadContext {\n    progress(fraction: number): void;\n    readonly signal: AbortSignal;\n}",
+   "members": [
+    {
+     "name": "progress",
+     "kind": "method",
+     "type": "(fraction: number): void;",
+     "description": "Reports progress from 0 to 1."
+    },
+    {
+     "name": "signal",
+     "kind": "property",
+     "type": "AbortSignal",
+     "description": "Aborted when the user removes the file, or the form resets."
+    }
+   ]
+  },
+  {
+   "name": "NguUploadedFile",
+   "kind": "interface",
+   "summary": "A file stored by your server, as your upload function describes it.",
+   "signature": "export interface NguUploadedFile {\n    readonly name: string;\n    readonly size?: number;\n    readonly type?: string;\n    readonly url?: string;\n    readonly id?: string | number;\n}",
+   "members": [
+    {
+     "name": "name",
+     "kind": "property",
+     "type": "string",
+     "description": "File name, shown in the file list."
+    },
+    {
+     "name": "size",
+     "kind": "property",
+     "type": "number",
+     "description": "Size in bytes.",
+     "optional": true
+    },
+    {
+     "name": "type",
+     "kind": "property",
+     "type": "string",
+     "description": "MIME type, such as `image/png`.",
+     "optional": true
+    },
+    {
+     "name": "url",
+     "kind": "property",
+     "type": "string",
+     "description": "Where the file can be fetched; image files with a `url` get a thumbnail.",
+     "optional": true
+    },
+    {
+     "name": "id",
+     "kind": "property",
+     "type": "string | number",
+     "description": "Your server's id for the file. ngu-form keeps it in the value and does not read it.",
+     "optional": true
+    }
+   ]
+  },
+  {
+   "name": "NguUploadFn",
+   "kind": "type",
+   "summary": "Uploads one file and describes the stored result. Throw (or reject) to mark the upload as\nfailed; the user can retry it.",
+   "signature": "export type NguUploadFn = (file: File, context: NguUploadContext) => Promise<NguUploadedFile>;"
+  },
+  {
+   "name": "provideNguUpload",
+   "kind": "function",
+   "summary": "Registers `type: 'file'`, `type: 'image'` and `type: 'signature'`. Add it next to your other\nproviders; importing `ngu-form/upload` also teaches TypeScript the three types.\n\n```ts\nproviders: [provideNguUpload()]\n```",
+   "signature": "export declare function provideNguUpload(): Provider;"
+  },
+  {
+   "name": "declare module 'ngu-form'",
+   "kind": "augmentation",
+   "summary": "Adds to the interfaces of `ngu-form`.",
+   "signature": "declare module 'ngu-form' {\n    interface NguFieldTypeMap {\n        file: readonly NguFileValue[] | NguFileValue | null;\n        image: readonly NguFileValue[] | NguFileValue | null;\n        signature: string;\n    }\n    interface NguFieldOptionsMap {\n        file: NguFileOptions;\n        image: NguImageOptions;\n        signature: NguSignatureOptions;\n    }\n}",
+   "members": [
+    {
+     "name": "NguFieldTypeMap.file",
+     "kind": "property",
+     "type": "readonly NguFileValue[] | NguFileValue | null",
+     "description": "`type: 'file'`, on properties holding a `File` or uploaded file, a list of them, or `null`."
+    },
+    {
+     "name": "NguFieldTypeMap.image",
+     "kind": "property",
+     "type": "readonly NguFileValue[] | NguFileValue | null",
+     "description": "`type: 'image'`, on the same properties as `type: 'file'`."
+    },
+    {
+     "name": "NguFieldTypeMap.signature",
+     "kind": "property",
+     "type": "string",
+     "description": "`type: 'signature'`, on `string` properties: a PNG data URL, or `''` when not signed."
+    },
+    {
+     "name": "NguFieldOptionsMap.file",
+     "kind": "property",
+     "type": "NguFileOptions",
+     "description": "The options of `type: 'file'`."
+    },
+    {
+     "name": "NguFieldOptionsMap.image",
+     "kind": "property",
+     "type": "NguImageOptions",
+     "description": "The options of `type: 'image'`."
+    },
+    {
+     "name": "NguFieldOptionsMap.signature",
+     "kind": "property",
+     "type": "NguSignatureOptions",
+     "description": "The options of `type: 'signature'`."
+    }
+   ]
+  }
+ ]
+}

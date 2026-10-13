@@ -1,6 +1,6 @@
 import type { DocsSite } from 'docs-kit/site';
 import { NAV } from './docs/nav';
-import { VERSION } from './version';
+import { DROPDOWN_VERSION, VERSION } from './version';
 
 export const SITE: DocsSite = {
   name: 'ngu-form',
@@ -18,6 +18,11 @@ export const SITE: DocsSite = {
       { label: 'Changelog', path: '/changelog' },
       { label: 'Examples', path: '/examples' },
     ],
+  },
+  stackblitz: {
+    angular: '^22.2.0',
+    typescript: '~6.0.2',
+    dependencies: { 'ngu-form': `^${VERSION}`, 'ngu-dropdown': `^${DROPDOWN_VERSION}`, zod: '^4.6.5' },
   },
   sourceDir: 'projects/ngu-form',
 };

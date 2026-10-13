@@ -2,6 +2,10 @@ import { InjectionToken, type Provider } from '@angular/core';
 import type { NguLookConfig } from './look';
 import type { Breakpoint, Cols } from './types';
 
+/**
+ * Options for `provideNguFormConfig`: responsive breakpoints, the leave dialog, and the look of
+ * every form.
+ */
 export interface NguFormConfig extends NguLookConfig {
   /**
    * Minimum form widths, in CSS pixels, for responsive `cols`. Measured on `<ngu-form>`
@@ -18,6 +22,7 @@ export interface NguFormConfig extends NguLookConfig {
 
 export const DEFAULT_BREAKPOINTS: Readonly<Record<Breakpoint, number>> = { sm: 480, md: 720, lg: 960 };
 
+/** App-wide options, set by `provideNguFormConfig`. */
 export const NGU_FORM_CONFIG = new InjectionToken<NguFormConfig>('NGU_FORM_CONFIG');
 
 /** Sets app-wide options for ngu-form. */

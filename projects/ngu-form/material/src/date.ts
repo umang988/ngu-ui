@@ -62,6 +62,7 @@ import { errorMatcher, fromPicker, NGU_MATERIAL_OPTIONS, toPicker } from './shar
   `,
 })
 export class NguMatDate<D = unknown> {
+  /** The field's render context: texts, state and options, from ngu-form. */
   readonly context = input.required<NguFieldRenderContext>();
   protected readonly options = inject(NGU_MATERIAL_OPTIONS);
   protected readonly matcher = errorMatcher(this.context);
@@ -127,6 +128,7 @@ export class NguMatDate<D = unknown> {
   `,
 })
 export class NguMatDateRange<D = unknown> {
+  /** The field's render context: texts, state and options, from ngu-form. */
   readonly context = input.required<NguFieldRenderContext>();
   protected readonly options = inject(NGU_MATERIAL_OPTIONS);
   protected readonly matcher = errorMatcher(this.context);

@@ -16,6 +16,10 @@ interface Envelope {
 
 function webStorage(kind: 'local' | 'session'): DraftStorage {
   const store = (): Storage | undefined => {
+    // Never on the server: Node's own localStorage, where it exists, is shared by every request.
+    if (typeof window === 'undefined') {
+      return undefined;
+    }
     try {
       return kind === 'local' ? globalThis.localStorage : globalThis.sessionStorage;
     } catch {

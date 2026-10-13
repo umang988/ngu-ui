@@ -3,6 +3,7 @@ import { RouterLink } from '@angular/router';
 import { CodeBlock } from '../ui/code-block';
 import { DemoCard } from './demo-card';
 import { DocMarkdown } from './doc-markdown';
+import { ApiRows } from './api-table';
 import { DocText } from './doc-text';
 import type { DocSection } from './model';
 
@@ -12,7 +13,7 @@ import type { DocSection } from './model';
  */
 @Component({
   selector: 'app-doc-section',
-  imports: [RouterLink, CodeBlock, DemoCard, DocText, DocMarkdown],
+  imports: [RouterLink, CodeBlock, DemoCard, DocText, DocMarkdown, ApiRows],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { class: 'doc-section' },
   template: `
@@ -74,6 +75,9 @@ import type { DocSection } from './model';
           </tbody>
         </table>
       </div>
+    }
+    @if (s.api; as rows) {
+      <app-api-rows [rows]="rows" [label]="s.title" />
     }
     @if (s.markdown; as md) {
       <app-doc-markdown [src]="md" />

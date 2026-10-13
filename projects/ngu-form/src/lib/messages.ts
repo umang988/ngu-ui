@@ -24,15 +24,26 @@ export type NguMessage<P extends object = object> = string | ((params: P) => str
 /** Every text ngu-form renders itself, with English defaults in `NGU_DEFAULT_MESSAGES`. */
 export interface NguMessages {
   // --- validation ---------------------------------------------------------
+  /** Shown when a required field is empty. Params: `label`. */
   required: NguMessage<{ label: string }>;
+  /** Shown when an `email` field holds an invalid address. Params: `label`. */
   email: NguMessage<{ label: string }>;
+  /** Shown when text is shorter than `minLength`. Params: `label`, `minLength`. */
   minLength: NguMessage<{ label: string; minLength: number }>;
+  /** Shown when text is longer than `maxLength`. Params: `label`, `maxLength`. */
   maxLength: NguMessage<{ label: string; maxLength: number }>;
+  /** Shown when a number is below `min`. Params: `label`, `min`. */
   min: NguMessage<{ label: string; min: number }>;
+  /** Shown when a number is above `max`. Params: `label`, `max`. */
   max: NguMessage<{ label: string; max: number }>;
   /** `min` is a `Date` on date fields, and formatted text on time, month and week fields. */
   minDate: NguMessage<{ label: string; min: Date | string }>;
+  /** Shown when a date or time is after `max`. Params: `label`, `max`, typed as in `minDate`. */
   maxDate: NguMessage<{ label: string; max: Date | string }>;
+  /**
+   * Shown when text does not match `pattern`, or a time, month, week or color value has the wrong
+   * format. Params: `label`.
+   */
   pattern: NguMessage<{ label: string }>;
   /** A `url` field holds something other than a full http or https address. */
   url: NguMessage<{ label: string }>;
@@ -40,6 +51,7 @@ export interface NguMessages {
   phone: NguMessage<{ label: string }>;
   /** Too few or too many options chosen in a checkbox group or multiple select. */
   minSelected: NguMessage<{ label: string; min: number }>;
+  /** Shown when more options are chosen than `max` allows. Params: `label`, `max`. */
   maxSelected: NguMessage<{ label: string; max: number }>;
   /** A date range ends before it starts. */
   dateRange: NguMessage<{ label: string }>;
@@ -67,25 +79,33 @@ export interface NguMessages {
   warningPrefix: NguMessage;
 
   // --- lists ----------------------------------------------------------------
+  /** Label of a list's add button, unless the list sets `addLabel`. */
   add: NguMessage;
+  /** Label of a row's remove button, unless the list sets `removeLabel`. */
   remove: NguMessage;
   /** Accessible name of a row's remove button, such as "Remove 2". */
   removeItem: NguMessage<{ label: string; index: number }>;
+  /** Shown in a list without rows. Params: `add`, the add button's label. */
   emptyList: NguMessage<{ add: string }>;
+  /** Shown in a list without rows that has no add button or is read-only. */
   emptyListNoAdd: NguMessage;
   /** `label` of a list without a title. */
   listFallback: NguMessage;
+  /** Shown when a list, or a tags or file field, holds fewer entries than `min`. Params: `label`, `min`. */
   minItems: NguMessage<{ label: string; min: number }>;
+  /** Shown when a list, or a tags or file field, holds more entries than `max`. Params: `label`, `max`. */
   maxItems: NguMessage<{ label: string; max: number }>;
-  /** A row without a summary, and the row number in tables. */
+  /** Heading of a collapsible row whose `summary` returns empty text. Params: `index`. */
   entry: NguMessage<{ index: number }>;
   /** Accessible names of a row's move buttons. */
   moveUp: NguMessage<{ index: number }>;
+  /** Accessible name of a row's Move down button. Params: `index`. */
   moveDown: NguMessage<{ index: number }>;
   /** Tooltip of a row's drag handle. */
   dragToReorder: NguMessage;
   /** Announced after a row moved. */
   rowMoved: NguMessage<{ index: number; count: number }>;
+  /** Label of a row's copy button when the list sets `duplicate: true`. */
   duplicate: NguMessage;
   /** Accessible name of a row's duplicate button, such as "Duplicate entry 2". */
   duplicateItem: NguMessage<{ label: string; index: number }>;
@@ -95,6 +115,7 @@ export interface NguMessages {
   rowNeedsAttention: NguMessage;
   /** Under a long list whose problem rows are scrolled out of view. */
   rowsNeedAttention: NguMessage<{ count: number; rows: string }>;
+  /** Button after `rowsNeedAttention` that brings the first of those rows into view. Params: `index`. */
   goToEntry: NguMessage<{ index: number }>;
   /** Header of the row number column in tables, read by screen readers; `#` is shown. */
   rowNumber: NguMessage;
@@ -106,38 +127,55 @@ export interface NguMessages {
   sectionProblems: NguMessage<{ count: number }>;
   /** Accessible name of the wizard's step list. */
   stepsLabel: NguMessage;
+  /** Shown before each step's title, such as "Step 2 of 4". Params: `index`, `count`. */
   stepProgress: NguMessage<{ index: number; count: number }>;
   /** Read after a finished step in the step list. */
   stepDone: NguMessage;
+  /** Label of the wizard's Next button. */
   next: NguMessage;
+  /** Label of the wizard's Back button. */
   back: NguMessage;
   /** Next button after an Edit link on the review step. */
   backToReview: NguMessage;
   /** Default title of the review step. */
   review: NguMessage;
+  /** Button on the review step that goes back to a step; screen readers hear the step title after it. */
   edit: NguMessage;
 
   // --- view mode ----------------------------------------------------------------
+  /** A ticked checkbox or switch in view mode, and a `true` value of a custom type. */
   yes: NguMessage;
+  /** An unticked checkbox or switch in view mode, and a `false` value of a custom type. */
   no: NguMessage;
   /** An empty value in view mode. */
   notProvided: NguMessage;
   /** A password in view mode. */
   secret: NguMessage;
+  /** A rating in view mode, such as "4 of 5". Params: `value`, `max`. */
   ratingValue: NguMessage<{ value: number; max: number }>;
+  /** A given consent in view mode. Params: `date`, the formatted date and time it was given. */
   consentGiven: NguMessage<{ date: string }>;
 
   // --- inputs ---------------------------------------------------------------
+  /** Text of the button that shows a password. */
   showPassword: NguMessage;
+  /** Text of that button while the password shows. */
   hidePassword: NguMessage;
+  /** Accessible name of the button that shows a password. */
   showPasswordLabel: NguMessage;
+  /** Accessible name of that button while the password shows. */
   hidePasswordLabel: NguMessage;
+  /** Announced after the password is shown. */
   passwordShown: NguMessage;
+  /** Announced after the password is hidden again. */
   passwordHidden: NguMessage;
+  /** Read by screen readers with the character counter. Params: `count`, the characters left. */
   charactersLeft: NguMessage<{ count: number }>;
+  /** Read with the character counter once the text is too long. Params: `count`, the characters over. */
   charactersOver: NguMessage<{ count: number }>;
   /** Labels of the two inputs of a date range. */
   dateFrom: NguMessage;
+  /** Label of a date range's end input, unless the field sets `toLabel`. */
   dateTo: NguMessage;
   /** Accessible name of the country picker on phone fields. */
   countryCode: NguMessage;
@@ -145,8 +183,11 @@ export interface NguMessages {
   ratingStar: NguMessage<{ count: number }>;
   /** Accessible name of a tag's remove button. */
   removeTag: NguMessage<{ tag: string }>;
+  /** Announced after tags are added. Params: `tag`, the new tags joined with commas. */
   tagAdded: NguMessage<{ tag: string }>;
+  /** Announced after a tag is removed. Params: `tag`. */
   tagRemoved: NguMessage<{ tag: string }>;
+  /** Announced when a typed tag is already in the list, so nothing is added. Params: `tag`. */
   tagDuplicate: NguMessage<{ tag: string }>;
   /** Shown under a multiple select on devices with a mouse. */
   multiSelectHint: NguMessage;
@@ -156,47 +197,75 @@ export interface NguMessages {
   captchaLabel: NguMessage;
 
   // --- files (ngu-form/upload) ------------------------------------------------
+  /** Label of the file picker button of a single-file field. */
   chooseFile: NguMessage;
+  /** Label of the file picker button of a field that takes several files. */
   chooseFiles: NguMessage;
+  /** Shown next to the file picker button. Params: `multiple`, true when the field takes several files. */
   dropHint: NguMessage<{ multiple: boolean }>;
   /** Status of a file being uploaded. */
   uploading: NguMessage<{ percent: number }>;
+  /** Status of a finished upload. Currently unused: the built-in file field shows the file size instead. */
   uploaded: NguMessage;
+  /** Status of a file whose upload failed, also announced after its name. */
   uploadFailed: NguMessage;
   /** Field error while files failed to upload. */
   uploadsFailed: NguMessage<{ count: number }>;
+  /** Label of the button that retries a failed upload. */
   retryUpload: NguMessage;
+  /** Accessible name of a file's remove button. Params: `name`, the file name. */
   removeFile: NguMessage<{ name: string }>;
+  /** Shown for a chosen file over `maxSize`, which is not added. Params: `name`, `size`, the limit. */
   fileTooLarge: NguMessage<{ name: string; size: string }>;
+  /** Shown for a chosen file that `accept` does not allow, which is not added. Params: `name`. */
   fileType: NguMessage<{ name: string }>;
   /** Announced after files are added or removed. */
   filesAdded: NguMessage<{ count: number }>;
+  /** Announced after a file is removed. Params: `name`. */
   fileRemoved: NguMessage<{ name: string }>;
+  /** Title of the crop dialog of image fields. */
   cropTitle: NguMessage;
+  /** Instructions under the crop dialog's title. */
   cropHint: NguMessage;
+  /** Label of the crop dialog's zoom slider. */
   cropZoom: NguMessage;
   /** Sliders that move the image inside the crop frame, for keyboard users. */
   cropX: NguMessage;
+  /** Label of the crop dialog's vertical position slider. */
   cropY: NguMessage;
+  /** Crop dialog button that adds the cropped image. */
   cropApply: NguMessage;
+  /** Crop dialog button that closes it without adding the image. */
   cropCancel: NguMessage;
+  /** Accessible name of the signature drawing area. */
   signaturePad: NguMessage;
+  /** Label of the button that clears a signature. */
   signatureClear: NguMessage;
+  /** Label of the button that switches a signature field to typing a name. */
   signatureType: NguMessage;
+  /** Label of that button while a name is typed, to switch back to drawing. */
   signatureDraw: NguMessage;
+  /** Placeholder of the name input of a typed signature. */
   signatureName: NguMessage;
+  /** Added to the drawing area's accessible name once it holds a signature. */
   signatureSigned: NguMessage;
 
   // --- password strength ----------------------------------------------------
-  /** Accessible value of the strength meter. */
+  /** Text under the strength meter, also its accessible value. Params: `level`. */
   strength: NguMessage<{ level: string }>;
+  /** Name of each score, from 0 (too weak) to 4 (strong); fills `level` in `strength`. Params: `score`. */
   strengthLevels: NguMessage<{ score: number }>;
+  /** Checklist rule for the minimum length. Params: `min`. */
   ruleLength: NguMessage<{ min: number }>;
+  /** Checklist rule for upper and lower case letters. */
   ruleCase: NguMessage;
+  /** Checklist rule for a digit. */
   ruleNumber: NguMessage;
+  /** Checklist rule for a symbol. */
   ruleSymbol: NguMessage;
   /** Read after each rule by screen readers. */
   ruleMet: NguMessage;
+  /** Read after a rule that is not met yet, by screen readers. */
   ruleUnmet: NguMessage;
   /** Error when the password is weaker than `strength.min`. */
   weakPassword: NguMessage<{ label: string }>;
@@ -208,14 +277,21 @@ export interface NguMessages {
   submitFailed: NguMessage;
   /** Asked by `nguUnsavedChangesGuard`. */
   unsavedChanges: NguMessage;
+  /** Heading of the error summary of `<ngu-form errorSummary>`. Params: `count`. */
   errorSummaryTitle: NguMessage<{ count: number }>;
+  /** Read by screen readers while the form's `load` runs. */
   loading: NguMessage;
+  /** Shown instead of the fields when the form's `load` fails. */
   loadFailed: NguMessage;
+  /** Notice after a saved draft was restored. Params: `time`, when the draft was saved. */
   draftRestored: NguMessage<{ time: string }>;
+  /** Button on the restored-draft notice that drops the draft. */
   discardDraft: NguMessage;
   /** Announced after the draft was discarded. */
   draftDiscarded: NguMessage;
+  /** Announced after Ctrl+Z or ⌘Z undoes a change. */
   undone: NguMessage;
+  /** Announced after Ctrl+Shift+Z, ⌘⇧Z or Ctrl+Y redoes a change. */
   redone: NguMessage;
 }
 
@@ -233,6 +309,7 @@ export interface NguMessagesConfig extends Partial<NguMessages> {
   readonly translate?: (key: string, params?: Readonly<Record<string, unknown>>) => string | null | undefined;
 }
 
+/** The English text of every message, used for keys that no config sets. */
 export const NGU_DEFAULT_MESSAGES: Readonly<NguMessages> = {
   required: '{label} is required',
   email: 'Enter a valid email address',
@@ -421,8 +498,10 @@ type ParamsOf<K extends keyof NguMessages> = NguMessages[K] extends NguMessage<i
 
 /** Resolves ngu-form's own texts and the app's labels for the current language. */
 export interface NguI18n {
+  /** The BCP 47 locale in use: the configs' `locale`, else `LOCALE_ID`, else `'en-US'`. */
   readonly locale: Signal<string>;
   /** A built-in message. */
+  // eslint-disable-next-line @typescript-eslint/no-empty-object-type -- `{} extends P` asks whether every param is optional
   message<K extends keyof NguMessages>(key: K, ...params: {} extends ParamsOf<K> ? [ParamsOf<K>?] : [ParamsOf<K>]): string;
   /** An app string (label, hint, option label), through `translate` when one is set. */
   text(value: string): string;

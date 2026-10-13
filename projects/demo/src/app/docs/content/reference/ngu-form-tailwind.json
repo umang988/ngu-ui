@@ -1,0 +1,11 @@
+{
+ "entry": "ngu-form/tailwind",
+ "symbols": [
+  {
+   "name": "nguTailwind",
+   "kind": "const",
+   "summary": "A complete Tailwind 4 look for ngu-form, as a class map. Use it with `theme: 'none'`, and\nimport `ngu-form/tailwind.css` after Tailwind so these classes are generated and the\n`ngu-accent` color exists:\n\n```ts\nprovideNguFormConfig({ theme: 'none', classes: nguTailwind })\n```\n\nChange a slot with a spread, `{ ...nguTailwind, submit: '…' }`, or add to one per form and\nper field with `classes`. Colors follow Tailwind's `dark:` variant.",
+   "signature": "export declare const nguTailwind: Required<NguClassMap>;"
+  }
+ ]
+}

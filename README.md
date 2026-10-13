@@ -1,22 +1,33 @@
-# ngu-form workspace
+# ngu-ui workspace
 
-Angular 22 workspace for the `ngu-form` library and its demo app.
+Angular 22 workspace for two libraries, [`ngu-form`](projects/ngu-form/README.md) and
+[`ngu-dropdown`](projects/ngu-dropdown/README.md), and their docs sites.
 
 | Path | What |
 | --- | --- |
-| `projects/ngu-form` | The publishable library (ng-packagr). See its [README](projects/ngu-form/README.md). |
-| `projects/demo` | Demo app that imports the library from source. |
+| `projects/ngu-form` | The ngu-form library (ng-packagr) and its schematics. |
+| `projects/ngu-dropdown` | The ngu-dropdown library. |
+| `projects/demo` | ngu-form's docs site, https://ngu-form.netlify.app. Imports the libraries from source. |
+| `projects/ngu-dropdown-demo` | ngu-dropdown's docs site, https://ngu-dropdown.netlify.app. |
+| `projects/docs-kit` | Shared docs shell, agent-docs generator and API reference generator. |
+| `projects/size-check`, `projects/ssr-check` | Bundle size and server-rendering checks. Not deployed. |
+| `e2e` | Playwright suites over the built sites ([README](e2e/README.md)). |
+| `api` | Generated public API reports, compared in CI. |
 
-Plans and progress: [ROADMAP.md](ROADMAP.md).
+Plans and progress: [ROADMAP.md](ROADMAP.md). How to work on it: [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Commands
 
 ```sh
-npm start                      # serve the demo on http://localhost:4200
-npm run build -- ngu-form      # build the library into dist/ngu-form
-npm run build -- demo          # build the demo
-npx ng test ngu-form           # library specs (vitest)
-npx ng test demo               # demo specs
+npm start                      # ngu-form docs site on http://localhost:4200
+npm run dropdown               # ngu-dropdown docs site on http://localhost:4301
+npm run build:dropdown         # dist/ngu-dropdown (build it first: ngu-form/dropdown uses it)
+npm run build:form             # dist/ngu-form, its schematics and agent docs
+npx ng test ngu-form --watch=false --include=projects/ngu-form/src/lib/define.spec.ts
+npm run lint
+npm run api:check              # after the builds: API report and TSDoc coverage
+node scripts/size.mjs --build --check
+npm run e2e -- --project=chromium   # after building the sites; see e2e/README.md
 ```
 
 The root `tsconfig.json` maps `ngu-form` to `projects/ngu-form/src/public-api.ts`,
@@ -45,8 +56,6 @@ After changing `angular.json`, restart `ng serve`; the dev server does not reloa
 
 ## Publish
 
-```sh
-npx ng build ngu-form
-cd dist/ngu-form
-npm publish --access public
-```
+Releases run from GitHub Actions: bump the version, date the changelog section, then run the
+**Release** workflow on `main`. It publishes with npm provenance, tags the commit and creates a
+GitHub release. See [CONTRIBUTING.md](CONTRIBUTING.md#releases).

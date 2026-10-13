@@ -120,6 +120,7 @@ export class NguStrength {
   protected readonly look = injectNguLook();
   /** The password typed so far. */
   readonly value = input.required<string>();
+  /** The field's `strength` options, with `true` passed as `{}`: checklist rules and score. */
   readonly options = input.required<StrengthOptions>();
   /** Length rule for the default checklist: the field's `minLength`, or 8. */
   readonly minLength = input.required<number>();

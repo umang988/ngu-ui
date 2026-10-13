@@ -10,6 +10,7 @@ const api = (key: string) => () => import('./content/api').then((m) => m.PAGES[k
 const systems = (key: string) => () => import('./content/design-systems').then((m) => m.PAGES[key]);
 const tools = (key: string) => () => import('./content/tools').then((m) => m.PAGES[key]);
 const migration = (key: string) => () => import('./content/migration').then((m) => m.PAGES[key]);
+const reference = (entry: string) => () => import('./content/reference').then((m) => m.referencePage(entry));
 
 /** The sidebar, in reading order. Previous and next links follow it too. */
 export const NAV: readonly NavGroup[] = [
@@ -20,6 +21,7 @@ export const NAV: readonly NavGroup[] = [
       { title: 'Installation', path: 'installation', load: start('installation') },
       { title: 'Configuration', path: 'configuration', load: start('configuration') },
       { title: 'AI coding agents', path: 'ai-agents', load: start('ai-agents') },
+      { title: 'Versioning and support', path: 'versioning', load: start('versioning') },
       { title: 'Changelog', path: 'changelog', load: start('changelog') },
     ],
   },
@@ -123,6 +125,21 @@ export const NAV: readonly NavGroup[] = [
       { title: '<ngu-form>', path: 'api/ngu-form', load: api('ngu-form') },
       { title: '<ngu-view>', path: 'api/ngu-view', load: api('ngu-view') },
       { title: 'Providers and helpers', path: 'api/providers', load: api('providers') },
+    ],
+  },
+  {
+    // Generated from the package's .d.ts files and TSDoc: `npm run api:update`.
+    title: 'API reference',
+    items: [
+      { title: 'ngu-form', path: 'reference/ngu-form', load: reference('ngu-form') },
+      { title: 'ngu-form/upload', path: 'reference/upload', load: reference('ngu-form/upload') },
+      { title: 'ngu-form/material', path: 'reference/material', load: reference('ngu-form/material') },
+      { title: 'ngu-form/primeng', path: 'reference/primeng', load: reference('ngu-form/primeng') },
+      { title: 'ngu-form/dropdown', path: 'reference/dropdown', load: reference('ngu-form/dropdown') },
+      { title: 'ngu-form/tailwind', path: 'reference/tailwind', load: reference('ngu-form/tailwind') },
+      { title: 'ngu-form/testing', path: 'reference/testing', load: reference('ngu-form/testing') },
+      { title: 'ngu-form/playwright', path: 'reference/playwright', load: reference('ngu-form/playwright') },
+      { title: 'ngu-form/debug', path: 'reference/debug', load: reference('ngu-form/debug') },
     ],
   },
 ];

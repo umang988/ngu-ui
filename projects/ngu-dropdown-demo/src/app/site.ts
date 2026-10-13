@@ -18,5 +18,10 @@ export const SITE: DocsSite = {
       { label: 'API', path: '/api/dropdown' },
     ],
   },
+  stackblitz: {
+    angular: '^22.2.0',
+    typescript: '~6.0.2',
+    dependencies: { 'ngu-dropdown': `^${VERSION}` },
+  },
   sourceDir: 'projects/ngu-dropdown',
 };

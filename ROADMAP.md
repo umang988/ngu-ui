@@ -378,35 +378,64 @@ without reading source code.
 
 Goal: a stable, documented, automated package.
 
+Status: started on 2026-10-13. Everything that can be checked on this machine is built and
+passing; the items left open need GitHub or npm: CI has not run yet (nothing is pushed), the
+screenshot baselines are made by a workflow on Linux, and the release workflow runs once the
+packages trust it on npmjs.com. ngu-form 0.6.0 goes to npm first, published by hand, because
+npm's trusted publishing needs the package to exist; 1.0.0 then comes from CI with provenance. Choices: releases use our own workflow with the
+hand-written changelogs (not Changesets or semantic-release); the API reference is generated
+into the docs site from the built `.d.ts` files and their TSDoc, with a committed API report
+that CI compares; server rendering is checked by a separate app (`projects/ssr-check`), and
+the docs site itself stays a client-rendered app.
+
 **Documentation**
 
-- [ ] **Docs site** (L). Guides, API reference, and live examples, built from the demo app and
-      deployed on every release.
-- [ ] **API reference** (M). Generated from TSDoc with every public symbol documented.
-- [ ] **StackBlitz examples** (S). One per major feature, linked from the docs.
-- [ ] **Recipes** (M). Login, signup with async username, checkout wizard, survey from JSON,
+- [x] **Docs site** (L). Guides, API reference, and live examples, built from the demo app and
+      deployed on every release. Netlify deploys `main`, which every release comes from.
+- [x] **API reference** (M). Generated from TSDoc with every public symbol documented.
+      `projects/docs-kit/api/api.mjs` writes one page per entry point and `api/*.api.md`;
+      `npm run api:check` fails on an undocumented export or an API change not in the report.
+- [x] **StackBlitz examples** (S). One per major feature, linked from the docs. Every demo and
+      example has "Open in StackBlitz", which posts it as an Angular CLI project that installs
+      the published packages (works once 0.6.0 is on npm). Six demos that load the site's own
+      theme files have no button.
+- [x] **Recipes** (M). Login, signup with async username, checkout wizard, survey from JSON,
       settings page with autosave, admin CRUD with view mode.
 
 **Automation**
 
 - [ ] **CI** (M). GitHub Actions running lint, unit tests, build, bundle-size budget and axe
-      on every pull request.
-- [ ] **End-to-end tests** (M). Playwright suite over the demo, including keyboard-only flows.
+      on every pull request. Written (`.github/workflows/ci.yml`, with angular-eslint); ticks
+      when it is green on GitHub.
+- [x] **End-to-end tests** (M). Playwright suite over the demo, including keyboard-only flows.
+      `e2e/`: every page of both sites in light and dark (axe, console), keyboard flows,
+      IndexedDB drafts, ngu-dropdown, the recipes, in Chromium, Firefox and WebKit.
 - [ ] **Visual regression** (M). Screenshots of each field type in light, dark and RTL.
+      Written (`/gallery`, `e2e/visual.spec.ts`); ticks once the "Update screenshots" workflow
+      has committed Linux baselines.
 - [ ] **Release automation** (S). Changesets or semantic-release, changelog, npm provenance.
+      Our own "Release" workflow instead; ticks after its first real run (ngu-dropdown 0.1.2 is
+      a good first one).
 
 **Quality bars**
 
-- [ ] **Bundle budget** (S). Core under an agreed size gzipped, tracked per release.
-- [ ] **Performance** (M). A 500-field form renders and validates without dropped frames.
-- [ ] **SSR and hydration** (M). Forms render on the server and hydrate without mismatches.
-- [ ] **Browser support** (S). Documented matrix; last two versions of evergreen browsers.
+- [x] **Bundle budget** (S). Core under an agreed size gzipped, tracked per release. What
+      ngu-form adds to a login form's initial JavaScript, over the same form written by hand:
+      73.0 kB gzip on 2026-10-13, budget 76 kB (`projects/size-check/budget.json`), in each
+      release's notes.
+- [x] **Performance** (M). A 500-field form renders and validates without dropped frames.
+      `/bench` and `e2e/perf.spec.ts`: render about 0.2 s, 3 ms of handler time per keystroke,
+      full check about 0.1 s.
+- [x] **SSR and hydration** (M). Forms render on the server and hydrate without mismatches.
+      Every example, checked in development mode; wizards, tabs and lazy controls render on
+      the server with incremental hydration.
+- [x] **Browser support** (S). Documented matrix; last two versions of evergreen browsers.
 
 **Project health**
 
-- [ ] **Versioning policy** (S). Major versions follow Angular majors; deprecations live one major.
-- [ ] **Contributing guide, code of conduct, security policy** (S).
-- [ ] **Issue and pull request templates** (S).
+- [x] **Versioning policy** (S). Major versions follow Angular majors; deprecations live one major.
+- [x] **Contributing guide, code of conduct, security policy** (S).
+- [x] **Issue and pull request templates** (S).
 
 **Done when** 1.0.0 is published to npm with provenance, the docs site is live, and CI is green.
 
@@ -471,9 +500,20 @@ Found while building v0.1. Each one gets a spec before it is fixed.
       the options' container), the column headers of `layout: 'table'` lists (no slot), the
       upload drop zone's text and look (no slot), and filled versus outlined rating stars.
       Agents without the notes reached them with `::ng-deep`, up to 87 rules in one form.
-- [ ] **IndexedDB drafts in tests** (S). `nguIndexedDbDrafts()` works in the profile demo
-      (saved and restored after a reload in Chrome) but has no automated spec, because jsdom
-      has no IndexedDB. Cover it in the Phase 6 Playwright suite.
+- [x] **IndexedDB drafts in tests** (S). Closed in Phase 6: `e2e/drafts.spec.ts` saves a
+      draft, reloads and clears it, in Chromium, Firefox and WebKit.
+- [ ] **A smaller core** (M). A login form ships the view mode, lists, run-time fields, choice
+      groups and the strength meter, because their components sit in the same chunks as the
+      core (`NguView` with the step helpers) or are referenced from templates. Defer or split
+      them; the size check in `scripts/size.mjs` shows the gain. Incremental hydration support
+      adds about 3.7 kB of Angular's own code to every app.
+- [ ] **Signature pad labelling** (S). In draw mode the field's label points at the canvas,
+      which a `<label for>` cannot name, and the hint and error are linked only to the
+      typed-name input.
+- [ ] **Unused API** (S). `NguMessages.uploaded` is never shown and `NguToken.group` allows
+      `'parts'`, which no token uses. Use them or remove them before 1.0.
+- [ ] **Formatting check in CI** (S). 146 files differ from Prettier. Format them once, checking
+      that inline templates render the same, then add `prettier --check` to CI.
 
 ---
 

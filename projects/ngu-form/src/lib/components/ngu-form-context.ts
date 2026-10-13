@@ -26,6 +26,7 @@ export interface NguProblemSource {
   readonly message: Signal<string | undefined>;
   /** The host element, for page order. */
   readonly element: HTMLElement;
+  /** The field, group or list node it renders; undo and redo use it to focus what they changed. */
   readonly field: Field<any>;
   /** The step, tab, panel or row it sits in, which may be out of view. */
   readonly section?: NguRevealable | null;
@@ -42,7 +43,12 @@ export interface NguRevealable {
 /** Shared by `ngu-form` with the fields it renders. */
 @Injectable()
 export class NguFormContext {
+  /** When fields show errors: the form's `errorsOn` input, unless a field sets its own. */
   errorsOn: Signal<ErrorDisplay> = signal<ErrorDisplay>('dirty');
+  /**
+   * True from a submit attempt until a successful submit or a reset; fields then show their errors
+   * at once.
+   */
   submitAttempted: WritableSignal<boolean> = signal(false);
   /** Increments when the form is reset; renderers clear their own state on change. */
   resets: Signal<number> = signal(0);
@@ -59,13 +65,15 @@ export class NguFormContext {
   loading: Signal<boolean> = signal(false);
   /** Width of `<ngu-form>` in CSS pixels, once measured. */
   width: Signal<number | undefined> = signal(undefined);
+  /** Widths behind responsive `cols`: the defaults with `provideNguFormConfig({ breakpoints })` applied. */
   breakpoints: Readonly<Record<Breakpoint, number>> = DEFAULT_BREAKPOINTS;
   /** `nguField` templates by path. */
   fieldTemplates: Signal<TemplateMap> = signal(new Map());
   /** `nguControl` templates by path. */
   controlTemplates: Signal<TemplateMap> = signal(new Map());
-  /** `nguPrefix` and `nguSuffix` icon templates by path. */
+  /** `nguPrefix` icon templates by path. */
   prefixTemplates: Signal<TemplateMap> = signal(new Map());
+  /** `nguSuffix` icon templates by path. */
   suffixTemplates: Signal<TemplateMap> = signal(new Map());
   /** Messages and translations for this form. */
   i18n: NguI18n = createNguI18n();

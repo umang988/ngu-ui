@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: ngu-form docs
+    url: https://ngu-form.netlify.app
+    about: Guides, every field type and the API reference.
+  - name: ngu-dropdown docs
+    url: https://ngu-dropdown.netlify.app
+    about: Server paging, selection, forms and theming.
+  - name: Report a security vulnerability
+    url: https://github.com/umang988/ngu-ui/security/advisories/new
+    about: Please report vulnerabilities privately, not as issues.

@@ -1,0 +1,120 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NG_CLI_ANALYTICS: 'false'
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+
+  unit:
+    name: Unit tests (${{ matrix.project }})
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        project: [ngu-form, ngu-dropdown, demo, ngu-dropdown-demo]
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npx ng test ${{ matrix.project }} --watch=false
+
+  build:
+    name: Build, API and size
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Build the libraries
+        run: npm run build:dropdown && npm run build:form
+      - name: Schematic specs
+        run: npm run test:schematics
+      - name: Public API matches api/*.api.md, and every export has TSDoc
+        run: npm run api:check
+      - name: Bundle size budget
+        run: node scripts/size.mjs --build --check
+      - name: Build the docs sites and the SSR check
+        run: |
+          npx ng build demo
+          node projects/docs-kit/agents/generate.mjs projects/demo/agent-docs.json --site dist/demo/browser
+          npx ng build ngu-dropdown-demo
+          node projects/docs-kit/agents/generate.mjs projects/ngu-dropdown-demo/agent-docs.json --site dist/ngu-dropdown-demo/browser
+          npx ng build ssr-check
+      - uses: actions/upload-artifact@v7
+        with:
+          name: dist
+          path: |
+            dist/demo/browser
+            dist/ngu-dropdown-demo/browser
+            dist/ssr-check/browser
+          retention-days: 7
+
+  e2e:
+    name: E2E (${{ matrix.project }})
+    needs: build
+    runs-on: ubuntu-24.04
+    # Browsers and their system libraries, the same image the screenshot baselines come from.
+    container: mcr.microsoft.com/playwright:v1.63.0-noble
+    strategy:
+      fail-fast: false
+      matrix:
+        project: [site, ssr, perf, chromium, firefox, webkit, visual]
+    env:
+      # Firefox refuses to start as root in this container unless HOME is root's.
+      HOME: /root
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - uses: actions/download-artifact@v8
+        with:
+          name: dist
+          path: dist
+      - name: Run
+        run: |
+          if [ "${{ matrix.project }}" = visual ] && ! ls e2e/snapshots/visual.spec.ts/*-linux.png > /dev/null 2>&1; then
+            echo "::warning::No screenshot baselines yet. Run the Update screenshots workflow on this branch."
+            exit 0
+          fi
+          npx playwright test -c e2e --project=${{ matrix.project }}
+      - uses: actions/upload-artifact@v7
+        if: failure()
+        with:
+          name: playwright-${{ matrix.project }}
+          path: |
+            playwright-report
+            test-results
+          retention-days: 7

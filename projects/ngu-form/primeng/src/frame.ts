@@ -61,12 +61,8 @@ import type { NguFieldRenderContext } from 'ngu-form';
   `,
 })
 export class NguPrimeFrame {
+  /** The field's render context, passed on by the PrimeNG renderer that uses the frame. */
   readonly context = input.required<NguFieldRenderContext>();
   /** The control is a group (radios, checkboxes, segments): its label is not a `<label>`. */
   readonly group = input(false);
-}
-
-/** Id of the message under a control, for `aria-describedby`, or null. */
-export function messageId(c: NguFieldRenderContext): string | null {
-  return c.error || c.pending || c.warning || c.hint ? `${c.id}-msg` : null;
 }

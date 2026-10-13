@@ -123,7 +123,7 @@
               "budgets": [
                 {
                   "type": "initial",
-                  "maximumWarning": "650kB",
+                  "maximumWarning": "680kB",
                   "maximumError": "1MB"
                 },
                 {
@@ -245,6 +245,66 @@
           "options": {
             "tsConfig": "projects/ngu-dropdown-demo/tsconfig.spec.json"
           }
+        }
+      }
+    },
+    "size-check": {
+      "projectType": "application",
+      "root": "projects/size-check",
+      "sourceRoot": "projects/size-check/src",
+      "prefix": "app",
+      "architect": {
+        "build": {
+          "builder": "@angular/build:application",
+          "options": {
+            "browser": "projects/size-check/src/main.ts",
+            "index": "projects/size-check/src/index.html",
+            "tsConfig": "projects/size-check/tsconfig.app.json",
+            "outputPath": "dist/size-check/ngu"
+          },
+          "configurations": {
+            "production": {
+              "outputHashing": "none",
+              "statsJson": true
+            },
+            "plain": {
+              "outputHashing": "none",
+              "statsJson": true,
+              "outputPath": "dist/size-check/plain",
+              "browser": "projects/size-check/src/main.plain.ts"
+            }
+          },
+          "defaultConfiguration": "production"
+        }
+      }
+    },
+    "ssr-check": {
+      "projectType": "application",
+      "root": "projects/ssr-check",
+      "sourceRoot": "projects/ssr-check/src",
+      "prefix": "app",
+      "architect": {
+        "build": {
+          "builder": "@angular/build:application",
+          "options": {
+            "browser": "projects/ssr-check/src/main.ts",
+            "server": "projects/ssr-check/src/main.server.ts",
+            "index": "projects/ssr-check/src/index.html",
+            "tsConfig": "projects/ssr-check/tsconfig.app.json",
+            "outputMode": "static",
+            "outputPath": "dist/ssr-check"
+          },
+          "configurations": {
+            "production": {
+              "outputHashing": "all"
+            },
+            "development": {
+              "optimization": false,
+              "extractLicenses": false,
+              "sourceMap": true
+            }
+          },
+          "defaultConfiguration": "development"
         }
       }
     }

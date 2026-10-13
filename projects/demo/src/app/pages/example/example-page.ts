@@ -1,8 +1,10 @@
 import { NgComponentOutlet } from '@angular/common';
-import { ChangeDetectionStrategy, Component, computed, inject, resource, viewChild, type Type } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, resource, signal, viewChild, type Type } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
+import { injectDocsSite } from 'docs-kit/site';
 import { CodeTabs } from 'docs-kit/ui/code-tabs';
 import { RichText } from 'docs-kit/ui/rich-text';
+import { angularProject, fetchSources, openStackBlitz } from 'docs-kit/ui/stackblitz';
 import { EXAMPLES, exampleById, isLazy } from './examples';
 
 /** One example: what it is for, a live preview and the source that runs it. */
@@ -58,6 +60,10 @@ import { EXAMPLES, exampleById, isLazy } from './examples';
       <section class="source" aria-labelledby="code-title">
         <h2 id="code-title">Code</h2>
         <p class="source__note">The files below are the ones running in the preview.</p>
+        <p class="source__open">
+          <button type="button" class="button button--quiet" (click)="openOnStackBlitz()">Open in StackBlitz</button>
+          <span role="status">{{ openError() }}</span>
+        </p>
         <app-code-tabs [files]="ex.files" label="Source files" maxHeight="40rem" />
       </section>
 
@@ -132,6 +138,15 @@ import { EXAMPLES, exampleById, isLazy } from './examples';
       color: var(--ink-2);
       font-size: 0.9375rem;
     }
+    .source__open {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.75rem;
+      margin: 0 0 1rem;
+      color: var(--ink-2);
+      font-size: 0.875rem;
+    }
     @media (max-width: 62rem) {
       .workbench {
         grid-template-columns: minmax(0, 1fr);
@@ -164,6 +179,26 @@ export class ExamplePage {
   });
 
   private readonly outlet = viewChild(NgComponentOutlet);
+  private readonly site = injectDocsSite();
+  protected readonly openError = signal('');
+
+  /** Opens the example's files as a new Angular project on StackBlitz. */
+  protected async openOnStackBlitz(): Promise<void> {
+    const ex = this.example();
+    this.openError.set('');
+    try {
+      const files = ex.files.flatMap((f) => (f.src ? [{ path: f.src, url: `/source/${f.src}` }] : []));
+      const title = `${this.site.name}: ${ex.title}`;
+      const project = angularProject(title, await fetchSources(files), this.site.stackblitz!);
+      if ('error' in project) {
+        this.openError.set(project.error);
+        return;
+      }
+      openStackBlitz(title, ex.summary, project.files, `src/app/${files[0].path}`);
+    } catch {
+      this.openError.set('The example could not be prepared. Try again.');
+    }
+  }
 
   /** The example component in the preview, for guards that look at its forms. */
   exampleInstance(): unknown {
