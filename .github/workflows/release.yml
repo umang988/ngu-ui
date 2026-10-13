@@ -57,10 +57,10 @@ jobs:
         id: meta
         run: node scripts/release-check.mjs ${{ inputs.package }} release-notes.md >> "$GITHUB_OUTPUT"
 
+      # Both packages for either release: api:check reads both, and building ngu-form checks that
+      # it still compiles against this ngu-dropdown.
       - name: Build
-        run: |
-          npm run build:dropdown
-          if [ "${{ inputs.package }}" = ngu-form ]; then npm run build:form; fi
+        run: npm run build:dropdown && npm run build:form
       - name: Test
         run: |
           npx ng test ${{ inputs.package }} --watch=false
