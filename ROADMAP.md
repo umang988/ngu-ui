@@ -100,7 +100,7 @@ These decide trade-offs when an item could be built more than one way.
 Goal: remove the small frictions that almost every real form hits.
 
 Status: all items built on 2026-10-10 and listed in `projects/ngu-form/CHANGELOG.md` under
-0.2.0 (not yet published). 110 library specs pass; axe reports no violations on the demo.
+0.2.0 (not published; 0.6.0 was the first release). 110 library specs pass; axe reports no violations on the demo.
 
 **Dependent and derived values**
 
@@ -150,7 +150,7 @@ Status: all items built on 2026-10-10 and listed in `projects/ngu-form/CHANGELOG
 Goal: fit into existing validation stacks, and work in every language.
 
 Status: everything except the screen reader pass built on 2026-10-10 and listed in
-`projects/ngu-form/CHANGELOG.md` under 0.3.0 (not yet published). 171 library specs pass;
+`projects/ngu-form/CHANGELOG.md` under 0.3.0 (not published). 171 library specs pass;
 axe reports no violations on every demo page in light and dark, with errors showing, in
 Arabic (right to left) and with forced colors. The "Done when" is met by the
 "In three languages" example.
@@ -212,7 +212,7 @@ built-in with keyboard support, labels and validation. Heavier ones ship in thei
 point.
 
 Status: everything except the combobox built on 2026-10-11 and listed in
-`projects/ngu-form/CHANGELOG.md` under 0.4.0 (not yet published). The combobox followed in
+`projects/ngu-form/CHANGELOG.md` under 0.4.0 (not published). The combobox followed in
 Phase 5 as `ngu-form/dropdown`.
 214 library specs pass; axe reports no violations on every demo page in light and dark, and
 on the "Every field type" example right to left, with errors showing and with the crop dialog
@@ -274,7 +274,7 @@ open. Heavier inputs load on first use through `@defer`, and uploads live in the
 Goal: handle multi-step and data-heavy forms.
 
 Status: all items built on 2026-10-11 and listed in `projects/ngu-form/CHANGELOG.md` under
-0.5.0 (not yet published). 269 library specs pass; axe reports no violations on all 56 demo
+0.5.0 (not published). 269 library specs pass; axe reports no violations on all 56 demo
 pages in light and dark, on every step of the checkout wizard, and on tabs, panels and long
 lists with errors showing. The "Done when" is met by the Checkout example. Two choices differ
 from the first wording: reordering and long lists are built into ngu-form instead of using
@@ -321,7 +321,7 @@ keyboard path for dragging), and the read-only view is its own component, `<ngu-
 Goal: make adoption easy for teams with an existing design system and test setup.
 
 Status: all items built on 2026-10-12 and listed in `projects/ngu-form/CHANGELOG.md` under
-0.6.0 (not yet published), together with the Phase 3 combobox as `ngu-form/dropdown`. Choices
+0.6.0 (published on 2026-10-13), together with the Phase 3 combobox as `ngu-form/dropdown`. Choices
 that differ from the first wording: renderers take over the whole field (label, control and
 messages) through a new contract, `provideNguFieldRenderers`, rather than only the control;
 PrimeNG controls are bound with a new `nguBind` directive because `[formField]` would mark them
@@ -378,10 +378,11 @@ without reading source code.
 
 Goal: a stable, documented, automated package.
 
-Status: started on 2026-10-13. Everything is built, and CI is green on GitHub; the items left
-open need a workflow run: the screenshot baselines are made by a workflow on Linux, and the
-release workflow runs once the packages trust it on npmjs.com. ngu-form 0.6.0 goes to npm first, published by hand, because
-npm's trusted publishing needs the package to exist; 1.0.0 then comes from CI with provenance. Choices: releases use our own workflow with the
+Status: started on 2026-10-13. Everything is built, and CI is green on GitHub. On 2026-10-13
+ngu-dropdown 0.1.2 went to npm through the Release workflow with provenance, and ngu-form 0.6.0
+was published by hand, because npm's trusted publishing needs the package to exist; 1.0.0 then
+comes from CI with provenance. The one item left open needs a workflow run: the screenshot
+baselines are made by a workflow on Linux. Choices: releases use our own workflow with the
 hand-written changelogs (not Changesets or semantic-release); the API reference is generated
 into the docs site from the built `.d.ts` files and their TSDoc, with a committed API report
 that CI compares; server rendering is checked by a separate app (`projects/ssr-check`), and
@@ -396,7 +397,7 @@ the docs site itself stays a client-rendered app.
       `npm run api:check` fails on an undocumented export or an API change not in the report.
 - [x] **StackBlitz examples** (S). One per major feature, linked from the docs. Every demo and
       example has "Open in StackBlitz", which posts it as an Angular CLI project that installs
-      the published packages (works once 0.6.0 is on npm). Six demos that load the site's own
+      the published packages (they need ngu-form 0.6.0 on npm, published on 2026-10-13). Six demos that load the site's own
       theme files have no button.
 - [x] **Recipes** (M). Login, signup with async username, checkout wizard, survey from JSON,
       settings page with autosave, admin CRUD with view mode.
@@ -412,9 +413,10 @@ the docs site itself stays a client-rendered app.
 - [ ] **Visual regression** (M). Screenshots of each field type in light, dark and RTL.
       Written (`/gallery`, `e2e/visual.spec.ts`); ticks once the "Update screenshots" workflow
       has committed Linux baselines.
-- [ ] **Release automation** (S). Changesets or semantic-release, changelog, npm provenance.
-      Our own "Release" workflow instead; ticks after its first real run (ngu-dropdown 0.1.2 is
-      a good first one).
+- [x] **Release automation** (S). Changesets or semantic-release, changelog, npm provenance.
+      Our own "Release" workflow instead. Its first real run published ngu-dropdown 0.1.2 on
+      2026-10-13. Each package's trusted publisher on npmjs.com needs "Allow npm publish"
+      ticked; without it npm only allows `npm stage publish`.
 
 **Quality bars**
 
