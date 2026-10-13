@@ -378,10 +378,9 @@ without reading source code.
 
 Goal: a stable, documented, automated package.
 
-Status: started on 2026-10-13. Everything that can be checked on this machine is built and
-passing; the items left open need GitHub or npm: CI has not run yet (nothing is pushed), the
-screenshot baselines are made by a workflow on Linux, and the release workflow runs once the
-packages trust it on npmjs.com. ngu-form 0.6.0 goes to npm first, published by hand, because
+Status: started on 2026-10-13. Everything is built, and CI is green on GitHub; the items left
+open need a workflow run: the screenshot baselines are made by a workflow on Linux, and the
+release workflow runs once the packages trust it on npmjs.com. ngu-form 0.6.0 goes to npm first, published by hand, because
 npm's trusted publishing needs the package to exist; 1.0.0 then comes from CI with provenance. Choices: releases use our own workflow with the
 hand-written changelogs (not Changesets or semantic-release); the API reference is generated
 into the docs site from the built `.d.ts` files and their TSDoc, with a committed API report
@@ -404,9 +403,9 @@ the docs site itself stays a client-rendered app.
 
 **Automation**
 
-- [ ] **CI** (M). GitHub Actions running lint, unit tests, build, bundle-size budget and axe
-      on every pull request. Written (`.github/workflows/ci.yml`, with angular-eslint); ticks
-      when it is green on GitHub.
+- [x] **CI** (M). GitHub Actions running lint, unit tests, build, bundle-size budget and axe
+      on every pull request. `.github/workflows/ci.yml`, with angular-eslint: 13 jobs, green on
+      GitHub from its first run on 2026-10-13 (about 10 minutes).
 - [x] **End-to-end tests** (M). Playwright suite over the demo, including keyboard-only flows.
       `e2e/`: every page of both sites in light and dark (axe, console), keyboard flows,
       IndexedDB drafts, ngu-dropdown, the recipes, in Chromium, Firefox and WebKit.
