@@ -1,0 +1,27 @@
+{
+  "name": "ngu-form",
+  "url": "https://ngu-form.netlify.app",
+  "install": "ng add ngu-form",
+  "aiCommand": "ng g ngu-form:ai",
+  "packageJson": "projects/ngu-form/package.json",
+  "site": "projects/demo/src/app/site.ts",
+  "examples": "projects/demo/src/app/pages/example/examples.ts",
+  "content": ["projects/demo/src/app/docs/content"],
+  "demos": "projects/demo/src/app/docs/demos",
+  "exampleSources": "projects/demo/src/app/examples",
+  "markdown": "projects/ngu-form",
+  "aliases": { "ngu-form": "projects/ngu-form/src/lib/tokens.ts" },
+  "agents": "projects/ngu-form/agents",
+  "skills": [
+    {
+      "name": "ngu-form",
+      "description": "Write, change or debug Angular forms built with ngu-form (defineForm specs rendered by <ngu-form>). Use whenever the project depends on ngu-form or the user asks for a form in an Angular app that has it installed."
+    },
+    {
+      "name": "ngu-form-from-image",
+      "guide": "from-image",
+      "scripts": ["snap.mjs"],
+      "description": "Recreate a form from a screenshot, photo, mockup or design export with ngu-form, then render it and compare it with the image. Use when the user shares an image of a form, a wizard, a settings page or any data-entry screen and asks to build it in an Angular app that has ngu-form."
+    }
+  ]
+}

@@ -249,6 +249,98 @@ export const appConfig: ApplicationConfig = {
     ],
   },
 
+  'ai-agents': {
+    title: 'AI coding agents',
+    description:
+      'Give Claude Code, Codex, Cursor or Copilot the docs of the version you installed, so they write ngu-form code that compiles and can build a form from a screenshot.',
+    sections: [
+      {
+        id: 'setup',
+        title: 'Set up a project',
+        text: [
+          '`ng add ngu-form` asks whether to add notes for AI coding agents. In a project that already has ngu-form, run the `ai` schematic. It writes a short block into `AGENTS.md`: the rules agents get wrong most often, how to check generated code, and an index of the docs inside `node_modules/ngu-form/docs`.',
+          'Claude Code reads `CLAUDE.md` instead of `AGENTS.md` when a project has one, and Gemini CLI reads `GEMINI.md`, so those get the same block when they exist, unless they already import `AGENTS.md`. The block sits between markers: run the schematic again after updating ngu-form, or with `--remove` to take it out.',
+        ],
+        code: [{ code: 'ng g ngu-form:ai', lang: 'bash' }],
+      },
+      {
+        id: 'contents',
+        title: 'What agents get',
+        text: [
+          'Everything comes from the package itself, so it matches the installed version and works offline. Agents learn about ngu-form from these files instead of from training data, which predates it.',
+        ],
+        table: {
+          caption: 'Files for AI agents',
+          columns: ['Path', 'Contents'],
+          rows: [
+            [
+              '`node_modules/ngu-form/docs/`',
+              'Every page of this site as Markdown, with the source of every demo and example.',
+            ],
+            [
+              '`node_modules/ngu-form/docs/AGENTS.md`',
+              'The block the schematic writes, to copy by hand into any instructions file.',
+            ],
+            [
+              '`node_modules/ngu-form/docs/guides/from-image.md`',
+              'How to turn a screenshot or mockup into a form, and check the result against it.',
+            ],
+            [
+              '`node_modules/ngu-form/skills/`',
+              'The same knowledge as Agent Skills: `ngu-form` and `ngu-form-from-image`.',
+            ],
+            [
+              '`/llms.txt`, `/llms-full.txt` on this site',
+              'The docs for agents that read the web, such as chat assistants.',
+            ],
+          ],
+        },
+        after: [
+          'Any page of this site is also available as Markdown: add `.md` to its address, as in `/layout.md`.',
+        ],
+      },
+      {
+        id: 'from-image',
+        title: 'Forms from a screenshot',
+        text: [
+          'Attach a screenshot, a photo of a sketch, or a design export, and ask for the form, as in "Build the form in signup.png with ngu-form, on the /signup route". The notes send the agent to the screenshot guide: it lists every field in the image, maps each one to a field type, writes a typed model and spec, matches colors and spacing with [theme tokens](/theming), then renders the page and compares it with the image.',
+        ],
+        code: [
+          {
+            lang: 'bash',
+            code: `# How the agent checks its render (needs: npm i -D playwright-core)
+node node_modules/ngu-form/skills/ngu-form-from-image/scripts/snap.mjs http://localhost:4200/signup signup-render.png`,
+          },
+        ],
+        after: [
+          '`snap.mjs` saves a screenshot, prints the browser console, where ngu-form reports mistakes as [diagnostics](/diagnostics), and lists the rendered fields row by row with their labels, types and required marks, so the agent can compare them with the image.',
+        ],
+      },
+      {
+        id: 'checks',
+        title: 'How agents check their work',
+        list: [
+          'Types: the spec is checked against the model, so a field type that does not fit its value fails the build. The notes tell agents to fix the model or the type, never to cast.',
+          'Diagnostics: development builds log mistakes TypeScript cannot see, such as a path that matches no field, as `ngu-form [NGU-xxx]` with a link to the fix.',
+          'The render: for screenshots, the agent compares its own screenshot with the original before it reports back.',
+        ],
+      },
+      {
+        id: 'skills',
+        title: 'Agent Skills',
+        text: [
+          'The skills in `node_modules/ngu-form/skills` follow the Agent Skills format. Tools that collect skills from packages can use them where they are; to make one always available in Claude Code, copy it into the project. A copy does not update with the package, but the `AGENTS.md` block always points at the installed files.',
+        ],
+        code: [
+          {
+            code: 'mkdir -p .claude/skills\ncp -R node_modules/ngu-form/skills/ngu-form-from-image .claude/skills/',
+            lang: 'bash',
+          },
+        ],
+      },
+    ],
+  },
+
   changelog: {
     title: 'Changelog',
     description: 'What changed in each release, with migration notes for breaking changes.',

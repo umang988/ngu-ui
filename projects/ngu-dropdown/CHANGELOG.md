@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.1.2 (unreleased): Docs for AI coding agents
+
+No changes to the component.
+
+### Added
+
+- The package ships every docs page as Markdown, with the source of every demo, in `docs/`,
+  so AI coding agents read the docs of the installed version.
+- `ng add ngu-dropdown` and `ng g ngu-dropdown:ai` write a block into `AGENTS.md` (and
+  `CLAUDE.md` or `GEMINI.md` when the project has them) with the rules agents get wrong most
+  often and an index of those files. Running it again replaces the block; `--remove` takes it
+  out.
+- `skills/ngu-dropdown`, the same notes as an Agent Skill.
+- The docs site serves `llms.txt`, `llms-full.txt` and every page as `.md`.
+
 ## 0.1.1 (2026-10-11): Docs links
 
 No code changes.

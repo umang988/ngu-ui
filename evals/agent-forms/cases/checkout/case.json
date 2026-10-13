@@ -1,0 +1,19 @@
+{
+  "route": "/checkout",
+  "prompt": "design.png shows the first step of our checkout. Build the checkout with ngu-form as a standalone component on the /checkout route, and match the design as closely as you can.",
+  "expect": {
+    "steps": ["shipping", "payment", "review"],
+    "fields": [
+      { "match": "full name", "required": true },
+      { "match": "street address", "required": true },
+      { "match": "apartment", "required": false },
+      { "match": "city", "required": true },
+      { "match": "state", "types": ["select", "dropdown"], "required": true },
+      { "match": "zip code", "required": true },
+      { "match": "phone", "types": ["phone", "tel"], "required": true },
+      { "match": "delivery method", "types": ["segmented", "radio"] }
+    ],
+    "rows": [["city", "state", "zip code"]],
+    "buttons": ["next"]
+  }
+}

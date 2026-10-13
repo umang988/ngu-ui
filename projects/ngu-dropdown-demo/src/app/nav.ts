@@ -11,6 +11,7 @@ export const NAV: readonly NavGroup[] = [
     items: [
       { title: 'Introduction', path: 'introduction', load: start('introduction') },
       { title: 'Installation', path: 'installation', load: start('installation') },
+      { title: 'AI coding agents', path: 'ai-agents', load: start('ai-agents') },
       { title: 'Changelog', path: 'changelog', load: start('changelog') },
     ],
   },

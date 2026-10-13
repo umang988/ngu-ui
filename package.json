@@ -8,7 +8,9 @@
     "dropdown": "ng serve ngu-dropdown-demo",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "test": "ng test",
+    "build:form": "ng build ngu-form && node projects/ngu-form/schematics/build.mjs && node projects/docs-kit/agents/generate.mjs projects/demo/agent-docs.json --package dist/ngu-form",
+    "build:dropdown": "ng build ngu-dropdown && node projects/docs-kit/agents/generate.mjs projects/ngu-dropdown-demo/agent-docs.json --package dist/ngu-dropdown"
   },
   "private": true,
   "packageManager": "npm@11.19.0",

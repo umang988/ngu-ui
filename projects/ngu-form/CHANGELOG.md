@@ -84,10 +84,23 @@
   types without a renderer, naming the provider to add (`NGU-301`), unknown icons (`NGU-302`),
   registry entries that are not components (`NGU-304`) and two live forms sharing a draft key
   (`NGU-401`).
+- **Docs for AI coding agents.** The package ships every docs page as Markdown, with the
+  source of every demo and example, in `docs/`, so agents read the docs of the installed
+  version instead of guessing from training data. `ng g ngu-form:ai` (also offered by
+  `ng add`) writes a block into `AGENTS.md`, and into `CLAUDE.md` or `GEMINI.md` when the
+  project has them: the rules agents get wrong most often, how to check generated code, and an
+  index of those files. Running it again replaces the block; `--remove` takes it out.
+- **Forms from a screenshot.** `docs/guides/from-image.md` takes an agent from an image of a
+  form to a typed spec (a table from what it sees to field types and options), its look (theme
+  tokens) and a check against the image. `skills/ngu-form-from-image/scripts/snap.mjs` renders
+  a page, saves a screenshot, prints console problems and lists the rendered fields row by row.
+- **Agent Skills.** `skills/ngu-form` and `skills/ngu-form-from-image` in the Agent Skills
+  format, for tools that load skills from packages.
 - Exported for renderers: `NguTransform`, `NguStrength`, `FieldTransform`.
 - Docs: Angular Material, PrimeNG, Unstyled and Tailwind, Renderers, Icons, Server dropdown,
   Testing, Schematics, Debug panel, Single fields, Diagnostics, From ngx-formly, From reactive
-  forms; Theming gained density and size, and its token table now comes from `NGU_TOKENS`.
+  forms, AI coding agents; Theming gained density and size, and its token table now comes from
+  `NGU_TOKENS`. The site serves `llms.txt`, `llms-full.txt` and every page as `.md`.
 
 ### Changed
 

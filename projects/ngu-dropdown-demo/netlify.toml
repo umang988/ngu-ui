@@ -3,7 +3,8 @@
 # Netlify then installs and builds from the repo root, so the paths below are relative to it.
 
 [build]
-  command = "npx ng build ngu-dropdown-demo"
+  # The generator adds llms.txt, llms-full.txt, AGENTS.md and one .md per page for AI agents.
+  command = "npx ng build ngu-dropdown-demo && node projects/docs-kit/agents/generate.mjs projects/ngu-dropdown-demo/agent-docs.json --site dist/ngu-dropdown-demo/browser"
   publish = "dist/ngu-dropdown-demo/browser"
   # Exit 0 skips the build: only when nothing this site is built from changed since the last
   # deploy. A build without a cached commit (first deploy, "clear cache") always runs.
@@ -22,3 +23,14 @@
   from = "/*"
   to = "/index.html"
   status = 200
+
+# Markdown for AI agents, shown as text rather than downloaded.
+[[headers]]
+  for = "/*.md"
+  [headers.values]
+    Content-Type = "text/markdown; charset=utf-8"
+
+[[headers]]
+  for = "/*.txt"
+  [headers.values]
+    Content-Type = "text/plain; charset=utf-8"

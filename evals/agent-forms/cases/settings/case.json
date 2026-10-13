@@ -1,0 +1,16 @@
+{
+  "route": "/settings",
+  "prompt": "design.png shows the Profile tab of our settings page. Build the settings form with ngu-form as a standalone component on the /settings route, and match the design as closely as you can.",
+  "expect": {
+    "tabs": ["profile", "notifications", "security"],
+    "fields": [
+      { "match": "display name", "required": true },
+      { "match": "username" },
+      { "match": "bio", "types": ["textarea"] },
+      { "match": "timezone", "types": ["select", "dropdown"] },
+      { "match": "language", "types": ["select", "dropdown"] }
+    ],
+    "rows": [["timezone", "language"], ["cancel", "save changes"]],
+    "buttons": ["cancel", "save changes"]
+  }
+}

@@ -419,6 +419,10 @@ these build on experimental APIs and ship behind explicit opt-in.
 
 **Agents and AI**
 
+- [x] **Docs for coding agents** (M). Shipped early, in 0.6: every docs page as Markdown inside
+      the package, an `AGENTS.md` block written by `ng g ngu-form:ai` (and `ng add`), a
+      screenshot-to-form guide and skill with a render check, and `llms.txt` on the site. Same
+      for ngu-dropdown. Measured with the screenshot evals in `evals/agent-forms`.
 - [ ] **WebMCP tools** (M). Expose a form as a tool that in-browser AI agents can fill and
       submit, using Angular's experimental `provideExperimentalWebMcpForms` and the
       `experimentalWebMcpTool` form option. Labels and hints become the tool description.
@@ -462,6 +466,11 @@ Found while building v0.1. Each one gets a spec before it is fixed.
 - [ ] **Typed dates in the app's locale** (M). Date fields use the browser's picker, whose
       format follows the browser's language rather than `provideNguMessages({ locale })`.
       Consider an optional text entry with a locale mask.
+- [ ] **Styling hooks the screenshot evals asked for** (S). Agents told not to style internal
+      classes could not match these details of a design: choice options in columns (no slot on
+      the options' container), the column headers of `layout: 'table'` lists (no slot), the
+      upload drop zone's text and look (no slot), and filled versus outlined rating stars.
+      Agents without the notes reached them with `::ng-deep`, up to 87 rules in one form.
 - [ ] **IndexedDB drafts in tests** (S). `nguIndexedDbDrafts()` works in the profile demo
       (saved and restored after a reload in Chrome) but has no automated spec, because jsdom
       has no IndexedDB. Cover it in the Phase 6 Playwright suite.

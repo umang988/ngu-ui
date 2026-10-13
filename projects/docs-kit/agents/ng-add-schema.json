@@ -1,0 +1,14 @@
+{
+  "$schema": "http://json-schema.org/schema",
+  "$id": "{{name}}-ng-add",
+  "title": "Add {{name}} to a project",
+  "type": "object",
+  "properties": {
+    "ai": {
+      "type": "boolean",
+      "default": true,
+      "description": "Add notes and a docs index for AI coding agents to AGENTS.md (and CLAUDE.md or GEMINI.md when the project has them).",
+      "x-prompt": "Add notes for AI coding agents (Claude Code, Codex, Cursor, Copilot) to AGENTS.md?"
+    }
+  }
+}

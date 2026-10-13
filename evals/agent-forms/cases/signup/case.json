@@ -1,0 +1,16 @@
+{
+  "route": "/signup",
+  "prompt": "design.png is our designer's sign-up screen. Build it with ngu-form as a standalone component on the /signup route, and match the design as closely as you can.",
+  "expect": {
+    "fields": [
+      { "match": "first name", "required": true },
+      { "match": "last name", "required": true },
+      { "match": "work email", "types": ["email"], "required": true },
+      { "match": "password", "types": ["password"], "required": true },
+      { "match": "company size", "types": ["select", "dropdown"] },
+      { "match": "terms of service", "types": ["checkbox", "consent"], "required": true }
+    ],
+    "rows": [["first name", "last name"]],
+    "buttons": ["create account"]
+  }
+}

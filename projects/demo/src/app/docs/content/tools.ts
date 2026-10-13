@@ -248,7 +248,7 @@ test('signs up', async ({ page }) => {
         id: 'ng-add',
         title: 'ng add',
         text: [
-          '`ng add ngu-form` installs the package and asks three questions: a design system to render with (none, Angular Material or PrimeNG), whether to add file, image and signature fields, and whether to create a sample form. It writes the providers into `app.config.ts`.',
+          '`ng add ngu-form` installs the package and asks four questions: a design system to render with (none, Angular Material or PrimeNG), whether to add file, image and signature fields, whether to create a sample form, and whether to add notes for [AI coding agents](/ai-agents). It writes the providers into `app.config.ts`.',
         ],
         code: [{ code: 'ng add ngu-form', lang: 'bash' }],
       },

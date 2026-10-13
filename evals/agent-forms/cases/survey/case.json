@@ -1,0 +1,15 @@
+{
+  "route": "/feedback",
+  "prompt": "design.png is a guest feedback survey. Build it with ngu-form as a standalone component on the /feedback route, and match the design as closely as you can.",
+  "expect": {
+    "fields": [
+      { "match": "overall rating", "types": ["rating"], "required": true },
+      { "match": "recommend", "types": ["radio", "segmented"] },
+      { "match": "amenities", "types": ["checkbox"] },
+      { "match": "stay with us again", "types": ["range"] },
+      { "match": "anything else", "types": ["textarea"] },
+      { "match": "contact me", "types": ["switch"] }
+    ],
+    "buttons": ["send feedback"]
+  }
+}

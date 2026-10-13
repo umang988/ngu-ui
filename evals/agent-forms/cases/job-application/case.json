@@ -1,0 +1,19 @@
+{
+  "route": "/apply",
+  "prompt": "design.png is a job application form from our careers site. Build it with ngu-form as a standalone component on the /apply route, and match the design as closely as you can.",
+  "expect": {
+    "texts": ["personal information", "experience"],
+    "fields": [
+      { "match": "full name", "required": true },
+      { "match": "email", "types": ["email"], "required": true },
+      { "match": "phone", "types": ["phone", "tel"] },
+      { "match": "linkedin", "types": ["text", "url"] },
+      { "match": "years of experience", "types": ["number"], "required": true },
+      { "match": "start date", "types": ["date"] },
+      { "match": "resume", "types": ["file"], "required": true },
+      { "match": "cover letter", "types": ["textarea"] }
+    ],
+    "rows": [["full name", "email"], ["phone", "linkedin"], ["years of experience", "start date"]],
+    "buttons": ["submit application"]
+  }
+}

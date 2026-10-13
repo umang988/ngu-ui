@@ -144,6 +144,52 @@ export const appConfig: ApplicationConfig = {
     ],
   },
 
+  'ai-agents': {
+    title: 'AI coding agents',
+    description:
+      'Give Claude Code, Codex, Cursor or Copilot the docs of the version you installed, so they wire up fetchFn, keys and labels correctly.',
+    sections: [
+      {
+        id: 'setup',
+        title: 'Set up a project',
+        text: [
+          '`ng add ngu-dropdown` asks whether to add notes for AI coding agents; in a project that already has it, run the `ai` schematic. It writes a short block into `AGENTS.md` with the rules agents get wrong most often, how to check the result, and an index of the docs inside `node_modules/ngu-dropdown/docs`.',
+          'Claude Code reads `CLAUDE.md` instead of `AGENTS.md` when a project has one, and Gemini CLI reads `GEMINI.md`, so those get the same block when they exist, unless they already import `AGENTS.md`. Run the schematic again after an update, or with `--remove` to take the block out.',
+        ],
+        code: [{ code: 'ng g ngu-dropdown:ai', lang: 'bash' }],
+      },
+      {
+        id: 'contents',
+        title: 'What agents get',
+        table: {
+          caption: 'Files for AI agents',
+          columns: ['Path', 'Contents'],
+          rows: [
+            [
+              '`node_modules/ngu-dropdown/docs/`',
+              'Every page of this site as Markdown, with the source of every demo.',
+            ],
+            [
+              '`node_modules/ngu-dropdown/docs/AGENTS.md`',
+              'The block the schematic writes, to copy by hand into any instructions file.',
+            ],
+            [
+              '`node_modules/ngu-dropdown/skills/ngu-dropdown`',
+              'The same notes as an Agent Skill.',
+            ],
+            [
+              '`/llms.txt`, `/llms-full.txt` on this site',
+              'The docs for agents that read the web.',
+            ],
+          ],
+        },
+        after: [
+          'Any page of this site is also available as Markdown: add `.md` to its address, as in `/server-data.md`. In an [ngu-form](https://ngu-form.netlify.app/ai-agents) project, its own notes cover the `dropdown` field type too.',
+        ],
+      },
+    ],
+  },
+
   changelog: {
     title: 'Changelog',
     description: 'What changed in each release.',

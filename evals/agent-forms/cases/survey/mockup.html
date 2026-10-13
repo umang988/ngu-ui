@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Feedback</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #fff7ed; font: 15px/1.5 "Avenir Next", Avenir, "Segoe UI", sans-serif; color: #292524; }
+  .card { width: 580px; margin: 36px auto; background: #fff; border-radius: 20px; padding: 36px; box-shadow: 0 10px 30px rgba(154,52,18,.08); }
+  h1 { font-size: 26px; margin: 0 0 6px; }
+  .sub { color: #78716c; margin: 0 0 28px; }
+  .field { margin-bottom: 24px; }
+  .label { font-weight: 600; margin-bottom: 10px; display: block; }
+  .req { color: #ea580c; }
+  .stars { font-size: 30px; color: #d6d3d1; letter-spacing: 4px; }
+  .radios { display: flex; gap: 22px; }
+  .radios span, .checks span { display: flex; align-items: center; gap: 8px; }
+  .r { width: 18px; height: 18px; border-radius: 50%; border: 2px solid #a8a29e; display: inline-block; }
+  .c { width: 18px; height: 18px; border-radius: 5px; border: 2px solid #a8a29e; display: inline-block; }
+  .checks { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+  .slider { position: relative; height: 6px; background: #e7e5e4; border-radius: 3px; margin: 14px 0 8px; }
+  .slider i { position: absolute; left: 0; width: 50%; height: 6px; background: #ea580c; border-radius: 3px; }
+  .slider b { position: absolute; left: 50%; top: -7px; width: 20px; height: 20px; margin-left: -10px; border-radius: 50%; background: #fff; border: 3px solid #ea580c; }
+  .ends { display: flex; justify-content: space-between; color: #78716c; font-size: 13px; }
+  .area { height: 96px; border: 1px solid #d6d3d1; border-radius: 12px; padding: 10px 12px; color: #a8a29e; }
+  .switch { display: flex; align-items: center; gap: 12px; }
+  .sw { width: 40px; height: 22px; border-radius: 11px; background: #d6d3d1; position: relative; flex: none; }
+  .sw::after { content: ""; position: absolute; left: 3px; top: 3px; width: 16px; height: 16px; border-radius: 50%; background: #fff; }
+  button { background: #ea580c; color: #fff; border: 0; border-radius: 999px; height: 46px; padding: 0 28px; font: 600 15px/1 inherit; margin-top: 4px; }
+</style>
+</head>
+<body>
+  <div class="card">
+    <h1>How was your stay?</h1>
+    <p class="sub">Your feedback helps us improve. It takes about two minutes.</p>
+    <div class="field"><span class="label">Overall rating <span class="req">*</span></span><div class="stars">★★★★★</div></div>
+    <div class="field"><span class="label">Would you recommend us to a friend?</span>
+      <div class="radios"><span><i class="r"></i>Yes</span><span><i class="r"></i>No</span><span><i class="r"></i>Not sure</span></div>
+    </div>
+    <div class="field"><span class="label">Which amenities did you use?</span>
+      <div class="checks"><span><i class="c"></i>Pool</span><span><i class="c"></i>Gym</span><span><i class="c"></i>Spa</span><span><i class="c"></i>Restaurant</span><span><i class="c"></i>Room service</span></div>
+    </div>
+    <div class="field"><span class="label">How likely are you to stay with us again?</span>
+      <div class="slider"><i></i><b></b></div>
+      <div class="ends"><span>0 · Not likely</span><span>10 · Very likely</span></div>
+    </div>
+    <div class="field"><span class="label">Anything else you'd like to share?</span><div class="area">Tell us more…</div></div>
+    <div class="field switch"><span class="sw"></span><span>You may contact me about my feedback</span></div>
+    <button>Send feedback</button>
+  </div>
+</body>
+</html>

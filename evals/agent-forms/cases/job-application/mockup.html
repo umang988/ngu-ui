@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Apply</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #eef2f7; font: 14px/1.5 Georgia, "Times New Roman", serif; color: #1f2937; }
+  .card { width: 760px; margin: 32px auto; background: #fff; border-top: 4px solid #2563eb; padding: 34px 40px 30px; box-shadow: 0 2px 10px rgba(0,0,0,.06); }
+  h1 { font-size: 26px; margin: 0; font-weight: 600; }
+  .meta { color: #6b7280; margin: 4px 0 26px; font-family: system-ui, sans-serif; }
+  h2 { font: 600 12px/1 system-ui, sans-serif; text-transform: uppercase; letter-spacing: .08em; color: #2563eb; margin: 6px 0 16px; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 20px; }
+  .field { margin-bottom: 18px; font-family: system-ui, sans-serif; }
+  label { display: block; font-weight: 600; font-size: 13px; margin-bottom: 6px; }
+  .input { height: 40px; border: 1px solid #c7ced8; border-radius: 3px; padding: 0 10px; display: flex; align-items: center; justify-content: space-between; color: #9ca3af; }
+  .pre { display: flex; }
+  .pre span { border: 1px solid #c7ced8; border-right: 0; border-radius: 3px 0 0 3px; padding: 0 10px; display: flex; align-items: center; background: #f3f4f6; color: #4b5563; }
+  .pre .input { flex: 1; border-radius: 0 3px 3px 0; }
+  .drop { border: 2px dashed #c7ced8; border-radius: 6px; padding: 22px; text-align: center; color: #4b5563; }
+  .drop b { color: #2563eb; }
+  .drop small { display: block; color: #9ca3af; margin-top: 4px; }
+  .area { height: 110px; border: 1px solid #c7ced8; border-radius: 3px; }
+  .count { text-align: right; color: #9ca3af; font-size: 12px; margin-top: 4px; }
+  hr { border: 0; border-top: 1px solid #e5e7eb; margin: 8px 0 22px; }
+  .actions { display: flex; justify-content: flex-end; }
+  button { background: #2563eb; color: #fff; border: 0; border-radius: 3px; height: 42px; padding: 0 24px; font: 600 14px system-ui, sans-serif; }
+</style>
+</head>
+<body>
+  <div class="card">
+    <h1>Apply for Senior Frontend Engineer</h1>
+    <div class="meta">Remote · Full-time · Engineering</div>
+    <h2>Personal information</h2>
+    <div class="grid">
+      <div class="field"><label>Full name *</label><div class="input"></div></div>
+      <div class="field"><label>Email *</label><div class="input"></div></div>
+      <div class="field"><label>Phone</label><div class="pre"><span>🇮🇳 +91</span><div class="input"></div></div></div>
+      <div class="field"><label>LinkedIn profile</label><div class="pre"><span>linkedin.com/in/</span><div class="input"></div></div></div>
+    </div>
+    <h2>Experience</h2>
+    <div class="grid">
+      <div class="field"><label>Years of experience *</label><div class="input" style="color:#1f2937">0</div></div>
+      <div class="field"><label>Earliest start date</label><div class="input">mm/dd/yyyy <span>📅</span></div></div>
+    </div>
+    <div class="field"><label>Resume *</label><div class="drop">Drop your resume here or <b>browse</b><small>PDF, up to 5 MB</small></div></div>
+    <div class="field"><label>Cover letter</label><div class="area"></div><div class="count">0 / 1000</div></div>
+    <hr />
+    <div class="actions"><button>Submit application</button></div>
+  </div>
+</body>
+</html>

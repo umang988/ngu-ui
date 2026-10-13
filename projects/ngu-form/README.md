@@ -8,7 +8,7 @@ binding are the official ones.
 ## Install
 
 ```sh
-ng add ngu-form      # asks about Material or PrimeNG, uploads and a sample form
+ng add ngu-form      # asks about Material or PrimeNG, uploads, a sample form and AI agent notes
 # or
 npm install ngu-form
 ```
@@ -1223,6 +1223,21 @@ Fields and lists carry `data-ngu-path` and `data-ngu-type` for any other tool.
   development builds warn about template paths that match no field and missing providers.
 - `<ngu-field [field]="f.email" [def]="{ label: 'Email', type: 'email' }" />` renders one field
   inside a hand-written Signal Forms form.
+
+## AI coding agents
+
+The package carries its own docs for coding agents such as Claude Code, Codex, Cursor and
+Copilot, so they work from the installed version instead of guessing:
+
+- `docs/`: every page of the docs site as Markdown, with the source of every demo.
+- `ng g ngu-form:ai` (also offered by `ng add`) writes a short block into `AGENTS.md`, and into
+  `CLAUDE.md` or `GEMINI.md` when the project has them: the rules agents get wrong most often,
+  how to check generated code, and an index of `docs/`. Run it again after updating.
+- `docs/guides/from-image.md` and the `ngu-form-from-image` skill take an agent from a
+  screenshot or mockup to a form, then compare the render with the image using
+  `skills/ngu-form-from-image/scripts/snap.mjs`.
+- The docs site serves [`llms.txt`](https://ngu-form.netlify.app/llms.txt),
+  [`llms-full.txt`](https://ngu-form.netlify.app/llms-full.txt) and every page as `.md`.
 
 ## Roadmap
 

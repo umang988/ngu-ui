@@ -24,6 +24,8 @@ no component has to write that logic again.
 
 ```sh
 npm install ngu-dropdown
+# or, to also add notes for AI coding agents to AGENTS.md:
+ng add ngu-dropdown
 ```
 
 Peer dependencies: `@angular/core`, `@angular/common`, `@angular/forms` 22.2 or newer.
@@ -178,6 +180,14 @@ card or transformed ancestor can clip it.
 | Enter                     | Pick the active row                                                |
 | Escape                    | Close this list only, not a dialog around it                       |
 | Home, End, Space, letters | Without a search box: first, last, pick, and jump by first letters |
+
+## AI coding agents
+
+The package carries every page of the docs site as Markdown in `docs/`, with the source of
+every demo. `ng g ngu-dropdown:ai` (also run by `ng add`) writes a short block into `AGENTS.md`,
+and into `CLAUDE.md` or `GEMINI.md` when the project has them, with the rules agents get wrong
+most often and an index of those files. The same notes ship as the `skills/ngu-dropdown` Agent
+Skill, and the site serves [`llms.txt`](https://ngu-dropdown.netlify.app/llms.txt).
 
 ## License
 

@@ -1,0 +1,18 @@
+{
+  "name": "ngu-dropdown",
+  "url": "https://ngu-dropdown.netlify.app",
+  "install": "npm install ngu-dropdown",
+  "aiCommand": "ng g ngu-dropdown:ai",
+  "packageJson": "projects/ngu-dropdown/package.json",
+  "site": "projects/ngu-dropdown-demo/src/app/site.ts",
+  "content": ["projects/ngu-dropdown-demo/src/app/content"],
+  "demos": "projects/ngu-dropdown-demo/src/app/demos",
+  "markdown": "projects/ngu-dropdown",
+  "agents": "projects/ngu-dropdown/agents",
+  "skills": [
+    {
+      "name": "ngu-dropdown",
+      "description": "Write, change or debug code that uses ngu-dropdown (<ngu-dropdown>, a select with server paging, search and virtual scrolling for Angular). Use whenever the project depends on ngu-dropdown or the user needs a searchable or server-backed select in an Angular app that has it installed."
+    }
+  ]
+}

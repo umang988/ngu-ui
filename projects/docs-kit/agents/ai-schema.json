@@ -1,0 +1,13 @@
+{
+  "$schema": "http://json-schema.org/schema",
+  "$id": "{{name}}-ai",
+  "title": "Notes about {{name}} for AI coding agents",
+  "type": "object",
+  "properties": {
+    "remove": {
+      "type": "boolean",
+      "description": "Remove the {{name}} notes from AGENTS.md, CLAUDE.md and GEMINI.md.",
+      "default": false
+    }
+  }
+}

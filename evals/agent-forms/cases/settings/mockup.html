@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Settings</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #f5f3ff; font: 14px/1.5 Inter, -apple-system, "Segoe UI", sans-serif; color: #1e1b4b; }
+  .card { width: 760px; margin: 36px auto; background: #fff; border-radius: 12px; border: 1px solid #e4e1f5; }
+  .head { padding: 24px 28px 0; }
+  h1 { font-size: 20px; margin: 0 0 16px; }
+  .tabs { display: flex; gap: 26px; border-bottom: 1px solid #e4e1f5; }
+  .tabs span { padding: 0 2px 12px; color: #6b6b8a; font-weight: 500; }
+  .tabs .on { color: #6d28d9; border-bottom: 2px solid #6d28d9; font-weight: 600; }
+  .body { padding: 26px 28px 8px; }
+  .field { margin-bottom: 20px; }
+  label { display: block; font-weight: 600; font-size: 13px; margin-bottom: 6px; }
+  .req { color: #dc2626; }
+  .input { height: 38px; border: 1px solid #d4d0ea; border-radius: 6px; padding: 0 11px; display: flex; align-items: center; justify-content: space-between; color: #1e1b4b; }
+  .pre { display: flex; }
+  .pre span { border: 1px solid #d4d0ea; border-right: 0; border-radius: 6px 0 0 6px; padding: 0 11px; display: flex; align-items: center; color: #6b6b8a; background: #faf9ff; }
+  .pre .input { flex: 1; border-radius: 0 6px 6px 0; }
+  .area { height: 88px; border: 1px solid #d4d0ea; border-radius: 6px; }
+  .hint { color: #6b6b8a; font-size: 12px; margin-top: 6px; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  .chev { color: #6b6b8a; }
+  .foot { display: flex; justify-content: flex-end; gap: 10px; padding: 16px 28px; border-top: 1px solid #e4e1f5; background: #faf9ff; border-radius: 0 0 12px 12px; }
+  .btn { height: 38px; padding: 0 18px; border-radius: 6px; font: 600 14px/38px inherit; }
+  .ghost { border: 1px solid #d4d0ea; background: #fff; color: #1e1b4b; }
+  .primary { background: #6d28d9; color: #fff; }
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="head">
+      <h1>Settings</h1>
+      <div class="tabs"><span class="on">Profile</span><span>Notifications</span><span>Security</span></div>
+    </div>
+    <div class="body">
+      <div class="field"><label>Display name <span class="req">*</span></label><div class="input">Priya Sharma</div></div>
+      <div class="field"><label>Username</label><div class="pre"><span>acme.com/</span><div class="input">priya</div></div></div>
+      <div class="field"><label>Bio</label><div class="area"></div><div class="hint">Brief description for your profile. URLs are hyperlinked.</div></div>
+      <div class="grid">
+        <div class="field"><label>Timezone</label><div class="input">(GMT+05:30) India Standard Time <span class="chev">⌄</span></div></div>
+        <div class="field"><label>Language</label><div class="input">English <span class="chev">⌄</span></div></div>
+      </div>
+    </div>
+    <div class="foot"><span class="btn ghost">Cancel</span><span class="btn primary">Save changes</span></div>
+  </div>
+</body>
+</html>

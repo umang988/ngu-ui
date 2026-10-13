@@ -1,0 +1,16 @@
+{
+  "route": "/invoice",
+  "prompt": "design.png is the new-invoice screen of our billing app. Build it with ngu-form as a standalone component on the /invoice route, and match the design as closely as you can.",
+  "expect": {
+    "fields": [
+      { "match": "client", "types": ["select", "dropdown"], "required": true },
+      { "match": "invoice date", "types": ["date"], "required": true },
+      { "match": "due date", "types": ["date"], "required": true },
+      { "match": "notes", "types": ["textarea"] }
+    ],
+    "lists": [{ "columns": ["description", "qty", "unit price"], "minRows": 2 }],
+    "rows": [["client", "invoice date", "due date"]],
+    "buttons": ["save invoice"],
+    "texts": ["line item"]
+  }
+}

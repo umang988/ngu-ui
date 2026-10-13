@@ -1,4 +1,4 @@
-import { chain, noop, type Rule, type SchematicContext, type Tree } from '@angular-devkit/schematics';
+import { chain, noop, schematic, type Rule, type SchematicContext, type Tree } from '@angular-devkit/schematics';
 import { addDependency, addRootProvider, InstallBehavior } from '@schematics/angular/utility';
 import { projectInfo } from '../utils/workspace';
 
@@ -7,6 +7,8 @@ export interface NgAddOptions {
   renderer?: 'none' | 'material' | 'primeng';
   uploads?: boolean;
   sample?: boolean;
+  /** Write notes for AI coding agents into AGENTS.md through the `ai` schematic. */
+  ai?: boolean;
   skipInstall?: boolean;
 }
 
@@ -20,7 +22,7 @@ const VERSIONS: Readonly<Record<string, string>> = {
 
 /**
  * `ng add ngu-form`: registers the chosen renderer and uploads in the app config, installs
- * what they need, and creates a sample form.
+ * what they need, creates a sample form, and writes notes for AI coding agents.
  */
 export function ngAdd(options: NgAddOptions): Rule {
   return async (tree: Tree, context: SchematicContext) => {
@@ -57,6 +59,9 @@ export function ngAdd(options: NgAddOptions): Rule {
     }
     if (options.sample !== false) {
       rules.push(sample(`${project.sourceRoot}/app/sample-form/sample-form.ts`, project.prefix));
+    }
+    if (options.ai !== false) {
+      rules.push(schematic('ai', {}));
     }
     return chain(rules);
   };

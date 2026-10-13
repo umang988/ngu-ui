@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Checkout</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #f8fafc; font: 15px/1.5 "Helvetica Neue", Helvetica, Arial, sans-serif; color: #0f172a; }
+  .card { width: 660px; margin: 36px auto; background: #fff; border: 1px solid #e2e8f0; border-radius: 6px; padding: 32px; }
+  h1 { font-size: 24px; margin: 0 0 22px; font-weight: 700; }
+  .steps { display: flex; align-items: center; gap: 12px; margin-bottom: 28px; padding-bottom: 20px; border-bottom: 1px solid #e2e8f0; }
+  .step { display: flex; align-items: center; gap: 8px; color: #64748b; font-weight: 500; }
+  .dot { width: 26px; height: 26px; border-radius: 50%; border: 2px solid #cbd5e1; display: grid; place-items: center; font-size: 13px; font-weight: 700; }
+  .step.on { color: #047857; }
+  .step.on .dot { background: #059669; border-color: #059669; color: #fff; }
+  .line { flex: 1; height: 2px; background: #e2e8f0; }
+  h2 { font-size: 17px; margin: 0 0 16px; }
+  .grid3 { display: grid; grid-template-columns: 1.4fr 1fr 0.8fr; gap: 14px; }
+  .field { margin-bottom: 16px; }
+  label { display: block; font-size: 14px; font-weight: 600; margin-bottom: 6px; }
+  .opt { color: #64748b; font-weight: 400; }
+  .input { height: 42px; border: 1px solid #cbd5e1; border-radius: 4px; padding: 0 12px; display: flex; align-items: center; justify-content: space-between; color: #94a3b8; }
+  .phone { display: flex; }
+  .cc { height: 42px; border: 1px solid #cbd5e1; border-right: 0; border-radius: 4px 0 0 4px; padding: 0 10px; display: flex; align-items: center; gap: 6px; background: #f8fafc; color: #0f172a; }
+  .phone .input { flex: 1; border-radius: 0 4px 4px 0; }
+  .seg { display: inline-flex; border: 1px solid #cbd5e1; border-radius: 4px; overflow: hidden; }
+  .seg span { padding: 9px 16px; border-right: 1px solid #cbd5e1; }
+  .seg span:last-child { border-right: 0; }
+  .seg .on { background: #059669; color: #fff; font-weight: 600; }
+  .actions { display: flex; justify-content: space-between; margin-top: 26px; }
+  .btn { height: 42px; padding: 0 22px; border-radius: 4px; font: 600 15px/42px inherit; }
+  .back { border: 1px solid #cbd5e1; color: #475569; background: #fff; }
+  .next { background: #059669; color: #fff; }
+</style>
+</head>
+<body>
+  <div class="card">
+    <h1>Checkout</h1>
+    <div class="steps">
+      <div class="step on"><span class="dot">1</span>Shipping</div><span class="line"></span>
+      <div class="step"><span class="dot">2</span>Payment</div><span class="line"></span>
+      <div class="step"><span class="dot">3</span>Review</div>
+    </div>
+    <h2>Shipping address</h2>
+    <div class="field"><label>Full name *</label><div class="input"></div></div>
+    <div class="field"><label>Street address *</label><div class="input"></div></div>
+    <div class="field"><label>Apartment, suite, etc. <span class="opt">(optional)</span></label><div class="input"></div></div>
+    <div class="grid3">
+      <div class="field"><label>City *</label><div class="input"></div></div>
+      <div class="field"><label>State *</label><div class="input">Select… <span>⌄</span></div></div>
+      <div class="field"><label>ZIP code *</label><div class="input"></div></div>
+    </div>
+    <div class="field"><label>Phone *</label><div class="phone"><span class="cc">🇺🇸 +1 ⌄</span><div class="input">(555) 000-0000</div></div></div>
+    <div class="field"><label>Delivery method</label>
+      <div class="seg"><span class="on">Standard (5–7 days)</span><span>Express (1–2 days)</span></div>
+    </div>
+    <div class="actions"><span class="btn back">Back</span><span class="btn next">Next</span></div>
+  </div>
+</body>
+</html>
